@@ -1,24 +1,31 @@
-import Link from 'next/link';
+"use client";
+import Link from "next/link";
 
 const Header = () => {
-    return (
-        <header className="bg-emerald-600  flex items-center justify-between">
-            {/* First image on the left */}
-            <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/React.svg/1200px-React.svg.png" 
-                alt="Left Image" 
-                className="h-10 px-200" 
-            />
-
-            {/* Second image on the right */}
-            <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/React.svg/1200px-React.svg.png" 
-                alt="Right Image" 
-                className="h-10 px-200" 
-            />
-        </header>
-    );
+  return (
+    <header className="bg-emerald-600 text-white p-4 flex justify-between items-center">
+      <img src="logo.png" alt="Guayaba Logo" className="logo" />
+      <nav>
+        <ul className="flex space-x-4">
+          <li>
+            <Link href="/login">Login</Link>
+          </li>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link href="/about">About</Link>
+          </li>
+          <li>
+            <Link href="/services">Services</Link>
+          </li>
+          <li>
+            <Link href="/contact">Contact</Link>
+          </li>
+        </ul>
+      </nav>
+    </header>
+  );
 };
 
 export default Header;
-

@@ -15,7 +15,6 @@ const Header = () => {
             <li>
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className="bg-red-500 text-white px-4 py-2 rounded"
               >
                 Logout
               </button>
@@ -30,6 +29,9 @@ const Header = () => {
           {/* Enlaces comunes */}
           <li>
             <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link href="/account">Account</Link>
           </li>
           <li>
             <Link href="/about">About</Link>

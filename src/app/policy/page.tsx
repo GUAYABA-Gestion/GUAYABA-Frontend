@@ -418,9 +418,11 @@ export default function Home() {
           <p className="text-justify text-gray-700">
           La presente política se regirá por las leyes de la República de Colombia y las demás disposiciones vigentes sobre la materia.
           <br></br><br></br>
-          Cada vez que un usuario acceda a los sitios y/o aplicativos web de la entidad, será considerado como una aceptación tácita de esta política y cualquiera de las modificaciones que se le hagan. 
+          El usuario no podrá exigir ante la entidad o ante una autoridad judicial o administrativa, la aplicación de condición, norma o convenio que no esté expresamente incorporado en la presente política.
           <br></br><br></br>
-          Cada vez que un usuario acceda a los sitios y/o aplicativos web de la entidad, será considerado como una aceptación tácita de esta política y cualquiera de las modificaciones que se le hagan. 
+          En caso de que alguna de las disposiciones de esta política pierda vigencia u obligatoriedad, las demás disposiciones se mantendrán vigentes, serán vinculantes y producirán efectos.
+          <br></br><br></br>
+          La competencia para dirimir los conflictos legales o judiciales recaerá en los jueces competentes en Colombia. 
           </p>
         </div>
       </div>

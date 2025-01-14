@@ -199,6 +199,230 @@ export default function Home() {
             La recolección, almacenamiento, uso, circulación, supresión, actualización y gestión de los datos personales capturados por Guayaba, se realizará en ejercicio de sus funciones legales. 
           </p>
         </div>
+
+        {/* 10 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            10. Derechos de los titulares de los datos personales
+          </h1>
+          <p className="text-justify text-gray-700">
+            Guayaba, garantiza al titular de datos personales, el pleno de ejercicio de los derechos contenidos en el artículo 8º de la Ley 1581 de 2012, a saber: 
+            <br></br><br></br>
+            a. Conocer, actualizar y rectificar sus datos personales frente a los Responsables del Tratamiento o Encargados del Tratamiento. 
+            Este derecho se podrá ejercer, entre otros frente a datos parciales, inexactos, incompletos, fraccionados, que induzcan a error, o aquellos cuyo Tratamiento esté expresamente prohibido o no haya sido autorizado.
+            <br></br><br></br>
+            b. Solicitar prueba de la autorización otorgada al Responsable del Tratamiento salvo cuando expresamente se exceptúe como requisito para el Tratamiento, de conformidad con lo previsto en el artículo 10 de la citada ley.
+            <br></br><br></br>
+            c. Ser informado por el Responsable del Tratamiento o el Encargado del Tratamiento, previa solicitud, respecto del uso que le ha dado a sus datos personales.
+            <br></br><br></br>
+            d. Presentar ante la Superintendencia de Industria y Comercio quejas por infracciones a lo dispuesto en la citada ley y las demás normas que la modifiquen, adicionen o complementen.
+            <br></br><br></br>
+            e. Revocar la autorización y/o solicitar la supresión del dato cuando en el Tratamiento no se respeten los principios, derechos y garantías constitucionales y legales. 
+            La revocatoria y/o supresión procederá cuando la Superintendencia de Industria y Comercio haya determinado que en el Tratamiento el Responsable o Encargado han incurrido en conductas contrarias a la ley y a la Constitución.
+            <br></br><br></br>
+            f. Acceder en forma gratuita a sus datos personales que hayan sido objeto de Tratamiento. 
+          </p>
+        </div>
+
+      {/* 11 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            11. Deberes del responsable del tratamiento
+          </h1>
+          <p className="text-justify text-gray-700">
+            Santiago Reyes Ochoa, actuando en calidad de responsable del tratamiento de datos personales y, en consecuencia, todas sus dependencias y áreas de trabajo, como encargado del tratamiento de los datos personales, 
+            cumplirá los deberes establecidos en el artículo 17º de la Ley 1581 de 2012 a saber:
+            <br></br><br></br>
+            a. Garantizar al Titular, en todo tiempo, el pleno y efectivo ejercicio del derecho de hábeas data.
+            <br></br><br></br>
+            b. Solicitar y conservar, en las condiciones previstas en la Ley 1581 de 2012, copia de la respectiva autorización otorgada por el titular, para el uso y tratamiento de los datos personales.
+            <br></br><br></br>
+            c. Informar debidamente al Titular sobre la finalidad de la recolección y los derechos que le asisten por virtud de la autorización otorgada.
+            <br></br><br></br>
+            d. Conservar la información bajo las condiciones de seguridad necesarias para impedir su adulteración, pérdida, consulta, uso o acceso no autorizado o fraudulento.
+            <br></br><br></br>
+            e. Garantizar que la información que se suministre al encargado del Tratamiento sea veraz, completa, exacta, actualizada, comprobable y comprensible.
+            <br></br><br></br>
+            f. Actualizar la información, comunicando de forma oportuna al encargado del tratamiento, todas las novedades respecto de los datos que previamente le haya suministrado y 
+            adoptar las demás medidas necesarias para que la información suministrada a éste, se mantenga actualizada.
+            <br></br><br></br>
+            g. Rectificar la información cuando sea incorrecta y comunicar lo pertinente al encargado del tratamiento.
+            <br></br><br></br>
+            h. Suministrar al encargado del tratamiento, según el caso, únicamente datos cuyo tratamiento esté previamente autorizado.
+            <br></br><br></br>
+            i. Exigir al encargado del tratamiento en todo momento, el respeto a las condiciones de seguridad y privacidad de la información del titular.
+            <br></br><br></br>
+            j. Tramitar las consultas y reclamos formulados.
+            <br></br><br></br>
+            k. Adoptar un manual interno de políticas y procedimientos para garantizar el adecuado cumplimiento de la citada ley y en especial, para la atención de consultas y reclamos.
+            <br></br><br></br>
+            l. Informar a solicitud del titular sobre el uso dado a sus datos.
+            <br></br><br></br>
+            m. Informar a la autoridad de protección de datos cuando se presenten violaciones a los códigos de seguridad y existan riesgos en la administración de la información de los titulares.
+            <br></br><br></br>
+            n. Cumplir las instrucciones y requerimientos que imparta la Superintendencia de Industria y Comercio y la Procuraduría General de la Nación.
+          </p>
+        </div>
+
+
+        {/* 12 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            12. Aviso de Privacidad
+          </h1>
+          <p className="text-justify text-gray-700">
+            Cuando no sea posible poner a disposición del titular, la Política de Tratamiento de la Información, Guayaba, informará por medio de un Aviso de Privacidad, sobre la existencia de tal política.
+            <br></br><br></br>
+            El Aviso de Privacidad se expedirá en medios físicos, electrónicos o en cualquier otro formato, donde se ponga a disposición del titular de los datos, además de la existencia de la política de tratamiento de datos, 
+            la forma de acceder a ellas y la finalidad que se pretende dar a la información; el aviso se enviará al correo electrónico o dirección física cuando se disponga de dicha información.
+            <br></br><br></br>
+            <strong>13.1 Contenido del Aviso de Privacidad</strong><br></br>
+            •	Nombre o razón social y datos de contacto del responsable del tratamiento.
+            <br></br>
+            •	El tratamiento al cual serán sometidos los datos y la finalidad del mismo.
+            <br></br>
+            •	Los derechos que le asisten al titular.
+            <br></br>
+            •	Los mecanismos dispuestos por la entidad para que el titular conozca la Política de Tratamiento de Datos Personales y los cambios sustanciales que se produzcan en ella o en el Aviso de Privacidad.
+            <br></br>
+            •	Información sobre consulta y acceso a la Política de tratamiento de Datos Personales.
+          </p>
+        </div>
+
+        {/* 13 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            13. Autorización
+          </h1>
+          <p className="text-justify text-gray-700">
+            Guayaba, deberá obtener la autorización del titular de los datos, por medio de un documento físico, electrónico, mensaje de datos, internet, sitio web, de manera verbal, telefónica o 
+            cualquier otro formato que permita su posterior consulta a fin de validar de forma inequívoca que sin el consentimiento del titular los datos no hubieran sido empleados para dichos fines.
+            <br></br><br></br>
+            Cada vez que un usuario se registra en los sitios y/o aplicativos web de Guayaba, tal registro se considera como una aceptación tácita de ésta política, 
+            por medio de la cual autoriza a la entidad para que lleve a cabo el tratamiento de los datos personales.
+          </p>
+        </div>
+
+        {/* 14 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            14. Atención de consultas
+          </h1>
+          <p className="text-justify text-gray-700">
+            Guayaba dará aplicación al artículo 14 de la Ley 1581 de 2012, así:
+            <br></br><br></br>
+            Los titulares, o sus representantes podrán consultar la información personal del titular que repose en Guayaba, quien suministrara toda la información contenida en el registro individual o que esté vinculada con la identificación del titular.
+            <br></br><br></br>
+            La consulta se formulará a través del correo guayabagestion@gmail.com y será atendida en un término máximo de diez (10) días hábiles, contados a partir de la fecha de recibo de la misma. 
+            De cumplirse el término sin que sea posible atender la consulta, Santiago Reyes Ochoa, como responsable del tratamiento de los datos, informará al interesado, 
+            expresando los motivos de la demora y señalando la fecha en que se atenderá su consulta, la cual no podrá superar los cinco (5) días hábiles siguientes al vencimiento del primer término.
+          </p>
+        </div>
+
+        {/* 15 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            15. Atención de reclamos
+          </h1>
+          <p className="text-justify text-gray-700">
+            El Titular o sus representantes, que consideren que la información contenida en una base de datos bajo la responsabilidad de Guayaba, 
+            debe ser objeto de corrección, actualización o supresión, o cuando adviertan el presunto incumplimiento de cualquiera de los deberes contenidos en ley, 
+            podrán presentar un reclamo ante el Responsable del Tratamiento o el Encargado del Tratamiento el cual será tramitado bajo las reglas establecidas en el artículo 15 de la Ley 1581 de 2012, a saber:
+            <br></br><br></br>
+            1. El reclamo se formulará mediante solicitud dirigida al Responsable del Tratamiento o al Encargado del Tratamiento, con la identificación del Titular, 
+            la descripción de los hechos que dan lugar al reclamo, la dirección, y acompañando los documentos que se quiera hacer valer. Si el reclamo resulta incompleto, 
+            se requerirá al interesado dentro de los cinco (5) días siguientes a la recepción del reclamo para que subsane las fallas. 
+            Transcurridos dos (2) meses desde la fecha del requerimiento, sin que el solicitante presente la información requerida, se entenderá que ha desistido del reclamo. 
+            <br></br>
+            En caso de que quien reciba el reclamo no sea competente para resolverlo, dará traslado a quien corresponda en un término máximo de dos (2) días hábiles e informará de la situación al interesado.
+            <br></br><br></br>
+            2. Una vez recibido el reclamo completo, se incluirá en la base de datos una leyenda que diga "reclamo en trámite" y el motivo del mismo, en un término no mayor a dos (2) días hábiles. 
+            Dicha leyenda deberá mantenerse hasta que el reclamo sea decidido.
+            <br></br><br></br>
+            3. El término máximo para atender el reclamo será de quince (15) días hábiles contados a partir del día siguiente a la fecha de su recibo. 
+            Cuando no fuere posible atender el reclamo dentro de dicho término, se informará al interesado los motivos de la demora y la fecha en que se atenderá su reclamo, 
+            la cual en ningún caso podrá superar los ocho (8) días hábiles siguientes al vencimiento del primer término.
+          </p>
+        </div>
+
+        {/* 16  TODO: Aviso privacidad*/}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          16. Derecho de acceso a los datos
+          </h1>
+          <p className="text-justify text-gray-700">
+            Guayaba, garantiza el derecho de acceso a los datos personales, una vez se haya verificado la identidad del titular, su causahabiente y/o representante, poniendo a disposición de este, los respectivos datos personales.
+            <br></br><br></br>
+            Para tal efecto, se garantiza el establecimiento de medios y mecanismos electrónicos y con disponibilidad permanente, 
+            que permitan el acceso del titular a los datos personales.
+          </p>
+        </div>
+
+        {/* 17 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          17. Procedimiento para el ejercicio de los derechos
+          </h1>
+          <p className="text-justify text-gray-700">
+            Santiago Reyes Ochoa, como responsable del tratamiento de los datos, de acuerdo con las solicitudes que reciba de los Titulares de los datos, 
+            estudiara la necesidad de rectificar, actualizar y suprimir, la información que resulte ser incompleta o inexacta de conformidad con el procedimiento y 
+            los términos señalados en esta política, para lo cual allegará la solicitud al correo electrónico guayabagestion@gmail.com indicando la actualización, rectificación y supresión del dato y aportará la documentación que soporte su petición.
+            <br></br><br></br>
+            Los titulares de la información personal podrán ejercer sus derechos (revocar la autorización otorgada para el tratamiento de sus datos personales o actualizar, rectificar o suprimir alguno de ellos) en cualquier momento,
+            a través de los siguientes mecanismos:
+            <br></br><br></br>
+            •	Correo electrónico: guayabagestion@gmail.com
+            <br></br>
+            •	Teléfono: 57 314 8073225
+            <br></br><br></br>
+            En todo caso de deberá dar cumplimiento a lo establecido en el artículo 15 de la Ley 1581 de 2012.
+            <br></br><br></br>
+            Los titulares de los datos personales pueden revocar el consentimiento al tratamiento de sus datos personales en cualquier momento, siempre y cuando no lo impida una disposición legal o contractual, 
+            mediante la presentación de un reclamo, de acuerdo con lo establecido en el art. 15 de la ley 1581 de 2012. Para ello Guayaba pondrá a disposición del titular el correo electrónico guayabagestion@gmail.com
+            </p>
+        </div>
+
+        {/* 18 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          18. Seguridad
+          </h1>
+          <p className="text-justify text-gray-700">
+            Guayaba, está comprometida en efectuar un correcto uso y tratamiento de los datos personales contenidos en sus bases de datos, evitando el acceso no autorizado a terceros que puedan conocer, 
+            adulterar, divulgar y/o destruir la información que allí reposa.
+          </p>
+        </div>
+
+        {/* 19 */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          19. Vigencia y aviso de posible cambio sustacial en las politicas de tratamiento
+          </h1>
+          <p className="text-justify text-gray-700">
+          La presente Política para el Tratamiento de Datos Personales rige a partir de la fecha de su expedición, se divulgará a través del portal institucional; https://guayaba-frontend.vercel.app/, 
+          y estará sujeta a actualizaciones en la medida en que se modifiquen o se dicten nuevas disposiciones legales sobre la materia. Así mismo, la entidad podrá modificarla a su libre elección y en cualquier momento.
+          <br></br><br></br>
+          Todos los cambios, modificaciones y actualizaciones que se lleven a cabo, entrarán en vigencia una vez sean publicados en el portal institucional. 
+          <br></br><br></br>
+          Cada vez que un usuario acceda a los sitios y/o aplicativos web de la entidad, será considerado como una aceptación tácita de esta política y cualquiera de las modificaciones que se le hagan. 
+          <br></br><br></br>
+          La vigencia y conservación de las bases de datos de la entidad será por un término indefinido, sin perjuicio de lo establecido en las disposiciones legales.
+          </p>
+        </div>
+
+        {/* 20 */}
+       <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          20. Ley aplicable y jurisdicción
+          </h1>
+          <p className="text-justify text-gray-700">
+          La presente política se regirá por las leyes de la República de Colombia y las demás disposiciones vigentes sobre la materia.
+          <br></br><br></br>
+          Cada vez que un usuario acceda a los sitios y/o aplicativos web de la entidad, será considerado como una aceptación tácita de esta política y cualquiera de las modificaciones que se le hagan. 
+          <br></br><br></br>
+          Cada vez que un usuario acceda a los sitios y/o aplicativos web de la entidad, será considerado como una aceptación tácita de esta política y cualquiera de las modificaciones que se le hagan. 
+          </p>
+        </div>
       </div>
     </div>
   );

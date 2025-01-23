@@ -2,6 +2,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import SessionWrapper from "../../components/SessionWrapper";
+import Navbar from "../../components/Navbar";
+import { RolProvider } from "../../context/RolContext"; // Importar el RolProvider
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,8 +42,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Wrap children with SessionWrapper to make it a Client Component */}
-        <SessionWrapper>{children}</SessionWrapper>
+        {/* Wrap with SessionWrapper first, then include RolProvider */}
+        <SessionWrapper>
+          <RolProvider>
+            <div className="flex">
+              {/* Navbar on the left */}
+              <Navbar />
+              {/* Main content on the right */}
+              <main className="flex-grow p-4">{children}</main>
+            </div>
+          </RolProvider>
+        </SessionWrapper>
       </body>
     </html>
   );

@@ -28,15 +28,15 @@ export const authOptions: AuthOptions = {
           const data = await response.json();
 
           if (data.exists) {
-            session.user.id_usuario = data.user.id_usuario ?? null;
+            session.user.id_persona = data.user.id_persona ?? null;
             session.user.rol = data.user.rol ?? null;
           } else {
-            session.user.id_usuario = null;
+            session.user.id_persona = null;
             session.user.rol = null;
           }
         } catch (error) {
           console.error("Error verificando usuario:", error);
-          session.user.id_usuario = null;
+          session.user.id_persona = null;
           session.user.rol = null;
           token.flashMessage = "Hubo un error al verificar tu cuenta.";
         }

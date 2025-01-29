@@ -64,7 +64,7 @@ export default function Register() {
       }
 
       // Si la sesión contiene un user_id y rol, redirigimos
-      if (session?.user?.id_usuario && session?.user?.rol) {
+      if (session?.user?.id_persona && session?.user?.rol) {
         await updateFlashMessage("Ya estás registrado, te ayudamos con el login automáticamente :)");
         router.push("/"); // Redirigir al home si ya existe el usuario
       }

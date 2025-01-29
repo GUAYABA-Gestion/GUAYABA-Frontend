@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 import { Header } from "../../../components";
 
 interface AccountInfo {
-  id_usuario: number;
+  id_persona: number;
   usuario_correo: string;
   rol: string;
-  id_persona: number;
   nombre: string;
-  persona_correo: string;
   telefono: string | null;
   detalles: string | null;
 }
@@ -27,7 +25,7 @@ export default function Account() {
       const fetchAccountInfo = async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/account?id_usuario=${session?.user?.id_usuario}`
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/account?id_persona=${session?.user?.id_persona}`
           );
           if (!response.ok) throw new Error("Error al obtener la información.");
           const data = await response.json();
@@ -59,7 +57,7 @@ const handleDeleteAccount = async () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id_usuario: session?.user?.id_usuario }),
+          body: JSON.stringify({ id_persona: session?.user?.id_persona }),
         }
       );
       if (!response.ok) throw new Error("Error al eliminar la cuenta.");
@@ -96,16 +94,11 @@ const handleDeleteAccount = async () => {
       <div className="mt-8">
         <h2 className="text-xl font-bold">Información de la Cuenta</h2>
         <div className="mt-4">
-          <h3 className="text-lg font-semibold">Usuario</h3>
-          <p><strong>ID Usuario:</strong> {accountInfo.id_usuario}</p>
+          <h3 className="text-lg font-semibold">PErsona</h3>
+          <p><strong>ID Persona:</strong> {accountInfo.id_persona}</p>
           <p><strong>Correo:</strong> {accountInfo.usuario_correo}</p>
           <p><strong>Rol:</strong> {accountInfo.rol}</p>
-        </div>
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Persona</h3>
-          <p><strong>ID Persona:</strong> {accountInfo.id_persona}</p>
           <p><strong>Nombre:</strong> {accountInfo.nombre}</p>
-          <p><strong>Correo:</strong> {accountInfo.persona_correo || "N/A"}</p>
           <p><strong>Teléfono:</strong> {accountInfo.telefono || "N/A"}</p>
           <p><strong>Detalles:</strong> {accountInfo.detalles || "N/A"}</p>
         </div>

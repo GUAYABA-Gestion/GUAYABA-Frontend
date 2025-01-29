@@ -11,17 +11,17 @@ export default function Login() {
 
   // Efecto para manejar el comportamiento de la sesión
   useEffect(() => {
-    // Si el usuario tiene un id_usuario, redirigimos al home sin cerrar la sesión
-    if (session?.user?.id_usuario) {
+    // Si el usuario esta en la base de datos, redirigimos al home sin cerrar la sesión
+    if (session?.user?.id_persona) {
       router.push("/");
-    } else if (session?.user?.id_usuario === null) {
-      // Si no tiene id_usuario, mostramos el mensaje de registro
+    } else if (session?.user?.id_persona === null) {
+      // Si no, mostramos el mensaje de registro
       setMessage("No tenemos tu cuenta registrada. Por favor, ve a la página de registro.");
     }
 
     // Esto solo se ejecuta cuando el usuario no tiene cuenta
     return () => {
-      if (session?.user?.id_usuario === null) {
+      if (session?.user?.id_persona === null) {
         signOut({ redirect: false });
       }
     };
@@ -37,7 +37,7 @@ export default function Login() {
   };
 
   const handleRegisterRedirect = () => {
-    if (!session?.user?.id_usuario) {
+    if (!session?.user?.id_persona) {
       // Si el usuario no está registrado, cerramos sesión y lo redirigimos a registro
       signOut({ redirect: false }).then(() => {
         router.push("/register");

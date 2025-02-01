@@ -1,11 +1,31 @@
 "use client";
-import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAuthCookie, removeAuthCookie } from "../utils/cookies";
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react"; // Importar signOut de NextAuth
 
 const Header = () => {
-  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
+
+  // Verificar autenticación solo en el cliente
+  useEffect(() => {
+    setIsAuthenticated(!!getAuthCookie());
+  }, []);
+
+  // Función para manejar el logout
+  const handleLogout = async () => {
+    // Eliminar la cookie del JWT
+    removeAuthCookie();
+
+    // Cerrar la sesión de Google con NextAuth
+    await signOut({ redirect: false });
+
+    // Redirigir al login
+    router.push("/login");
+  };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -18,7 +38,7 @@ const Header = () => {
         <img
           src="/images/Guayaba_LogoTexto.png"
           alt="Guayaba Logo"
-          className="w-48 h-auto" // Ajusta el tamaño según sea necesario
+          className="w-48 h-auto"
         />
       </div>
 
@@ -48,10 +68,10 @@ const Header = () => {
 
       {/* Menú en pantallas grandes: horizontal, siempre visible */}
       <ul className="hidden md:flex md:flex-row md:space-x-6 items-center">
-        {session ? (
+        {isAuthenticated ? (
           <li>
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleLogout}
               className="hover:text-gray-300 transition-colors"
             >
               Logout
@@ -103,10 +123,10 @@ const Header = () => {
         }`}
       >
         <ul>
-          {session ? (
+          {isAuthenticated ? (
             <li>
               <button
-                onClick={() => signOut({ callbackUrl: "/login" })}
+                onClick={handleLogout}
                 className="hover:text-gray-300 transition-colors"
               >
                 Logout

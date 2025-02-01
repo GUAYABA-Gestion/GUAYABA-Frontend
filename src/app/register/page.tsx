@@ -1,172 +1,270 @@
 "use client";
 import { useState, useEffect } from "react";
-import { signIn, useSession, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 import { Header } from "../../../components";
-
-const backendLink = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
-
-interface Sede {
-  id_sede: number;
-  nombre: string;
-}
+import { Sede } from "../../types/api";
+import { getTempMessage, removeTempMessage } from "../../../utils/cookies";
 
 export default function Register() {
   const { data: session } = useSession();
   const router = useRouter();
+
   const [sedes, setSedes] = useState<Sede[]>([]);
-  const [selectedSede, setSelectedSede] = useState<string | null>(null);
+  const [selectedSede, setSelectedSede] = useState<string>("");
   const [agreedToPolicy, setAgreedToPolicy] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string>("");
+  const [isChecking, setIsChecking] = useState(true);
 
-  // Traer las sedes al cargar la página
   useEffect(() => {
-    const fetchSedes = async () => {
+    const checkUserRegistration = async () => {
       try {
-        const response = await fetch(`${backendLink}/api/sedes`);
+        const tokenToSend = session?.googleToken;
+        if (!tokenToSend) {
+          setIsChecking(false);
+          return;
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/check-user`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${tokenToSend}`,
+            },
+          }
+        );
+
+        if (!response.ok) throw new Error("Error en la verificación");
+
         const data = await response.json();
-        setSedes(data);
+
+        if (data.exists) {
+          // Manejar usuario registrado
+          if (session?.googleToken && !Cookies.get("jwt")) {
+            Cookies.set("jwt", data.token, {
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "strict",
+            });
+          }
+
+          setMessage("✅ Ya estás registrado. Redirigiendo...");
+          setTimeout(() => router.push("/"), 2000);
+          return;
+        }
+
+        // Usuario no registrado, cargar sedes
+        if (session?.googleToken) await loadSedes();
       } catch (error) {
-        console.error("Error al obtener las sedes:", error);
+        console.error("Error al verificar:", error);
+      } finally {
+        setIsChecking(false);
       }
     };
-    fetchSedes();
-  }, []);
 
-  const updateFlashMessage = async (newMessage: string) => {
-    try {
-      const response = await fetch(`/api/updateflash`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          flashMessage: newMessage,
-        }),
-      });
+    const loadSedes = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes`,
+          {
+            headers: {
+              Authorization: `Bearer ${session?.googleToken}`,
+            },
+          }
+        );
 
-      if (response.ok) {
-        console.log("Flash message actualizado.");
-      } else {
-        console.error("Error al actualizar el mensaje de flash.");
+        if (!response.ok) throw new Error("Error al cargar sedes");
+        setSedes(await response.json());
+      } catch (error) {
+        console.error("Error:", error);
+        setMessage("❌ Error al cargar las sedes disponibles");
       }
-    } catch (error) {
-      console.error("Error al llamar al endpoint de actualización de mensaje:", error);
+    };
+
+    const tempMessage = getTempMessage();
+    if (tempMessage) {
+      setMessage(tempMessage);
+      removeTempMessage();
     }
-  };
 
-  useEffect(() => {
-    const updateMessageIfNeeded = async () => {
-      // Mostrar mensaje si existe en la sesión
-      if (session?.flashMessage) {
-        setMessage(session.flashMessage);
-      }
-
-      // Si la sesión contiene un user_id y rol, redirigimos
-      if (session?.user?.id_persona && session?.user?.rol) {
-        await updateFlashMessage("Ya estás registrado, te ayudamos con el login automáticamente :)");
-        router.push("/"); // Redirigir al home si ya existe el usuario
-      }
-    };
-
-    updateMessageIfNeeded(); // Llamamos a la función asíncrona aquí
+    checkUserRegistration();
   }, [session, router]);
 
-  const registerUser = async () => {
-    if (!session || !session.user?.email || !selectedSede) {
-      setMessage("Por favor, completa todos los campos requeridos.");
+  const handleRegistration = async () => {
+    if (!session?.googleToken) {
+      setMessage("❌ Error de autenticación");
       return;
     }
 
-    if (!agreedToPolicy) {
-      setMessage("Debes aceptar la política de tratamiento de datos.");
+    // Validaciones del formulario
+    const errors = [];
+    if (!selectedSede) errors.push("selecciona una sede");
+    if (!agreedToPolicy) errors.push("acepta las políticas");
+
+    if (errors.length > 0) {
+      setMessage(`⚠️ Por favor: ${errors.join(" y ")}`);
       return;
     }
+
+    setIsLoading(true);
+    setMessage("");
 
     try {
-      setIsLoading(true);
-      const response = await fetch(`${backendLink}/api/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          correo: session.user.email,
-          nombre: session.user.name,
-          sede_id: selectedSede,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            googleToken: session.googleToken,
+            id_sede: selectedSede,
+          }),
+        }
+      );
 
       const data = await response.json();
 
-      if (response.ok && data.registered) {
-        signOut({ redirect: false }).then(() => {
-          router.push("/login");
+      if (response.ok) {
+        Cookies.set("jwt", data.token, {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          expires: 1,
         });
+        router.push("/");
       } else {
-        const errorMessage = data.error || "Hubo un problema al registrar el usuario.";
-        // Actualizamos el mensaje de flash en el backend antes de redirigir
-        await updateFlashMessage(errorMessage);
-        router.push("/"); // Redirigir incluso si hubo error
+        throw new Error(data.error || "Error en el registro");
       }
     } catch (error) {
-      console.error("Error en el registro:", error);
-      const errorMessage = "Error interno al registrar el usuario.";
-      // Actualizamos el mensaje de flash en el backend antes de redirigir
-      await updateFlashMessage(errorMessage);
-      router.push("/");
+      console.error("Registro fallido:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isLoading) {
-    return <p>Cargando...</p>;
+  if (isChecking) {
+    return (
+      <div className="min-h-screen p-4">
+        <Header />
+        <main className="max-w-md mx-auto mt-8 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-4" />
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto" />
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (!session) {
     return (
-      <div>
+      <div className="min-h-screen p-4 bg-gray-50">
         <Header />
-        <h1>Registro</h1>
-        <p>Debes iniciar sesión con Google para registrarte.</p>
-        <button onClick={() => signIn("google")}>Registro con Google</button>
+        <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Registro</h1>
+          <p className="mb-6 text-gray-600">
+            Para continuar, inicia sesión con tu cuenta institucional
+          </p>
+          <button
+            onClick={() => signIn("google")}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z" />
+            </svg>
+            Continuar con Google
+          </button>
+        </main>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="min-h-screen p-4 bg-gray-50">
       <Header />
-      <h1>Registro</h1>
-      {message && <div className="alert alert-success">{message}</div>}
-      <label>
-        Selecciona una sede:
-        <select onChange={(e) => setSelectedSede(e.target.value)} defaultValue="">
-          <option value="" disabled>
-            Selecciona una sede
-          </option>
-          {sedes.map((sede) => (
-            <option key={sede.id_sede} value={sede.id_sede.toString()}>
-              {sede.nombre}
+      <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">
+          Completa tu registro
+        </h1>
+
+        {message && (
+          <div
+            className={`mb-6 p-4 rounded-lg ${
+              message.startsWith("✅")
+                ? "bg-green-100 text-green-800"
+                : message.startsWith("⚠️")
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {message}
+          </div>
+        )}
+
+        <div className="mb-6">
+          <label className="block text-gray-700 font-medium mb-2">
+            Selecciona tu sede
+          </label>
+          <select
+            value={selectedSede}
+            onChange={(e) => setSelectedSede(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+            disabled={isLoading}
+          >
+            <option value="" disabled className="text-black">
+              Elige una sede
             </option>
-          ))}
-        </select>
-      </label>
-      <div>
-        <input
-          type="checkbox"
-          id="policy"
-          onChange={(e) => setAgreedToPolicy(e.target.checked)}
-        />
-        <label htmlFor="policy">
-          Confirmo que he leído y acepto la <a href="/policy">Política de tratamiento de datos de GUAYABA.</a>
-        </label>
-      </div>
-      <button onClick={registerUser} disabled={isLoading}>
-        {isLoading ? "Cargando..." : "Registrarse"}
-      </button>
+            {sedes.map((sede) => (
+              <option
+                key={sede.id_sede}
+                value={sede.id_sede}
+                className="text-black"
+              >
+                {sede.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-6">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={agreedToPolicy}
+              onChange={(e) => setAgreedToPolicy(e.target.checked)}
+              className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="text-gray-600">
+              Acepto la{" "}
+              <a
+                href="/policy"
+                className="text-blue-600 hover:underline font-medium"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Política de Tratamiento de Datos
+              </a>
+            </span>
+          </label>
+        </div>
+
+        <button
+          onClick={handleRegistration}
+          disabled={isLoading}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              Registrando...
+            </div>
+          ) : (
+            "Finalizar Registro"
+          )}
+        </button>
+      </main>
     </div>
   );
 }

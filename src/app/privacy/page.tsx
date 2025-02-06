@@ -39,7 +39,7 @@ export default function PrivacyPolicy() {
               <strong>Inicia sesión con Google:</strong> Nombre, correo electrónico y foto de perfil.
             </li>
             <li className="mb-2">
-              <strong>Usa nuestro sitio:</strong> Cookies técnicas (JWS) para gestionar su sesión.
+              <strong>Usa nuestro sitio:</strong> Cookies técnicas (JWT) para gestionar su sesión.
             </li>
             <li>
               <strong>Interactúa con formularios:</strong> Datos de contacto si nos escribe.
@@ -55,7 +55,7 @@ export default function PrivacyPolicy() {
           </div>
           <ul className="list-disc pl-6 mt-2 text-gray-700">
             <li className="mb-2">
-              <strong>session_jws:</strong> Cookie técnica para mantener su sesión activa de forma segura. 
+              <strong>session_jwt:</strong> Cookie técnica para mantener su sesión activa de forma segura. 
               Duración: Hasta que cierre el navegador.
             </li>
           </ul>
@@ -69,7 +69,7 @@ export default function PrivacyPolicy() {
           <h2 className="text-xl font-bold text-gray-800 mb-4">4. Finalidad del Tratamiento</h2>
           <ul className="list-disc pl-6 text-gray-700">
             <li className="mb-2">Autenticar su identidad mediante Google Sign-In.</li>
-            <li className="mb-2">Brindar acceso seguro a su cuenta (cookie JWS).</li>
+            <li className="mb-2">Brindar acceso seguro a su cuenta (cookie JWT).</li>
             <li>Responder consultas y mejorar nuestros servicios.</li>
           </ul>
         </div>

@@ -12,11 +12,14 @@ export default function Home() {
       <div className="flex flex-col md:flex-row bg-gray-50 overflow-hidden items-center md:items-start">
         {/* Sección izquierda: Texto */}
         <div className="flex-1 p-6 text-center md:text-left">
-          <h2 className="text-2xl font-bold text-gray-800">Bienvenido a Guayaba</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Bienvenido a Guayaba
+          </h2>
           <p className="mt-4 text-gray-600">
-            Centralizamos la información clave de la estructura educativa de tu universidad,
-            facilitando la gestión y toma de decisiones respecto a los distintos espacios que la componen, para que los puedas disfrutar al máximo.
-            Creemos en la innovación y la fiabilidad.
+            Centralizamos la información clave de la estructura educativa de tu
+            universidad, facilitando la gestión y toma de decisiones respecto a
+            los distintos espacios que la componen, para que los puedas
+            disfrutar al máximo. Creemos en la innovación y la fiabilidad.
           </p>
           {/* Botones */}
           <div className="mt-6 flex justify-center space-x-4">
@@ -42,67 +45,90 @@ export default function Home() {
       {/* Sección: Misión y Visión */}
       <div className="bg-[#F1F5F3] py-16">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-
-
           {/* Bloque Misión */}
           <div className="flex items-start space-x-6">
             <img
-            src="/images/mision.png"
-            alt="Misión"
-            className="w-40 h-40 object-contain self-start"
+              src="/images/mision.png"
+              alt="Misión"
+              className="w-40 h-40 object-contain self-start"
             />
             <div className="flex flex-col">
-              <h3 className="text-2xl font-bold text-[#034f00] mb-4">Nuestra Misión</h3>
+              <h3 className="text-2xl font-bold text-[#034f00] mb-4">
+                Nuestra Misión
+              </h3>
               <p className="text-lg text-gray-700">
-              En GUAYABA, diseñamos, desarrollamos y mejoramos constantemente una plataforma que centraliza la información clave de la infraestructura educativa, 
-              facilitando su seguimiento y planificación. Nos enfocamos en consolidar datos, generar informes útiles y promover herramientas confiables que respalden 
-              la toma de decisiones estratégicas, con el compromiso de abordar los retos del sector educativo de forma efectiva y sostenible.
+                Con Guayaba, diseñamos, desarrollamos y mejoramos constantemente
+                una plataforma que centraliza la información clave de la
+                infraestructura educativa, facilitando su seguimiento y gestión.
+                Nos enfocamos en consolidar datos, generar informes útiles y
+                promover herramientas confiables que respalden la toma de
+                decisiones estratégicas, con el compromiso de abordar estos
+                retos del sector educativo de forma efectiva y sostenible.
               </p>
             </div>
           </div>
 
-        {/* Bloque Visión */}
-        <div className="flex items-start space-x-6">
-          <div className="flex flex-col">
-            <h3 className="text-2xl font-bold text-[#034f00] mb-4">Nuestra Visión</h3>
+          {/* Bloque Visión */}
+          <div className="flex items-start space-x-6">
+            <div className="flex flex-col">
+              <h3 className="text-2xl font-bold text-[#034f00] mb-4">
+                Nuestra Visión
+              </h3>
               <p className="text-lg text-gray-700">
-              Para 2027, ser una opción confiable y accesible en Colombia para la gestión integral de infraestructura educativa, 
-              destacándonos por nuestro rigor en procesos como la consolidación de información clave, el seguimiento del uso de espacios 
-              y la planificación horaria. Buscamos superar las limitaciones actuales del sector mediante soluciones innovadoras que respalden 
-              la toma de decisiones informadas, favoreciendo la eficiencia y sostenibilidad en la gestión educativa.
+                Para 2027, Guayaba busca ser una opción confiable y accesible en
+                Colombia para la gestión integral de infraestructura educativa,
+                destacándose por su rigor en procesos como la consolidación de
+                información clave, seguimiento del uso de espacios y
+                planificación horaria. Buscamos superar las limitaciones
+                actuales del sector mediante una solución innovadora que
+                respalden la toma de decisiones, favoreciendo la eficiencia y
+                sostenibilidad en la gestión educativa.
               </p>
+            </div>
+            <img
+              src="/images/vision.png"
+              alt="Visión"
+              className="w-40 h-40 object-contain self-start fill-[#1f6032]"
+            />
           </div>
-          <img
-          src="/images/vision.png"
-          alt="Visión"
-          className="w-40 h-40 object-contain self-start fill-[#1f6032]"
-          />
         </div>
       </div>
-</div>
-
 
       {/* Nueva Sección: Valores */}
       <div className="bg-[#E8F4E8] py-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h3 className="text-2xl font-bold text-[#034f00] mb-8">Nuestros Valores</h3>
+          <h3 className="text-2xl font-bold text-[#034f00] mb-8">
+            Nuestros Valores
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h4 className="text-xl font-semibold text-gray-800 mb-4">Innovación</h4>
+              <h4 className="text-xl font-semibold text-gray-800 mb-4">
+                Innovación
+              </h4>
               <p className="text-gray-600">
-                Desarrollamos soluciones tecnológicas avanzadas que abordan las necesidades actuales del sector educativo, facilitando la modernización y sostenibilidad en la gestión de infraestructuras.
+                Desarrollamos una solución tecnológicas avanzada que aborda las
+                necesidades actuales del sector educativo, facilitando la
+                modernización y sostenibilidad en la gestión de infraestructura.
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h4 className="text-xl font-semibold text-gray-800 mb-4">Fiabilidad</h4>
+              <h4 className="text-xl font-semibold text-gray-800 mb-4">
+                Fiabilidad
+              </h4>
               <p className="text-gray-600">
-                Proporcionamos una plataforma estable, accesible y consistente que garantiza la disponibilidad de datos y herramientas clave para todos los roles de usuario.
+                Proporcionamos una plataforma estable, accesible y consistente
+                que garantiza la disponibilidad de datos y herramientas clave
+                para todos los roles de usuario.
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h4 className="text-xl font-semibold text-gray-800 mb-4">Rigor</h4>
+              <h4 className="text-xl font-semibold text-gray-800 mb-4">
+                Rigor
+              </h4>
               <p className="text-gray-600">
-                Aseguramos la precisión y calidad de la información, así como la transparencia en los procesos, proporcionando herramientas que minimicen errores y respalden decisiones informadas.
+                Aseguramos la precisión y calidad de la información, así como la
+                transparencia en los procesos, proporcionando herramientas que
+                minimicen errores y respalden decisiones informadas.
               </p>
             </div>
           </div>

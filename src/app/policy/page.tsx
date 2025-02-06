@@ -1,7 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { Header } from "../../../components";
+import { Header, Footer } from "../../../components";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -196,7 +196,7 @@ export default function Home() {
             <br></br><br></br>
             •	Atender y evaluar la satisfacción de los usuarios frente a las peticiones, quejas, reclamos y denuncias presentadas.
             <br></br><br></br>
-            La recolección, almacenamiento, uso, circulación, supresión, actualización y gestión de los datos personales capturados por Guayaba, se realizará en ejercicio de sus funciones legales. 
+            La recolección, almacenamiento, uso, circulación, supresión, actualización y gestión de los datos personales capturados por Guayaba, se realizará en ejercicio de sus funciones. 
           </p>
         </div>
 
@@ -426,6 +426,7 @@ export default function Home() {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

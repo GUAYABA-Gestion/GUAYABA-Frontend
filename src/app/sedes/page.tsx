@@ -1,16 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession, signIn } from "next-auth/react";
+import { Sede } from "../../types/api";
 import { useRol } from "../../../context/RolContext";
 
 // Interfaces para los datos
-interface Sede {
-  id_sede: number;
-  nombre: string;
-  municipio: string;
-  coordinador: string;
-}
-
 interface Edificio {
   id_edificio: number;
   id_sede: number;
@@ -25,47 +20,83 @@ interface Edificio {
 }
 
 const GestionSedes: React.FC = () => {
+  const { data: session } = useSession();
   const { rolSimulado } = useRol();
 
   // Datos simulados
-  const sedes: Sede[] = [
-    { id_sede: 1, nombre: "Sede Norte", municipio: "Bogotá", coordinador: "Juan Pérez" },
-    { id_sede: 2, nombre: "Sede Sur", municipio: "Medellín", coordinador: "Ana Gómez" },
-  ];
+  // const sedes: Sede[] = [
+  //   { id_sede: 1, nombre: "Sede Norte", municipio: "Bogotá", coordinador: "Juan Pérez" },
+  //   { id_sede: 2, nombre: "Sede Sur", municipio: "Medellín", coordinador: "Ana Gómez" },
+  // ];
 
-  const edificios: Edificio[] = [
-    {
-      id_edificio: 1,
-      id_sede: 1,
-      id_titular: 101,
-      nombre: "Edificio A",
-      dirección: "Calle 123",
-      categoría: "Académico",
-      propiedad: "Pública",
-      area_terreno: 5000,
-      area_construida: 4500,
-      cert_uso_suelo: true,
-    },
-    {
-      id_edificio: 2,
-      id_sede: 2,
-      id_titular: 102,
-      nombre: "Edificio B",
-      dirección: "Carrera 45",
-      categoría: "Administrativo",
-      propiedad: "Privada",
-      area_terreno: 3000,
-      area_construida: 2800,
-      cert_uso_suelo: false,
-    },
-  ];
+  // const edificios: Edificio[] = [
+  //   {
+  //     id_edificio: 1,
+  //     id_sede: 1,
+  //     id_titular: 101,
+  //     nombre: "Edificio A",
+  //     dirección: "Calle 123",
+  //     categoría: "Académico",
+  //     propiedad: "Pública",
+  //     area_terreno: 5000,
+  //     area_construida: 4500,
+  //     cert_uso_suelo: true,
+  //   },
+  //   {
+  //     id_edificio: 2,
+  //     id_sede: 2,
+  //     id_titular: 102,
+  //     nombre: "Edificio B",
+  //     dirección: "Carrera 45",
+  //     categoría: "Administrativo",
+  //     propiedad: "Privada",
+  //     area_terreno: 3000,
+  //     area_construida: 2800,
+  //     cert_uso_suelo: false,
+  //   },
+  // ];
 
   const [sedeSeleccionada, setSedeSeleccionada] = useState<number | null>(null);
+  const [sedes, setSedes] = useState<Sede[]>([]);
+  const [edificios, setEdificios] = useState<Edificio[]>([]);
+
+  const fetchSedes = async () => {
+    try {
+      console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLICK_BACKEND_URL}/api/sedes`,
+        {
+          headers: {
+            Authorization: `Bearer ${session?.googleToken}`
+          }
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch sedes");
+      const data: Sede[] = await response.json();
+      setSedes(data);
+    } catch (error) {
+      console.error("Error fetching sedes:", error);
+    }
+  }
+
+  const fetchEdificios = async() => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLICK_BACKEND_URL}edificios`);
+      if (!response.ok) throw new Error("Failed to fetch edificios");
+      const data: Edificio[] = await response.json();
+      setEdificios(data);
+    } catch (error) {
+      //console.error("Error fetching edificios:", error);
+    }
+  }
 
   // Seleccionar automáticamente la primera sede para administradores
   useEffect(() => {
-    if (rolSimulado === "admin" && sedes.length > 0) {
-      setSedeSeleccionada(sedes[0].id_sede);
+    fetchSedes();
+
+    if (rolSimulado === "admin" && sedes!.length > 0) {
+      setSedeSeleccionada(sedes![0].id_sede);
     }
   }, [rolSimulado]);
 
@@ -74,7 +105,7 @@ const GestionSedes: React.FC = () => {
     rolSimulado === "admin"
       ? sedes
       : rolSimulado === "coordinador"
-      ? sedes.filter((sede) => sede.coordinador === "Ana Gómez") // Lógica del coordinador autenticado
+      ? sedes.filter((sede) => sede.coordinador === 1) // Lógica del coordinador autenticado
       : sedes.filter((sede) => edificios.some((edificio) => edificio.id_sede === sede.id_sede));
 
   // Filtrar edificios visibles según el rol y sede seleccionada

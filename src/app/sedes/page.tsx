@@ -65,7 +65,7 @@ const GestionSedes: React.FC = () => {
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLICK_BACKEND_URL}/api/sedes`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes`,
         {
           headers: {
             Authorization: `Bearer ${session?.googleToken}`

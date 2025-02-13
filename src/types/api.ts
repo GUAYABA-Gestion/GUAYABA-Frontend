@@ -25,3 +25,28 @@ export interface Sede {
   municipio?: number;
   coordinador?: number;
 }
+
+export interface Mantenimiento {
+  id_mantenimiento: number;
+  id_espacio: number;
+  id_encargado: number;
+  tipo_contrato: string;
+  tipo: string;
+  estado: string;
+  necesidad: string;
+  prioridad: string;
+  detalle: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  observación: string;
+}
+
+export interface Espacio {
+  id_espacio: number,
+  id_edificio: number,
+  nombre:string,
+  estado:string,
+  tipo:string,
+  capacidad:string,
+  mediciónmt2:number,
+}

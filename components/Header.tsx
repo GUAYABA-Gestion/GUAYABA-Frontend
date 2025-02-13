@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { getAuthCookie, removeAuthCookie } from "../utils/cookies";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react"; // Importar signOut de NextAuth
+import { useRol } from "../context/RolContext"; // Importar contexto de rol
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+  const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
 
   // Verificar autenticación solo en el cliente
   useEffect(() => {
@@ -22,7 +24,7 @@ const Header = () => {
 
     // Cerrar la sesión de Google con NextAuth
     await signOut({ redirect: false });
-
+    cambiarRol("none");
     // Redirigir al login
     router.push("/login");
   };

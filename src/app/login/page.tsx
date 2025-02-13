@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { Header } from "../../../components";
 import { setAuthCookie, getAuthCookie, removeAuthCookie } from "../../../utils/cookies";
 import { setTempMessage } from "../../../utils/cookies";
+import { useRol } from "../../../context/RolContext"; // Importar contexto de rol
 
 export default function Login() {
   const { data: session } = useSession();
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
 
   useEffect(() => {
     const jwt = getAuthCookie();
@@ -36,6 +38,7 @@ export default function Login() {
 
           if (data.exists) {
             setAuthCookie(data.token);
+            await fetchUserData(); 
             router.push('/');
           } else {
             setTempMessage("No tienes una cuenta registrada. Por favor, completa tu registro.");

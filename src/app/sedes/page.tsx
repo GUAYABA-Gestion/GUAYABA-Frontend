@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Sede } from "../../types/api";
 import { useRol } from "../../../context/RolContext";
+import Cookies from "js-cookie";
 
 // Interfaces para los datos
 interface Edificio {
@@ -23,53 +24,22 @@ const GestionSedes: React.FC = () => {
   const { data: session } = useSession();
   const { rolSimulado } = useRol();
 
-  // Datos simulados
-  // const sedes: Sede[] = [
-  //   { id_sede: 1, nombre: "Sede Norte", municipio: "Bogotá", coordinador: "Juan Pérez" },
-  //   { id_sede: 2, nombre: "Sede Sur", municipio: "Medellín", coordinador: "Ana Gómez" },
-  // ];
-
-  // const edificios: Edificio[] = [
-  //   {
-  //     id_edificio: 1,
-  //     id_sede: 1,
-  //     id_titular: 101,
-  //     nombre: "Edificio A",
-  //     dirección: "Calle 123",
-  //     categoría: "Académico",
-  //     propiedad: "Pública",
-  //     area_terreno: 5000,
-  //     area_construida: 4500,
-  //     cert_uso_suelo: true,
-  //   },
-  //   {
-  //     id_edificio: 2,
-  //     id_sede: 2,
-  //     id_titular: 102,
-  //     nombre: "Edificio B",
-  //     dirección: "Carrera 45",
-  //     categoría: "Administrativo",
-  //     propiedad: "Privada",
-  //     area_terreno: 3000,
-  //     area_construida: 2800,
-  //     cert_uso_suelo: false,
-  //   },
-  // ];
-
   const [sedeSeleccionada, setSedeSeleccionada] = useState<number | null>(null);
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [edificios, setEdificios] = useState<Edificio[]>([]);
+
+  const [isRoleLoaded, setIsRoleLoaded] = useState(false); // Estado para controlar la carga del rol
 
   const fetchSedes = async () => {
     try {
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/sedes`,
         {
           headers: {
-            Authorization: `Bearer ${session?.googleToken}`
-          }
+            Authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
         }
       );
       if (!response.ok) throw new Error("Failed to fetch sedes");
@@ -78,43 +48,61 @@ const GestionSedes: React.FC = () => {
     } catch (error) {
       console.error("Error fetching sedes:", error);
     }
-  }
+  };
 
-  const fetchEdificios = async() => {
+  const fetchEdificios = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLICK_BACKEND_URL}edificios`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/edificios`,
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
+        });
       if (!response.ok) throw new Error("Failed to fetch edificios");
       const data: Edificio[] = await response.json();
       setEdificios(data);
     } catch (error) {
-      //console.error("Error fetching edificios:", error);
+      console.error("Error fetching edificios:", error);
     }
-  }
+  };
 
-  // Seleccionar automáticamente la primera sede para administradores
   useEffect(() => {
-    fetchSedes();
-
-    if (rolSimulado === "admin" && sedes!.length > 0) {
-      setSedeSeleccionada(sedes![0].id_sede);
+    // Esperar que el rol esté disponible
+    if (rolSimulado) {
+      setIsRoleLoaded(true);
     }
   }, [rolSimulado]);
+
+  useEffect(() => {
+    if (isRoleLoaded) {
+      fetchSedes();
+
+      if (rolSimulado === "admin" && sedes.length > 0) {
+        setSedeSeleccionada(sedes[0].id_sede);
+      }
+    }
+  }, [isRoleLoaded, rolSimulado, sedes]);
 
   // Filtrar sedes visibles según el rol
   const sedesVisibles: Sede[] =
     rolSimulado === "admin"
       ? sedes
-      : rolSimulado === "coordinador"
+      : rolSimulado === "coord"
       ? sedes.filter((sede) => sede.coordinador === 1) // Lógica del coordinador autenticado
       : sedes.filter((sede) => edificios.some((edificio) => edificio.id_sede === sede.id_sede));
 
   // Filtrar edificios visibles según el rol y sede seleccionada
   const edificiosVisibles: Partial<Edificio>[] =
-    rolSimulado === "admin" || rolSimulado === "coordinador"
+    rolSimulado === "admin" || rolSimulado === "coord"
       ? edificios.filter((edificio) => !sedeSeleccionada || edificio.id_sede === sedeSeleccionada)
       : edificios
           .filter((edificio) => !sedeSeleccionada || edificio.id_sede === sedeSeleccionada)
           .map(({ id_edificio, nombre }) => ({ id_edificio, nombre })); // Mostrar solo nombres
+
+  // Mostrar un mensaje de espera si el rol no está cargado
+  if (!isRoleLoaded) {
+    return <div>Esperando rol...</div>;
+  }
 
   return (
     <div className="p-4">
@@ -129,7 +117,7 @@ const GestionSedes: React.FC = () => {
               <tr>
                 <th className="border border-gray-300 p-2">Nombre</th>
                 <th className="border border-gray-300 p-2">Municipio</th>
-                {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
+                {rolSimulado === "admin" || rolSimulado === "coord" ? (
                   <th className="border border-gray-300 p-2">Coordinador</th>
                 ) : null}
                 <th className="border border-gray-300 p-2">Acciones</th>
@@ -140,7 +128,7 @@ const GestionSedes: React.FC = () => {
                 <tr key={sede.id_sede}>
                   <td className="border border-gray-300 p-2">{sede.nombre}</td>
                   <td className="border border-gray-300 p-2">{sede.municipio}</td>
-                  {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
+                  {rolSimulado === "admin" || rolSimulado === "coord" ? (
                     <td className="border border-gray-300 p-2">{sede.coordinador}</td>
                   ) : null}
                   <td className="border border-gray-300 p-2">
@@ -172,7 +160,7 @@ const GestionSedes: React.FC = () => {
             <thead>
               <tr>
                 <th className="border border-gray-300 p-2">Nombre</th>
-                {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
+                {rolSimulado === "admin" || rolSimulado === "coord" ? (
                   <>
                     <th className="border border-gray-300 p-2">Dirección</th>
                     <th className="border border-gray-300 p-2">Categoría</th>
@@ -195,7 +183,7 @@ const GestionSedes: React.FC = () => {
                       {edificio.nombre}
                     </a>
                   </td>
-                  {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
+                  {rolSimulado === "admin" || rolSimulado === "coord" ? (
                     <>
                       <td className="border border-gray-300 p-2">{edificio.dirección}</td>
                       <td className="border border-gray-300 p-2">{edificio.categoría}</td>

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRol } from "../context/RolContext";
-import SelectorRol from "./SelectorRol";
 
 const Navbar = () => {
   const { rolSimulado } = useRol();
@@ -17,41 +16,37 @@ const Navbar = () => {
       { path: "/eventos", label: "Gestión de Eventos" },
       { path: "/dashboard", label: "Dashboard" },
     ],
-    coordinador: [
+    coord: [
       { path: "/sedes", label: "Gestión de Sede" },
       { path: "/edificios", label: "Gestión de Edificios" },
       { path: "/espacios", label: "Gestión de Espacios" },
       { path: "/mantenimiento", label: "Gestión de Mantenimientos" },
       { path: "/eventos", label: "Gestión de Eventos" },
     ],
-    mantenimiento: [
+    maint: [
       { path: "/edificios", label: "Gestión de Edificios" },
       { path: "/espacios", label: "Gestión de Espacios" },
       { path: "/mantenimiento", label: "Gestión de Mantenimientos" },
       { path: "/eventos", label: "Gestión de Eventos" },
     ],
-    estudiante: [
+    user: [
       { path: "/edificios", label: "Edificios" },
       { path: "/espacios", label: "Espacios" },
       { path: "/eventos", label: "Eventos" },
     ],
+    none: [],
   };
 
   const rutas = rutasPorRol[rolSimulado] || [];
 
   return (
-    <nav className="w-64 bg-gray-800 text-white h-screen p-4 flex flex-col">
+    <nav className="w-64 bg-gray-800 text-white h-screen p-4 flex flex-col sticky top-0 left-0">
       {/* Encabezado con Guayaba App y Rol Actual */}
       <div className="mb-6">
         <h1 className="text-xl font-bold">Guayaba App</h1>
         <p className="text-sm mt-1">
           Rol actual: <span className="font-medium">{rolSimulado}</span>
         </p>
-      </div>
-  
-      {/* Selector de Rol */}
-      <div className="mb-6">
-        <SelectorRol />
       </div>
   
       {/* Navegación */}

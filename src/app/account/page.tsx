@@ -1,12 +1,19 @@
 "use client";
 
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Header } from "../../../components";
 import { User, Sede } from "../../types/api";
 import Cookies from "js-cookie";
+
+const roleOptions = [
+  { value: "admin", label: "Administrador" },
+  { value: "coord", label: "Coordinador" },
+  { value: "maint", label: "Mantenimiento" },
+  { value: "user", label: "Usuario" },
+];
 
 export default function Account() {
   const { data: session } = useSession();
@@ -15,9 +22,9 @@ export default function Account() {
   const [sedeData, setSedeData] = useState<Sede | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
-    // Verificar autenticación
-    useAuth();
+  useAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -35,6 +42,7 @@ export default function Account() {
 
         const data = await response.json();
         setUserData(data);
+        setSelectedRole(data.rol);
         if (data.id_sede) {
           fetchSedeData(data.id_sede);
         }
@@ -48,29 +56,29 @@ export default function Account() {
 
     const fetchSedeData = async (sedeId: number) => {
       try {
-        const jwt = Cookies.get('jwt');
+        const jwt = Cookies.get("jwt");
         if (!jwt) throw new Error("No hay sesión activa");
-    
+
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/${sedeId}`,
           {
             headers: {
-              Authorization: `Bearer ${jwt}`
-            }
+              Authorization: `Bearer ${jwt}`,
+            },
           }
         );
-    
+
         if (!response.ok) {
-          throw new Error(response.status === 404 
-            ? "Sede no encontrada" 
-            : "Error al obtener datos de la sede"
+          throw new Error(
+            response.status === 404
+              ? "Sede no encontrada"
+              : "Error al obtener datos de la sede"
           );
         }
-    
+
         setSedeData(await response.json());
       } catch (error) {
         console.error("Error:", error);
-
       }
     };
 
@@ -81,38 +89,38 @@ export default function Account() {
     }
   }, [session, router]);
 
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.")) {
-      return;
-    }
-  
+  const handleRoleChange = async (newRole: string) => {
+    if (!userData) return;
+
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/delete`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/update`,
         {
-          method: "DELETE",
+          method: "PUT",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${Cookies.get("jwt")}`,
           },
+          body: JSON.stringify({
+            id_persona: userData.id_persona,
+            nombre: userData.nombre,
+            correo: userData.correo,
+            rol: newRole,
+            id_sede: userData.id_sede,
+          }),
         }
       );
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || "Error al eliminar la cuenta");
-      }
-  
-      // Cerrar sesión y redirigir
-      await signOut({ redirect: false });
-      Cookies.remove("jwt");
-      
-      // Mostrar mensaje de éxito
-      setMessage("✅ Tu cuenta ha sido eliminada correctamente");
-      router.push("/");
-  
+
+      if (!response.ok) throw new Error("Error al actualizar el rol");
+
+      setSelectedRole(newRole);
+      setMessage("✅ Rol actualizado correctamente.");
+      setTimeout(() => {
+        window.location.reload(); // 🔄 Recargar datos después del delay
+      }, 1500); // 1
     } catch (error) {
       console.error("Error:", error);
+      setMessage("❌ No se pudo actualizar el rol.");
     }
   };
 
@@ -135,16 +143,16 @@ export default function Account() {
     <div className="min-h-screen p-4 bg-gray-50">
       <Header />
       <main className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
-          Mi Cuenta
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Mi Cuenta</h1>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.startsWith("❌") 
-              ? "bg-red-100 text-red-800"
-              : "bg-blue-100 text-blue-800"
-          }`}>
+          <div
+            className={`mb-6 p-4 rounded-lg ${
+              message.startsWith("❌")
+                ? "bg-red-100 text-red-800"
+                : "bg-blue-100 text-blue-800"
+            }`}
+          >
             {message}
           </div>
         )}
@@ -169,9 +177,21 @@ export default function Account() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Rol</p>
-                <p className="font-medium text-gray-800">
-                  {userData?.rol || "N/A"}
-                </p>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={selectedRole}
+                  onChange={(e) => handleRoleChange(e.target.value)}
+                >
+                  {roleOptions.map((role) => (
+                    <option
+                      key={role.value}
+                      value={role.value}
+                      className="text-black"
+                    >
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -194,17 +214,6 @@ export default function Account() {
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="mt-8 border-t pt-6">
-          <div className="space-y-4">
-            <button
-              onClick={handleDeleteAccount}
-              className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              Eliminar Cuenta
-            </button>
           </div>
         </div>
       </main>

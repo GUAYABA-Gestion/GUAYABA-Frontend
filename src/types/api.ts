@@ -36,7 +36,7 @@ export interface Mantenimiento {
   necesidad: string;
   prioridad: string;
   detalle: string;
-  fecha_inicio: string;
+  fecha_ini: string;
   fecha_fin: string;
   observación: string;
 }

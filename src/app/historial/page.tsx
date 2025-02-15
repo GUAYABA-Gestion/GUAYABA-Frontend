@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
-import { Sede } from "../../types/api";
-import { useRol } from "../../../context/RolContext";
+import { useSession } from "next-auth/react";
 import Cookies from "js-cookie";
+import { useRol } from "../../../context/RolContext";
 
 // Interfaces para los datos
-interface Logs {
+interface Log {
   id_auditoria: number;
   tabla_afectada: string;
   operacion: "INSERT" | "UPDATE" | "DELETE";
@@ -19,14 +18,13 @@ interface Logs {
 const Historial: React.FC = () => {
   const { data: session } = useSession();
   const { rolSimulado } = useRol();
-  const [logs, setHistorial] = useState<Logs[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga
+  const [logs, setHistorial] = useState<Log[]>([]);
+  const [filteredLogs, setFilteredLogs] = useState<Log[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState("");
 
   useEffect(() => {
-    // Esperar hasta que rolSimulado no sea 'none' o undefined
-    if (!rolSimulado || rolSimulado === "none") {
-      return; // Evita hacer la carga hasta que el rol esté disponible
-    }
+    if (!rolSimulado || rolSimulado === "none") return;
 
     const fetchHistorial = async () => {
       try {
@@ -41,77 +39,114 @@ const Historial: React.FC = () => {
 
         if (!response.ok) throw new Error("Failed to fetch historial");
 
-        const data: Logs[] = await response.json();
+        const data: Log[] = await response.json();
         setHistorial(data);
+        setFilteredLogs(data);
       } catch (error) {
         console.error("Error fetching historial:", error);
       } finally {
-        setIsLoading(false); // Marcar como cargado
+        setIsLoading(false);
       }
     };
 
     fetchHistorial();
   }, [rolSimulado]);
 
-  if (!rolSimulado || rolSimulado === "none" || isLoading) {
-    return <div className="p-4 text-gray-600">Cargando historial...</div>; // Mostrar cargando si no hay rol válido
+  useEffect(() => {
+    if (!selectedDate) {
+      setFilteredLogs(logs); // Si no hay fecha, mostrar todos
+      return;
+    }
+
+    const filtered = logs.filter((log) => {
+      const logDate = new Date(log.fecha_hora).toISOString().split("T")[0]; // Extrae YYYY-MM-DD
+      return logDate === selectedDate;
+    });
+
+    setFilteredLogs(filtered);
+  }, [selectedDate, logs]);
+
+  if (!rolSimulado || rolSimulado === "none" || rolSimulado =="user" || rolSimulado == "maint" || rolSimulado == "coord") {
+    return <p className="text-gray-500 text-center mt-4">No tienes permisos para ver el historial.</p>;
+  }
+
+  if (isLoading) {
+    return <div className="p-4 text-gray-600">Cargando historial...</div>;
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Historial de Cambios</h1>
+    <div className="min-h-screen flex flex-col bg-gray-50 p-6">
+      <h1 className="text-3xl font-bold text-black mb-4 text-center">Historial de Cambios</h1>
 
-      {/* Tabla de Historial */}
+      {/* Filtro por fecha */}
+      <div className="mb-4 flex justify-center items-center">
+        <label className="mr-2 text-black font-medium">Filtrar por fecha:</label>
+        <input
+          type="date"
+          className="p-2 border border-gray-300 rounded-lg text-black"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
+      </div>
 
-      <div className="mt-6">
-        <table className="w-full border-collapse border border-gray-300 mt-2">
+      {/* Tabla */}
+      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table className="w-full border-collapse text-black">
           <thead>
-            <tr>
-              <th className="border border-gray-300 p-2">ID</th>
-              {rolSimulado === "admin" || rolSimulado === "coord" ? (
-                <>
-                  <th className="border border-gray-300 p-2">Tabla Afectada</th>
-                  <th className="border border-gray-300 p-2">Operación</th>
-                  <th className="border border-gray-300 p-2">Fecha - Hora</th>
-                  <th className="border border-gray-300 p-2">
-                    Datos Anteriores
-                  </th>
-                  <th className="border border-gray-300 p-2">Datos Nuevos</th>
-                </>
-              ) : null}
+            <tr className="bg-[#C2E7D1] text-black">
+              <th className="p-3 border">ID</th>
+              <th className="p-3 border">Tabla Afectada</th>
+              <th className="p-3 border">Operación</th>
+              <th className="p-3 border">Fecha - Hora</th>
+              <th className="p-3 border">Datos Anteriores</th>
+              <th className="p-3 border">Datos Nuevos</th>
             </tr>
           </thead>
           <tbody>
-            {logs.map((log: Partial<Logs>) => (
-              <tr key={log.id_auditoria}>
-                {rolSimulado === "admin" || rolSimulado === "coord" ? (
-                  <>
-                    <td className="border border-gray-300 p-2">
-                      {log.id_auditoria}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {log.tabla_afectada}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {log.operacion}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {log.fecha_hora}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {log.datos_anteriores
-                        ? JSON.stringify(log.datos_anteriores, null, 2)
-                        : "—"}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {log.datos_nuevos
-                        ? JSON.stringify(log.datos_nuevos, null, 2)
-                        : "—"}
-                    </td>
-                  </>
-                ) : null}
+            {filteredLogs.length > 0 ? (
+              filteredLogs.map((log) => (
+                <tr key={log.id_auditoria} className="border-t">
+                  <td className="p-3 text-center">{log.id_auditoria}</td>
+                  <td className="p-3">{log.tabla_afectada}</td>
+                  <td
+                    className={`p-3 text-center font-medium border ${
+                      log.operacion === "INSERT"
+                        ? "bg-[#C2E7D1] text-black"
+                        : log.operacion === "UPDATE"
+                        ? "bg-yellow-100 text-black"
+                        : "bg-red-100 text-black"
+                    }`}
+                  >
+                    {log.operacion}
+                  </td>
+                  <td className="p-3 text-center">{new Date(log.fecha_hora).toLocaleString()}</td>
+                  <td className="p-3">
+                    {log.datos_anteriores ? (
+                      <pre className="text-xs bg-gray-100 p-2 rounded whitespace-pre-wrap">
+                        {JSON.stringify(log.datos_anteriores, null, 2)}
+                      </pre>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {log.datos_nuevos ? (
+                      <pre className="text-xs bg-gray-100 p-2 rounded whitespace-pre-wrap">
+                        {JSON.stringify(log.datos_nuevos, null, 2)}
+                      </pre>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="p-4 text-center text-gray-500">
+                  No hay registros para esta fecha.
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

@@ -2,8 +2,21 @@ export interface User {
   id_persona: number;
   correo: string;
   nombre: string;
+  telefono: string;
   rol: string;
+  detalles: string;
+  sede_nombre: string;
+  id_sede?: number;
+  es_manual: boolean;
+}
+
+export interface Sede {
   id_sede: number;
+  nombre: string;
+  municipio: string;
+  coordinador: string;
+  nombre_municipio: string;
+  nombre_coordinador: string;
 }
 
 export interface CheckUserResponse {
@@ -17,13 +30,6 @@ export interface RegisterResponse {
   user?: User;
   token?: string;
   error?: string;
-}
-
-export interface Sede {
-  id_sede: number;
-  nombre: string;
-  municipio?: number;
-  coordinador?: number;
 }
 
 export interface Mantenimiento {

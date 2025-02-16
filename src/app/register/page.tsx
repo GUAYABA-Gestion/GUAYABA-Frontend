@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import { Header } from "../../../components";
 import { Sede } from "../../types/api";
 import { getTempMessage, removeTempMessage } from "../../../utils/cookies";
+import { useRol } from "../../../context/RolContext"; // Importar contexto de rol
 
 export default function Register() {
   const { data: session } = useSession();
@@ -17,6 +18,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [isChecking, setIsChecking] = useState(true);
+  const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
 
   useEffect(() => {
     const checkUserRegistration = async () => {
@@ -50,7 +52,7 @@ export default function Register() {
               sameSite: "strict",
             });
           }
-
+          await fetchUserData();
           setMessage("✅ Ya estás registrado. Redirigiendo...");
           setTimeout(() => router.push("/"), 2000);
           return;
@@ -133,6 +135,7 @@ export default function Register() {
           sameSite: "strict",
           expires: 1,
         });
+        await fetchUserData();
         router.push("/");
       } else {
         throw new Error(data.error || "Error en el registro");

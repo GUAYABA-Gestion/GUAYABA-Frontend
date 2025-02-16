@@ -1,7 +1,7 @@
 "use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // Importar useSearchParams
 import { Header } from "../../../components";
 import { setAuthCookie, getAuthCookie, removeAuthCookie } from "../../../utils/cookies";
 import { setTempMessage } from "../../../utils/cookies";
@@ -10,16 +10,20 @@ import { useRol } from "../../../context/RolContext"; // Importar contexto de ro
 export default function Login() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams(); // Obtener parámetros de la URL
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
 
+  // Obtener el callbackUrl de los parámetros de la URL
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
   useEffect(() => {
     const jwt = getAuthCookie();
 
-    // Si ya hay un JWT válido, redirigir al home
+    // Si ya hay un JWT válido, redirigir al callbackUrl o al home
     if (jwt) {
-      router.push('/');
+      router.push(callbackUrl);
       return;
     }
 
@@ -38,8 +42,8 @@ export default function Login() {
 
           if (data.exists) {
             setAuthCookie(data.token);
-            await fetchUserData(); 
-            router.push('/');
+            await fetchUserData();
+            router.push(callbackUrl); // Redirigir al callbackUrl después del login
           } else {
             setTempMessage("No tienes una cuenta registrada. Por favor, completa tu registro.");
             await signOut({ redirect: false });
@@ -55,7 +59,7 @@ export default function Login() {
 
       checkUser();
     }
-  }, [session, router]);
+  }, [session, router, callbackUrl]); // Agregar callbackUrl como dependencia
 
   const handleSignIn = async () => {
     setIsLoading(true);

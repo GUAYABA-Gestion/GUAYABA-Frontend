@@ -1,144 +1,136 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useRol } from "../../../context/RolContext";
+import UserTable from "./components/UserTable";
+import UserDetailsModal from "./components/UserDetailsModal";
+import { User, Sede } from "../../types/api";
+import { fetchUsers, fetchSedes, updateUser, deleteUserManual } from "./components/UserActions";
 
 const AdminDashboard = () => {
   const { rolSimulado } = useRol();
+  const [users, setUsers] = useState<User[]>([]);
+  const [sedes, setSedes] = useState<Sede[]>([]);
+  const [filters, setFilters] = useState({
+    sede: "",
+    rol: "",
+    correo: "",
+    es_manual: "",
+  });
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [editMode, setEditMode] = useState(false);
+  const [editedUser, setEditedUser] = useState<User | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Fetch users and sedes
+  useEffect(() => {
+    const fetchData = async () => {
+      const usersData = await fetchUsers();
+      const sedesData = await fetchSedes();
+      setUsers(usersData);
+      setSedes(sedesData);
+    };
+    fetchData();
+  }, []);
+
+  // Responsive items per page
+  useEffect(() => {
+    const handleResize = () => setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleEditField = (field: keyof User, value: string) => {
+    editedUser && setEditedUser({ ...editedUser, [field]: value });
+  };
+
+  const handleSaveChanges = async () => {
+    if (!editedUser) return;
+  
+    if (editedUser.telefono && !/^\d{10}$/.test(editedUser.telefono)) {
+      alert("El teléfono debe tener 10 dígitos");
+      return;
+    }
+  
+    try {
+      const updatedUser = await updateUser(editedUser);
+      
+      // Actualizar ambos estados
+      setUsers(users.map(user => 
+        user.id_persona === updatedUser.id_persona ? updatedUser : user
+      ));
+      
+      // Actualizar usuario seleccionado y editado
+      setSelectedUser(updatedUser);
+      setEditedUser(updatedUser);
+      
+      // Mostrar mensaje de éxito
+      setShowSuccess(true);
+      
+      // Ocultar mensaje después de 3 segundos
+      setTimeout(() => setShowSuccess(false), 3000);
+      
+      // Mantener el modal abierto
+      setEditMode(false);
+  
+    } catch (error) {
+      console.error("Update error:", error);
+    }
+  };
+
+  const handleDeleteUser = async (id_persona: number) => {
+    try {
+      await deleteUserManual(id_persona);
+      setUsers(users.filter(user => user.id_persona !== id_persona));
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
 
   if (rolSimulado !== "admin") {
     return (
       <div className="p-4">
-        <h2 className="text-2xl font-bold">Acceso Restringido</h2>
-        <p className="text-gray-600">
-          Esta vista solo está disponible para administradores.
-        </p>
+        <h2 className="text-2xl font-bold text-black">Acceso Restringido</h2>
+        <p className="text-gray-600">Esta vista solo está disponible para administradores.</p>
       </div>
     );
   }
 
-  // Datos simulados. Reemplázalos con una consulta real a la base de datos.
-  const stats = {
-    totalPersonas: 100,
-    desglosePorSede: {
-      sede1: 40,
-      sede2: 35,
-      sede3: 25,
-    },
-    personasConUsuario: 80,
-    roles: {
-      admin: 5,
-      coordinador: 15,
-      mantenimiento: 10,
-      estudiante: 70,
-    },
-  };
-
-  const personas = [
-    {
-      id_persona: 1,
-      nombre: "Juan Pérez",
-      correo: "juan.perez@example.com",
-      telefono: "3001234567",
-      detalles: "Empleado con 5 años de experiencia.",
-      rol: "Admin",
-      sede: "Sede 1",
-      usuario: "Sí",
-    },
-    {
-      id_persona: 2,
-      nombre: "Ana Gómez",
-      correo: "ana.gomez@example.com",
-      telefono: "3107654321",
-      detalles: "Coordinadora del área académica.",
-      rol: "Coordinador",
-      sede: "Sede 2",
-      usuario: "No",
-    },
-  ];
-
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Gestión de Roles</h1>
+    <>
+      <UserTable
+        users={users}
+        sedes={sedes}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        filters={filters}
+        onPageChange={setCurrentPage}
+        onUserClick={(user) => {
+          setSelectedUser(user);
+          setEditedUser(user);
+          setEditMode(false);
+        }}
+        onFilterChange={(filter, value) => setFilters(prev => ({ ...prev, [filter]: value }))}
+        resetFilters={() => setFilters({ sede: "", rol: "", correo: "", es_manual: "" })}
+      />
 
-      {/* Estadísticas */}
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold">Estadísticas Generales</h2>
-        <p className="text-gray-700">Total de Personas: {stats.totalPersonas}</p>
-        <p className="text-gray-700">
-          Personas por Sede:
-          {Object.entries(stats.desglosePorSede).map(([sede, cantidad]) => (
-            <span key={sede}>
-              {" "}
-              {sede}: {cantidad}
-            </span>
-          ))}
-        </p>
-        <p className="text-gray-700">Personas con Usuario: {stats.personasConUsuario}</p>
-        <p className="text-gray-700">
-          Roles:
-          {Object.entries(stats.roles).map(([rol, cantidad]) => (
-            <span key={rol}>
-              {" "}
-              {rol}: {cantidad}
-            </span>
-          ))}
-        </p>
-      </div>
-
-      {/* Tabla de Personas */}
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold">Lista de Personas</h2>
-        <table className="w-full border-collapse border border-gray-300 mt-2">
-          <thead>
-            <tr>
-              <th className="border border-gray-300 p-2">Nombre</th>
-              <th className="border border-gray-300 p-2">Correo</th>
-              <th className="border border-gray-300 p-2">Teléfono</th>
-              <th className="border border-gray-300 p-2">Detalles</th>
-              <th className="border border-gray-300 p-2">Rol</th>
-              <th className="border border-gray-300 p-2">Sede</th>
-              <th className="border border-gray-300 p-2">Usuario</th>
-              <th className="border border-gray-300 p-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {personas.map((persona) => (
-              <tr key={persona.id_persona} data-id={persona.id_persona}>
-                <td className="border border-gray-300 p-2">{persona.nombre}</td>
-                <td className="border border-gray-300 p-2">{persona.correo}</td>
-                <td className="border border-gray-300 p-2">{persona.telefono}</td>
-                <td className="border border-gray-300 p-2">{persona.detalles}</td>
-                <td className="border border-gray-300 p-2">{persona.rol}</td>
-                <td className="border border-gray-300 p-2">{persona.sede}</td>
-                <td className="border border-gray-300 p-2">{persona.usuario}</td>
-                <td className="border border-gray-300 p-2">
-                  <button
-                    onClick={() => console.log(`Editar ${persona.id_persona}`)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mr-2"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => console.log(`Eliminar ${persona.id_persona}`)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Botón para añadir persona */}
-      <button
-        onClick={() => console.log("Ir a añadir persona")}
-        className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-      >
-        Añadir Persona
-      </button>
-    </div>
+      <UserDetailsModal
+        user={selectedUser}
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+        onSave={handleSaveChanges}
+        onDelete={handleDeleteUser}
+        editMode={editMode}
+        setEditMode={setEditMode}
+        editedUser={editedUser}
+        handleEditField={handleEditField}
+        sedes={sedes}
+        showSuccess={showSuccess} 
+      />
+    </>
   );
 };
 

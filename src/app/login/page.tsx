@@ -1,7 +1,7 @@
 "use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // Importar useSearchParams
+import { redirect, useRouter, useSearchParams } from "next/navigation"; // Importar useSearchParams
 import { Header } from "../../../components";
 import { setAuthCookie, getAuthCookie, removeAuthCookie } from "../../../utils/cookies";
 import { setTempMessage } from "../../../utils/cookies";
@@ -23,6 +23,7 @@ export default function Login() {
 
     // Si ya hay un JWT válido, redirigir al callbackUrl o al home
     if (jwt) {
+      signOut({redirect: false});
       router.push(callbackUrl);
       return;
     }
@@ -43,6 +44,7 @@ export default function Login() {
           if (data.exists) {
             setAuthCookie(data.token);
             await fetchUserData();
+            await signOut({ redirect: false });
             router.push(callbackUrl); // Redirigir al callbackUrl después del login
           } else {
             setTempMessage("No tienes una cuenta registrada. Por favor, completa tu registro.");

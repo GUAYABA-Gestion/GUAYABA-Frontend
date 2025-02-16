@@ -27,7 +27,7 @@ export const fetchSedes = async () => {
 
 export const addUsersManual = async (users: any[]) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/addUser`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/addUser`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,15 +35,22 @@ export const addUsersManual = async (users: any[]) => {
       },
       body: JSON.stringify({ users }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al añadir usuarios");
+    }
+
     return response.json();
   } catch (error) {
-    console.error("Error al añadir usuarios:", error);
+    console.error("Error al añadir usuarios front:", error);
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
 export const deleteUserManual = async (id_persona: number) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/deleteManual`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/deleteManual`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -76,5 +83,28 @@ export const updateUser = async (user: User) => {
   } catch (error) {
     console.error("Error al actualizar el usuario:", error);
     throw error; // Relanza el error para manejarlo en el componente
+  }
+};
+
+export const getUserReferences = async (id_persona: number) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/references`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("jwt")}`,
+      },
+      body: JSON.stringify({ id_persona }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener referencias del usuario");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error al obtener referencias del usuario:", error);
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };

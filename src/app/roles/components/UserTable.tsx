@@ -31,20 +31,31 @@ const UserTable = ({
 }: UserTableProps) => {
   const getRolCompleto = (rol: string) => {
     switch (rol) {
-      case "user": return "Usuario";
-      case "admin": return "Administrador";
-      case "maint": return "Mantenimiento";
-      case "coord": return "Coordinador";
-      default: return rol;
+      case "user":
+        return "Usuario";
+      case "admin":
+        return "Administrador";
+      case "maint":
+        return "Mantenimiento";
+      case "coord":
+        return "Coordinador";
+      default:
+        return rol;
     }
+  };
+
+  const getSedeNombre = (id_sede: number | undefined) => {
+    const sede = sedes.find((s) => s.id_sede === id_sede);
+    return sede ? sede.nombre : "Sin sede";
   };
 
   const filteredUsers = users.filter((user) => {
     return (
-      (filters.sede === "" || user.sede_nombre === filters.sede) &&
+      (filters.sede === "" || user.id_sede?.toString() === filters.sede) &&
       (filters.rol === "" || user.rol === filters.rol) &&
       (filters.correo === "" || user.correo.includes(filters.correo)) &&
-      (filters.es_manual === "" || user.es_manual === (filters.es_manual === "true"))
+      (filters.es_manual === "" ||
+        user.es_manual === (filters.es_manual === "true"))
     );
   });
 
@@ -54,56 +65,6 @@ const UserTable = ({
 
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-[#034f00]">Gestión de Roles</h1>
-
-      {/* Filtros */}
-      <div className="mt-4 space-y-4">
-        <div className="flex space-x-4">
-          <input
-            type="text"
-            placeholder="Filtrar por correo"
-            value={filters.correo}
-            onChange={(e) => onFilterChange("correo", e.target.value)}
-            className="p-2 border rounded text-black"
-          />
-          <select
-            value={filters.rol}
-            onChange={(e) => onFilterChange("rol", e.target.value)}
-            className="p-2 border rounded text-black"
-          >
-            <option value="">Todos los roles</option>
-            <option value="admin">Administrador</option>
-            <option value="coord">Coordinador</option>
-            <option value="maint">Mantenimiento</option>
-            <option value="user">Usuario</option>
-          </select>
-          <select
-            value={filters.sede}
-            onChange={(e) => onFilterChange("sede", e.target.value)}
-            className="p-2 border rounded text-black"
-          >
-            <option value="">Todas las sedes</option>
-            {sedes.map((sede) => (
-              <option key={sede.id_sede} value={sede.nombre}>{sede.nombre}</option>
-            ))}
-          </select>
-          <select
-            value={filters.es_manual}
-            onChange={(e) => onFilterChange("es_manual", e.target.value)}
-            className="p-2 border rounded text-black"
-          >
-            <option value="">Todos</option>
-            <option value="true">Añadidos manualmente</option>
-            <option value="false">Registrados en el sistema</option>
-          </select>
-          <button
-            onClick={resetFilters}
-            className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
-          >
-            Reiniciar Filtros
-          </button>
-        </div>
-      </div>
 
       {/* Tabla */}
       <div className="mt-6">
@@ -124,9 +85,16 @@ const UserTable = ({
                   user.es_manual ? "border-l-4 border-red-500" : ""
                 }`}
               >
-                <td className="border border-gray-300 p-2 text-black">{user.correo}</td>
-                <td className="border border-gray-300 p-2 text-black">{getRolCompleto(user.rol)}</td>
-                <td className="border border-gray-300 p-2 text-black">{user.sede_nombre}</td>
+                <td className="border border-gray-300 p-2 text-black">
+                  {user.correo}
+                </td>
+                <td className="border border-gray-300 p-2 text-black">
+                  {getRolCompleto(user.rol)}
+                </td>
+                <td className="border border-gray-300 p-2 text-black">
+                  {getSedeNombre(user.id_sede)}
+                </td>
+
                 <td className="border border-gray-300 p-2 text-center">
                   <button
                     onClick={() => onUserClick(user)}
@@ -151,11 +119,14 @@ const UserTable = ({
           Anterior
         </button>
         <span className="flex items-center px-4 py-2 text-black">
-          Página {currentPage} de {Math.ceil(filteredUsers.length / itemsPerPage)}
+          Página {currentPage} de{" "}
+          {Math.ceil(filteredUsers.length / itemsPerPage)}
         </span>
         <button
           onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage)}
+          disabled={
+            currentPage === Math.ceil(filteredUsers.length / itemsPerPage)
+          }
           className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300 disabled:opacity-50"
         >
           Siguiente

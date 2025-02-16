@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { Header } from "../../../components";
@@ -53,6 +53,7 @@ export default function Register() {
             });
           }
           await fetchUserData();
+          await signOut({ redirect: false });
           setMessage("✅ Ya estás registrado. Redirigiendo...");
           setTimeout(() => router.push("/"), 2000);
           return;
@@ -136,6 +137,7 @@ export default function Register() {
           expires: 1,
         });
         await fetchUserData();
+        await signOut({ redirect: false });
         router.push("/");
       } else {
         throw new Error(data.error || "Error en el registro");

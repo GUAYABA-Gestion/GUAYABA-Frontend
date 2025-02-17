@@ -1,6 +1,7 @@
 "use client";
 import { Header } from "../../components";
 import { Footer } from "../../components";
+import {FuncionalidadesCarousel} from "../../components";
 
 export default function Home() {
   return (
@@ -41,6 +42,8 @@ export default function Home() {
           />
         </div>
       </div>
+
+      <FuncionalidadesCarousel />
 
       {/* Sección: Misión y Visión */}
       <div className="bg-[#F1F5F3] py-16">

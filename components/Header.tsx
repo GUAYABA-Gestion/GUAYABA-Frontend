@@ -111,11 +111,6 @@ const Header = () => {
             Contact
           </Link>
         </li>
-        <li>
-          <Link href="/session" className="hover:text-gray-300 transition-colors">
-            Session
-          </Link>
-        </li>
       </ul>
 
       {/* Menú desplegable para pantallas pequeñas */}
@@ -164,11 +159,6 @@ const Header = () => {
           <li>
             <Link href="/contact" className="hover:text-gray-300 transition-colors">
               Contact
-            </Link>
-          </li>
-          <li>
-            <Link href="/session" className="hover:text-gray-300 transition-colors">
-              Session
             </Link>
           </li>
         </ul>

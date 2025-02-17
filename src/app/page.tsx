@@ -1,6 +1,7 @@
 "use client";
 import { Header } from "../../components";
 import { Footer } from "../../components";
+import {FuncionalidadesCarousel} from "../../components";
 
 export default function Home() {
   return (
@@ -41,6 +42,8 @@ export default function Home() {
           />
         </div>
       </div>
+
+      <FuncionalidadesCarousel />
 
       {/* Sección: Misión y Visión */}
       <div className="bg-[#F1F5F3] py-16">
@@ -134,6 +137,60 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+
+      {/* Sección: Nuestro Equipo */}
+      <div className="bg-[#F9FAFB] py-16">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h3 className="text-2xl font-bold text-[#034f00] mb-8">Equipo GUAYABA</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+          {/* Miembro 1 */}
+            <div className="flex-grow flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg">
+              <img src="/images/tibusanti.jpg" alt="Miembro 1" className="w-32 h-32 rounded-full object-cover mb-4"/>
+              <h4 className="text-lg font-semibold text-gray-800">Santiago Reyes Ochoa</h4>
+              <p className="text-sm text-gray-600">Frontend + Backend</p>
+                <div className="mt-2 flex space-x-2">
+                  <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
+                  <a href="#" className="text-blue-500 hover:underline">GitHub</a>
+                </div>
+            </div>
+
+          {/* Miembro 2 */}
+            <div className="flex-grow flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg">
+              <img src="/images/sant.jpg" alt="Miembro 2" className="w-32 h-32 rounded-full object-cover mb-4"/>
+              <h4 className="text-lg font-semibold text-gray-800">Santiago Ballen Leguizamo</h4>
+              <p className="text-sm text-gray-600">Backend</p>
+                <div className="mt-2 flex space-x-2">
+                  <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
+                  <a href="#" className="text-blue-500 hover:underline">GitHub</a>
+                </div>
+            </div>
+
+          {/* Miembro 3 */}
+            <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+              <img src="/images/miguel.jpg" alt="Miembro 3" className="w-32 h-32 rounded-full object-cover mb-4"/>
+              <h4 className="text-lg font-semibold text-gray-800">Miguel Angel Suarez Cortes</h4>
+              <p className="text-sm text-gray-600">Backend</p>
+              <div className="mt-2 flex space-x-2">
+                <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
+                <a href="#" className="text-blue-500 hover:underline">GitHub</a>
+              </div>
+            </div>
+
+          {/* Miembro 4 */}
+            <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+              <img src="/images/dan3.jpg" alt="Miembro 4" className="w-32 h-32 rounded-full object-cover mb-4"/>
+              <h4 className="text-lg font-semibold text-gray-800">Daniel Esteban Tobar Lozano</h4>
+              <p className="text-sm text-gray-600">Frontend</p>
+                <div className="mt-2 flex space-x-2">
+                  <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
+                  <a href="#" className="text-blue-500 hover:underline">GitHub</a>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
 
       {/* Footer */}
       <Footer />

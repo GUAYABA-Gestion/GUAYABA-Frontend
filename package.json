@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "install": "^0.13.0",
     "js-cookie": "^3.0.5",
     "next": "15.1.3",

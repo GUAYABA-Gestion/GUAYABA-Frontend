@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Papa from "papaparse";
+import ExcelJS from "exceljs";
 import { addUsersManual } from "../components/UserActions";
 import { User, Sede } from "../../../types/api";
 
@@ -26,6 +27,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
     sede_nombre: "",
     es_manual: true,
   });
+  const [showCsvInfo, setShowCsvInfo] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Cambiamos a un array de errores por fila
   const [validationErrors, setValidationErrors] = useState<
@@ -74,6 +77,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    setSelectedFile(file);
 
     Papa.parse(file, {
       header: true,
@@ -144,117 +148,187 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
     setUsers([]);
     setError(null);
     setValidationErrors([]);
+    setShowCsvInfo(false);
+    setSelectedFile(null);
     onClose();
   };
 
+  const handleDownloadTemplate = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Plantilla Usuarios");
+
+    worksheet.columns = [
+      { header: "nombre", key: "nombre", width: 20 },
+      { header: "correo", key: "correo", width: 30 },
+      { header: "telefono", key: "telefono", width: 15 },
+      { header: "rol", key: "rol", width: 15 },
+      { header: "detalles", key: "detalles", width: 30 },
+      { header: "id_sede", key: "id_sede", width: 10 },
+    ];
+
+    worksheet.addRow(["", "", "", "user", "", 0]);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", "user_template.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Ordenar las sedes por id_sede
+  const sortedSedes = [...sedes].sort((a, b) => a.id_sede - b.id_sede);
+
   return (
     <div className={`fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 ${isOpen ? "visible" : "invisible"}`}>
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full max-h-screen overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-black">Añadir Usuarios</h2>
 
         {error && <div className="mb-4 text-red-500">{error}</div>}
 
-        <table className="w-full border-collapse border border-gray-300 table-fixed">
-          <thead>
-            <tr className="bg-[#80BA7F] text-white">
-              <th className="border border-gray-300 p-2">Nombre</th>
-              <th className="border border-gray-300 p-2">Correo</th>
-              <th className="border border-gray-300 p-2">Teléfono</th>
-              <th className="border border-gray-300 p-2">Rol</th>
-              <th className="border border-gray-300 p-2">Detalles</th>
-              <th className="border border-gray-300 p-2">Sede</th>
-              <th className="border border-gray-300 p-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={user.nombre}
-                    onChange={(e) => handleInputChange(index, e)}
-                    placeholder="Nombre"
-                    className="input text-black w-full"
-                  />
-                </td>
-                <td className={`border border-gray-300 p-2 ${validationErrors[index]?.correo ? "outline outline-red-500" : ""}`}>
-                  <input
-                    type="email"
-                    name="correo"
-                    value={user.correo}
-                    onChange={(e) => handleInputChange(index, e)}
-                    placeholder="Correo"
-                    className="input text-black w-full"
-                  />
-                </td>
-                <td className={`border border-gray-300 p-2 ${validationErrors[index]?.telefono ? "outline outline-red-500" : ""}`}>
-                  <input
-                    type="text"
-                    name="telefono"
-                    value={user.telefono}
-                    onChange={(e) => handleInputChange(index, e)}
-                    placeholder="Teléfono (10 dígitos)"
-                    className="input text-black w-full"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <select
-                    name="rol"
-                    value={user.rol}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="input text-black w-full"
-                  >
-                    <option value="admin">Administrador</option>
-                    <option value="coord">Coordinador</option>
-                    <option value="maint">Mantenimiento</option>
-                    <option value="user">Usuario</option>
-                  </select>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    name="detalles"
-                    value={user.detalles}
-                    onChange={(e) => handleInputChange(index, e)}
-                    placeholder="Detalles"
-                    className="input text-black w-full"
-                  />
-                </td>
-                <td className={`border border-gray-300 p-2 ${validationErrors[index]?.id_sede ? "outline outline-red-500" : ""}`}>
-                  <select
-                    name="id_sede"
-                    value={user.id_sede}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="input text-black w-full"
-                  >
-                    <option value={0}>Seleccione una sede</option>
-                    {sedes.map((sede) => (
-                      <option key={sede.id_sede} value={sede.id_sede}>
-                        {sede.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <button
-                    onClick={() => handleRemoveRow(index)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Eliminar
-                  </button>
-                </td>
+        <div className="overflow-y-auto max-h-60">
+          <table className="w-full border-collapse border border-gray-300 table-fixed">
+            <thead>
+              <tr className="bg-[#80BA7F] text-white">
+                <th className="border border-gray-300 p-2">Nombre</th>
+                <th className="border border-gray-300 p-2">Correo</th>
+                <th className="border border-gray-300 p-2">Teléfono</th>
+                <th className="border border-gray-300 p-2">Rol</th>
+                <th className="border border-gray-300 p-2">Detalles</th>
+                <th className="border border-gray-300 p-2">Sede</th>
+                <th className="border border-gray-300 p-2">Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((user, index) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 p-2">
+                    <input
+                      type="text"
+                      name="nombre"
+                      value={user.nombre}
+                      onChange={(e) => handleInputChange(index, e)}
+                      placeholder="Nombre"
+                      className="input text-black w-full"
+                    />
+                  </td>
+                  <td className={`border border-gray-300 p-2 ${validationErrors[index]?.correo ? "outline outline-red-500" : ""}`}>
+                    <input
+                      type="email"
+                      name="correo"
+                      value={user.correo}
+                      onChange={(e) => handleInputChange(index, e)}
+                      placeholder="Correo"
+                      className="input text-black w-full"
+                    />
+                  </td>
+                  <td className={`border border-gray-300 p-2 ${validationErrors[index]?.telefono ? "outline outline-red-500" : ""}`}>
+                    <input
+                      type="text"
+                      name="telefono"
+                      value={user.telefono}
+                      onChange={(e) => handleInputChange(index, e)}
+                      placeholder="Teléfono (10 dígitos)"
+                      className="input text-black w-full"
+                    />
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <select
+                      name="rol"
+                      value={user.rol}
+                      onChange={(e) => handleInputChange(index, e)}
+                      className="input text-black w-full"
+                    >
+                      <option value="admin">Administrador</option>
+                      <option value="coord">Coordinador</option>
+                      <option value="maint">Mantenimiento</option>
+                      <option value="user">Usuario</option>
+                    </select>
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <input
+                      type="text"
+                      name="detalles"
+                      value={user.detalles}
+                      onChange={(e) => handleInputChange(index, e)}
+                      placeholder="Detalles"
+                      className="input text-black w-full"
+                    />
+                  </td>
+                  <td className={`border border-gray-300 p-2 ${validationErrors[index]?.id_sede ? "outline outline-red-500" : ""}`}>
+                    <select
+                      name="id_sede"
+                      value={user.id_sede}
+                      onChange={(e) => handleInputChange(index, e)}
+                      className="input text-black w-full"
+                    >
+                      <option value={0}>Seleccione una sede</option>
+                      {sortedSedes.map((sede) => (
+                        <option key={sede.id_sede} value={sede.id_sede}>
+                          {sede.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <button
+                      onClick={() => handleRemoveRow(index)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <button onClick={handleAddRow} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
           + Añadir Fila
         </button>
 
-        <input type="file" accept=".csv" onChange={handleFileUpload} className="mt-4 text-black" />
+        <div className="mt-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={showCsvInfo}
+              onChange={() => setShowCsvInfo(!showCsvInfo)}
+              className="mr-2"
+            />
+            <span className="text-black">Mostrar opciones de carga por CSV</span>
+          </label>
+        </div>
+
+        {showCsvInfo && (
+          <>
+            <input type="file" accept=".csv" onChange={handleFileUpload} className="mt-4 text-black" />
+
+            <button onClick={handleDownloadTemplate} className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition duration-300">
+              Descargar Plantilla Excel
+            </button>
+
+            <div className="mt-4 text-black">
+              <h3 className="font-bold">Instrucciones para llenar el Excel:</h3>
+              <ul className="list-disc list-inside">
+                <li>Nombre: Nombre del usuario</li>
+                <li>Correo: Correo electrónico del usuario</li>
+                <li>Teléfono: Número de teléfono de 10 dígitos</li>
+                <li>Rol: Puede ser "admin", "coord", "maint" o "user"</li>
+                <li>Detalles: Detalles adicionales sobre el usuario</li>
+                <li>Sede: ID de la sede. Los IDs de las sedes disponibles son:</li>
+                <ul className="list-disc list-inside ml-4">
+                  {sortedSedes.map((sede) => (
+                    <li key={sede.id_sede}>{sede.id_sede}: {sede.nombre}</li>
+                  ))}
+                </ul>
+              </ul>
+              <p><b>Por favor, guarde el archivo como CSV UTF-8 antes de subirlo.</b></p>
+            </div>
+          </>
+        )}
 
         <div className="mt-4 flex space-x-4">
           <button onClick={handleSubmit} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Guardar Usuarios</button>

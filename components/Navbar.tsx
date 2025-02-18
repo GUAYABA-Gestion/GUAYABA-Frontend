@@ -9,7 +9,7 @@ const Navbar = () => {
   const rutasPorRol: Record<string, { path: string; label: string }[]> = {
     admin: [
       { path: "/roles", label: "Gestión de Roles" },
-      { path: "/sedes", label: "Gestión de Sedes" },
+      { path: "/infraestructura", label: "Gestión de Infraestructura" },
       { path: "/edificios", label: "Gestión de Edificios" },
       { path: "/espacios", label: "Gestión de Espacios" },
       { path: "/mantenimiento", label: "Gestión de Mantenimientos" },
@@ -18,7 +18,7 @@ const Navbar = () => {
     ],
     coord: [
       { path: "/sedes", label: "Gestión de Sede" },
-      { path: "/edificios", label: "Gestión de Edificios" },
+      { path: "/infraestructura", label: "Gestión de Infraestructura" },
       { path: "/espacios", label: "Gestión de Espacios" },
       { path: "/mantenimiento", label: "Gestión de Mantenimientos" },
       { path: "/eventos", label: "Gestión de Eventos" },

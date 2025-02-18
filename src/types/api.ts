@@ -13,16 +13,36 @@ export interface User {
 export interface Sede {
   id_sede: number;
   nombre: string;
-  municipio: string;
-  coordinador: string;
+  municipio: number;
+  coordinador: number | null;
   nombre_municipio: string;
-  nombre_coordinador: string;
+  nombre_coordinador: string | null;
+}
+
+export interface Edificio {
+  id_edificio: number;
+  id_sede: number;
+  id_titular: number | null;
+  nombre: string;
+  dirección: string;
+  categoría: string;
+  propiedad: string;
+  area_terreno: number;
+  area_construida: number;
+  cert_uso_suelo: boolean;
+  nombre_sede: string;
+  nombre_titular: string | null;
 }
 
 export interface CheckUserResponse {
   exists: boolean;
   user?: User;
   token?: string;
+}
+
+export interface Municipio {  
+  id: number;
+  nombre: string;
 }
 
 export interface RegisterResponse {
@@ -48,11 +68,11 @@ export interface Mantenimiento {
 }
 
 export interface Espacio {
-  id_espacio: number,
-  id_edificio: number,
-  nombre:string,
-  estado:string,
-  tipo:string,
-  capacidad:string,
-  mediciónmt2:number,
+  id_espacio: number;
+  id_edificio: number;
+  nombre: string;
+  estado: string;
+  tipo: string;
+  capacidad: string;
+  mediciónmt2: number;
 }

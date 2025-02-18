@@ -9,6 +9,7 @@ export function middleware(req: NextRequest) {
     "/account",
     "/sedes",
     "/mantenimiento",
+    "/infraestructura",
     "/reportes",
     "roles",
   ];
@@ -29,5 +30,5 @@ export function middleware(req: NextRequest) {
 
 // Configuración para aplicar el middleware en las rutas protegidas
 export const config = {
-  matcher: ["/account", "/sedes", "/mantenimiento", "/reportes"], // Rutas protegidas
+  matcher: ["/account", "/sedes", "/infraestructura","/mantenimiento", "/reportes"], // Rutas protegidas
 };

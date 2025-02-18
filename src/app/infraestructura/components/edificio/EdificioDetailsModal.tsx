@@ -1,52 +1,42 @@
 "use client";
 import { useState } from "react";
-import { User, Sede } from "../../../types/api";
-import { getUserReferences } from "../../api/auth/UserActions";
+import { Edificio } from "../../../../types/api";
 
-interface UserDetailsModalProps {
-  user: User | null;
+interface EdificioDetailsModalProps {
+  edificio: Edificio | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
-  onDelete: (id_persona: number) => void;
+  onDelete: (id_edificio: number) => void;
   editMode: boolean;
   setEditMode: (mode: boolean) => void;
-  editedUser: User | null;
-  handleEditField: (field: keyof User, value: string) => void;
-  sedes: Sede[];
+  editedEdificio: Edificio | null;
+  handleEditField: (field: keyof Edificio, value: string) => void;
   showSuccess: boolean;
 }
 
-const UserDetailsModal = ({
-  user,
+const EdificioDetailsModal = ({
+  edificio,
   isOpen,
   onClose,
   onSave,
   onDelete,
   editMode,
   setEditMode,
-  editedUser,
+  editedEdificio,
   handleEditField,
-  sedes,
-  showSuccess 
-}: UserDetailsModalProps) => {
+  showSuccess
+}: EdificioDetailsModalProps) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [references, setReferences] = useState<string[]>([]);
 
-  if (!isOpen || !user || !editedUser) return null;
+  if (!isOpen || !edificio || !editedEdificio) return null;
 
-  const handleDeleteClick = async () => {
-    try {
-      const data = await getUserReferences(user.id_persona);
-      setReferences(data.references);
-      setConfirmDelete(true);
-    } catch (error) {
-      console.error("Error al obtener referencias del usuario:", error);
-    }
+  const handleDeleteClick = () => {
+    setConfirmDelete(true);
   };
 
   const handleConfirmDelete = () => {
-    onDelete(user.id_persona);
+    onDelete(edificio.id_edificio);
     setConfirmDelete(false);
   };
 
@@ -55,19 +45,9 @@ const UserDetailsModal = ({
       <div className="bg-white p-6 rounded-lg max-w-md w-full">
         {confirmDelete ? (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg">
-            <p>ELIMINAR USUARIO </p>
-            <p className="font-bold">{user.correo}</p>
+            <p>ELIMINAR EDIFICIO</p>
+            <p className="font-bold">{edificio.nombre}</p>
             <p>¿Está seguro? Esta acción no se puede deshacer.</p>
-            {references.length > 0 && (
-              <>
-                <p>Si se elimina este usuario se eliminaría su referencia en la(s) tabla(s):</p>
-                <ul className="list-disc list-inside">
-                  {references.map((ref, index) => (
-                    <li key={index}>{ref}</li>
-                  ))}
-                </ul>
-              </>
-            )}
             <div className="mt-4 flex space-x-4">
               <button
                 onClick={handleConfirmDelete}
@@ -86,14 +66,8 @@ const UserDetailsModal = ({
         ) : (
           <>
             <h2 className="text-xl font-bold mb-4 text-black">
-              Detalles del Usuario
+              Detalles del Edificio
             </h2>
-            {!user.es_manual && (
-              <p className="text-red-500 mb-4">
-                Este usuario no fue añadido manualmente. Algunos campos no son
-                editables.
-              </p>
-            )}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -101,77 +75,80 @@ const UserDetailsModal = ({
                 </label>
                 <input
                   type="text"
-                  value={editedUser.nombre || ""}
+                  value={editedEdificio.nombre || ""}
                   onChange={(e) => handleEditField("nombre", e.target.value)}
                   className="mt-1 p-2 border rounded w-full text-black"
-                  disabled={!editMode || !user.es_manual}
+                  disabled={!editMode}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Correo
+                  Dirección
                 </label>
                 <input
                   type="text"
-                  value={editedUser.correo || ""}
-                  onChange={(e) => handleEditField("correo", e.target.value)}
+                  value={editedEdificio.dirección || ""}
+                  onChange={(e) => handleEditField("dirección", e.target.value)}
                   className="mt-1 p-2 border rounded w-full text-black"
-                  disabled={!editMode || !user.es_manual}
+                  disabled={!editMode}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Teléfono
+                  Categoría
                 </label>
                 <input
                   type="text"
-                  value={editedUser.telefono || ""}
-                  onChange={(e) => handleEditField("telefono", e.target.value)}
+                  value={editedEdificio.categoría || ""}
+                  onChange={(e) => handleEditField("categoría", e.target.value)}
                   className="mt-1 p-2 border rounded w-full text-black"
                   disabled={!editMode}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Rol
+                  Propiedad
                 </label>
-                <select
-                  value={editedUser.rol || ""}
-                  onChange={(e) => handleEditField("rol", e.target.value)}
+                <input
+                  type="text"
+                  value={editedEdificio.propiedad || ""}
+                  onChange={(e) => handleEditField("propiedad", e.target.value)}
                   className="mt-1 p-2 border rounded w-full text-black"
                   disabled={!editMode}
-                >
-                  <option value="admin">Administrador</option>
-                  <option value="coord">Coordinador</option>
-                  <option value="maint">Mantenimiento</option>
-                  <option value="user">Usuario</option>
-                </select>
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Sede
+                  Área del Terreno
                 </label>
-                <select
-                  value={editedUser.id_sede || ""}
-                  onChange={(e) => handleEditField("id_sede", e.target.value)}
+                <input
+                  type="number"
+                  value={editedEdificio.area_terreno || ""}
+                  onChange={(e) => handleEditField("area_terreno", e.target.value)}
                   className="mt-1 p-2 border rounded w-full text-black"
                   disabled={!editMode}
-                >
-                  <option value="">Seleccione una sede</option>
-                  {sedes.map((sede) => (
-                    <option key={sede.id_sede} value={sede.id_sede}>
-                      {sede.nombre}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Detalles
+                  Área Construida
                 </label>
-                <textarea
-                  value={editedUser.detalles || ""}
-                  onChange={(e) => handleEditField("detalles", e.target.value)}
+                <input
+                  type="number"
+                  value={editedEdificio.area_construida || ""}
+                  onChange={(e) => handleEditField("area_construida", e.target.value)}
+                  className="mt-1 p-2 border rounded w-full text-black"
+                  disabled={!editMode}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Certificado de Uso de Suelo
+                </label>
+                <input
+                  type="text"
+                  value={editedEdificio.cert_uso_suelo ? "Sí" : "No"}
+                  onChange={(e) => handleEditField("cert_uso_suelo", e.target.value)}
                   className="mt-1 p-2 border rounded w-full text-black"
                   disabled={!editMode}
                 />
@@ -194,10 +171,7 @@ const UserDetailsModal = ({
                     Guardar Cambios
                   </button>
                   <button
-                    onClick={() => {
-                      setEditMode(false);
-                      onClose();
-                    }}
+                    onClick={() => setEditMode(false)}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
                     Cancelar
@@ -211,14 +185,12 @@ const UserDetailsModal = ({
                   >
                     Editar
                   </button>
-                  {user.es_manual && (
-                    <button
-                      onClick={handleDeleteClick}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Eliminar
-                    </button>
-                  )}
+                  <button
+                    onClick={handleDeleteClick}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Eliminar
+                  </button>
                   <button
                     onClick={onClose}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
@@ -235,4 +207,4 @@ const UserDetailsModal = ({
   );
 };
 
-export default UserDetailsModal;
+export default EdificioDetailsModal;

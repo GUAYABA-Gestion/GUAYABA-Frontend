@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { User, Sede } from "../../../types/api";
 
 interface UserTableProps {
@@ -65,7 +66,6 @@ const UserTable = ({
 
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
-
       {/* Tabla */}
       <div className="mt-6">
         <table className="w-full border-collapse border border-gray-300 table-fixed">
@@ -78,33 +78,41 @@ const UserTable = ({
             </tr>
           </thead>
           <tbody>
-            {currentUsers.map((user, index) => (
-              <tr
-                key={user.id_persona}
-                className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} ${
-                  user.es_manual ? "border-l-4 border-red-500" : ""
-                }`}
-              >
-                <td className="border border-gray-300 p-2 text-black">
-                  {user.correo}
-                </td>
-                <td className="border border-gray-300 p-2 text-black">
-                  {getRolCompleto(user.rol)}
-                </td>
-                <td className="border border-gray-300 p-2 text-black">
-                  {getSedeNombre(user.id_sede)}
-                </td>
+            {currentUsers.length > 0 ? (
+              currentUsers.map((user, index) => (
+                <tr
+                  key={user.id_persona}
+                  className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} ${
+                    user.es_manual ? "border-l-4 border-red-500" : ""
+                  }`}
+                >
+                  <td className="border border-gray-300 p-2 text-black">
+                    {user.correo}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-black">
+                    {getRolCompleto(user.rol)}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-black">
+                    {getSedeNombre(user.id_sede)}
+                  </td>
 
-                <td className="border border-gray-300 p-2 text-center">
-                  <button
-                    onClick={() => onUserClick(user)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                  >
-                    Ver Detalles
-                  </button>
+                  <td className="border border-gray-300 p-2 text-center">
+                    <button
+                      onClick={() => onUserClick(user)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    >
+                      Ver Detalles
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="border border-gray-300 p-2 text-center text-gray-600">
+                  No hay personas para mostrar.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

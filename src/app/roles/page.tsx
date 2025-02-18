@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
+import ExcelJS from "exceljs";
 import { useRol } from "../../../context/RolContext";
 import UserTable from "./components/UserTable";
 import UserDetailsModal from "./components/UserDetailsModal";
 import AddUserModal from "./components/AddUserModal";
 import { User, Sede } from "../../types/api";
-import { fetchUsers, fetchSedes, updateUser, deleteUserManual } from "./components/UserActions";
+import { fetchUsers, fetchSedes, updateUser, deleteUserManual } from "../api/auth/UserActions";
 
 const AdminDashboard = () => {
   const { rolSimulado } = useRol();
@@ -96,6 +97,83 @@ const AdminDashboard = () => {
     setCurrentPage(1); // Resetear la paginación a la primera página
   };
 
+  const getRolCompleto = (rol: string) => {
+    switch (rol) {
+      case "user":
+        return "Usuario";
+      case "admin":
+        return "Administrador";
+      case "maint":
+        return "Mantenimiento";
+      case "coord":
+        return "Coordinador";
+      default:
+        return rol;
+    }
+  };
+
+  const getSedeNombre = (id_sede: number | undefined) => {
+    const sede = sedes.find((s) => s.id_sede === id_sede);
+    return sede ? sede.nombre : "Sin sede";
+  };
+
+  const handleDownloadExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Usuarios");
+
+    worksheet.columns = [
+      { header: "Nombre", key: "nombre", width: 20 },
+      { header: "Correo", key: "correo", width: 30 },
+      { header: "Teléfono", key: "telefono", width: 15 },
+      { header: "Rol", key: "rol", width: 20 },
+      { header: "Detalles", key: "detalles", width: 30 },
+      { header: "Sede", key: "sede", width: 30 },
+      { header: "Es Manual", key: "es_manual", width: 10 },
+    ];
+
+    const filteredUsers = users.filter((user) => {
+      return (
+        (filters.sede === "" || user.id_sede?.toString() === filters.sede) &&
+        (filters.rol === "" || user.rol === filters.rol) &&
+        (filters.correo === "" || user.correo.includes(filters.correo)) &&
+        (filters.es_manual === "" ||
+          user.es_manual === (filters.es_manual === "true"))
+      );
+    });
+
+    filteredUsers.forEach((user) => {
+      worksheet.addRow({
+        nombre: user.nombre,
+        correo: user.correo,
+        telefono: user.telefono,
+        rol: getRolCompleto(user.rol),
+        detalles: user.detalles,
+        sede: getSedeNombre(user.id_sede),
+        es_manual: user.es_manual ? "Sí" : "No",
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const date = new Date().toISOString().split("T")[0];
+    const filtersString = Object.entries(filters)
+      .filter(([_, value]) => value)
+      .map(([key, value]) => `${key}-${value}`)
+      .join("_");
+
+    const fileName = `usuarios_${filtersString}_${date}.xlsx`;
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (rolSimulado !== "admin") {
     return (
       <div className="p-4">
@@ -165,13 +243,21 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <button onClick={() => setIsAddUserModalOpen(true)} className="mt-4 bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300">
-          + Añadir Usuarios
-        </button>
+        <div className="mt-4 flex space-x-4">
+          <button onClick={() => setIsAddUserModalOpen(true)} className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300">
+            + Añadir Usuarios
+          </button>
+
+          <button
+            onClick={handleDownloadExcel}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+          >
+            Descargar tabla con filtros aplicados
+          </button>
+        </div>
 
         {/* Tabla */}
         <div className="mt-6">
-          {users.length > 0 ? (
             <UserTable
               users={users}
               sedes={sedes}
@@ -190,9 +276,6 @@ const AdminDashboard = () => {
                 setCurrentPage(1); // Resetear la paginación a la primera página
               }}
             />
-          ) : (
-            <div className="mt-4 text-center text-gray-600">No hay registros para mostrar.</div>
-          )}
         </div>
 
         {showSuccess && (

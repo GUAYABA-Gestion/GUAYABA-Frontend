@@ -108,3 +108,15 @@ export const getUserReferences = async (id_persona: number) => {
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
+
+export const getAdmins = async () => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/getAdmins`, {
+      headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Error al obtener usuarios por rol:", error);
+    return [];
+  }
+};

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
-import { addUsersManual } from "../components/UserActions";
+import { addUsersManual } from "../../api/auth/UserActions";
 import { User, Sede } from "../../../types/api";
 
 interface AddUserModalProps {

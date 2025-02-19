@@ -5,7 +5,11 @@ import { useSession } from "next-auth/react";
 import { Sede, Edificio, Municipio, User } from "../../types/api";
 import { useRol } from "../../../context/RolContext";
 import { fetchSedes, deleteSede } from "../api/auth/SedeActions";
-import { fetchEdificios, deleteEdificio, updateEdificio } from "../api/auth/EdificioActions";
+import {
+  fetchEdificios,
+  deleteEdificio,
+  updateEdificio,
+} from "../api/auth/EdificioActions";
 import SedeTable from "./components/sede/SedeTable";
 import EdificioTable from "./components/edificio/EdificioTable";
 import SedeDetailsModal from "./components/sede/SedeDetailsModal";
@@ -14,6 +18,8 @@ import AddSedeModal from "./components/sede/AddSedeModal";
 import AddEdificioModal from "./components/edificio/AddEdificioModal";
 import { fetchMunicipios } from "../api/auth/MunicipioActions";
 import { getAdmins } from "../api/auth/UserActions";
+import ExcelJS from "exceljs"; // Añadir esta
+import DetailsModal from "./components/informe/InformeModal"; // Añadir esta importación
 
 const GestionSedes: React.FC = () => {
   const { data: session } = useSession();
@@ -36,7 +42,9 @@ const GestionSedes: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [selectedSede, setSelectedSede] = useState<Sede | null>(null);
-  const [selectedEdificio, setSelectedEdificio] = useState<Edificio | null>(null);
+  const [selectedEdificio, setSelectedEdificio] = useState<Edificio | null>(
+    null
+  );
   const [isSedeModalOpen, setIsSedeModalOpen] = useState(false);
   const [isEdificioModalOpen, setIsEdificioModalOpen] = useState(false);
   const [isAddSedeModalOpen, setIsAddSedeModalOpen] = useState(false); // Estado para el modal de añadir sede
@@ -44,6 +52,7 @@ const GestionSedes: React.FC = () => {
   const [editMode, setEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // Añadir este estado
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,7 +70,8 @@ const GestionSedes: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleResize = () => setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
+    const handleResize = () =>
+      setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
@@ -115,25 +125,39 @@ const GestionSedes: React.FC = () => {
     return municipio ? municipio.nombre : "Sin municipio";
   };
 
-  const uniqueMunicipios = Array.from(new Set(sedes.map((sede) => getMunicipioNombre(sede.municipio))));
-  const uniqueCategorias = Array.from(new Set(edificios.map((edificio) => edificio.categoría)));
+  const uniqueMunicipios = Array.from(
+    new Set(sedes.map((sede) => getMunicipioNombre(sede.municipio)))
+  );
+  const uniqueCategorias = Array.from(
+    new Set(edificios.map((edificio) => edificio.categoría))
+  );
 
   const filteredSedes = sedes.filter((sede) => {
-    const nombreMatch = sede.nombre.toLowerCase().includes(filters.nombre.toLowerCase());
-    const municipioMatch = filters.municipio ? getMunicipioNombre(sede.municipio) === filters.municipio : true;
+    const nombreMatch = sede.nombre
+      .toLowerCase()
+      .includes(filters.nombre.toLowerCase());
+    const municipioMatch = filters.municipio
+      ? getMunicipioNombre(sede.municipio) === filters.municipio
+      : true;
     return nombreMatch && municipioMatch;
   });
 
   const filteredEdificios = edificios.filter(
     (edificio) =>
       selectedSedes.includes(edificio.id_sede) &&
-      (edificioFilters.nombre === "" || edificio.nombre.toLowerCase().includes(edificioFilters.nombre.toLowerCase())) &&
-      (edificioFilters.categoria === "" || edificio.categoría === edificioFilters.categoria)
+      (edificioFilters.nombre === "" ||
+        edificio.nombre
+          .toLowerCase()
+          .includes(edificioFilters.nombre.toLowerCase())) &&
+      (edificioFilters.categoria === "" ||
+        edificio.categoría === edificioFilters.categoria)
   );
 
   const handleSaveSede = (updatedSede: Sede) => {
     setSedes((prevSedes) =>
-      prevSedes.map((sede) => (sede.id_sede === updatedSede.id_sede ? updatedSede : sede))
+      prevSedes.map((sede) =>
+        sede.id_sede === updatedSede.id_sede ? updatedSede : sede
+      )
     );
     setSelectedSede(updatedSede); // Update the selected Sede
     setShowSuccess(true);
@@ -142,7 +166,11 @@ const GestionSedes: React.FC = () => {
 
   const handleSaveEdificio = (updatedEdificio: Edificio) => {
     setEdificios((prevEdificios) =>
-      prevEdificios.map((edificio) => (edificio.id_edificio === updatedEdificio.id_edificio ? updatedEdificio : edificio))
+      prevEdificios.map((edificio) =>
+        edificio.id_edificio === updatedEdificio.id_edificio
+          ? updatedEdificio
+          : edificio
+      )
     );
     setSelectedEdificio(updatedEdificio); // Update the selected Edificio
     setShowSuccess(true);
@@ -164,12 +192,14 @@ const GestionSedes: React.FC = () => {
   const handleDeleteSede = async (id_sede: number) => {
     try {
       await deleteSede(id_sede);
-      setSedes((prevSedes) => prevSedes.filter((sede) => sede.id_sede !== id_sede));
+      setSedes((prevSedes) =>
+        prevSedes.filter((sede) => sede.id_sede !== id_sede)
+      );
       setSelectedSede(null);
       setIsSedeModalOpen(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error : any) {
+    } catch (error: any) {
       console.error("Error al eliminar sede:", error);
       alert(error.message || "Error al eliminar sede");
     }
@@ -178,15 +208,71 @@ const GestionSedes: React.FC = () => {
   const handleDeleteEdificio = async (id_edificio: number) => {
     try {
       await deleteEdificio(id_edificio);
-      setEdificios((prevEdificios) => prevEdificios.filter((edificio) => edificio.id_edificio !== id_edificio));
+      setEdificios((prevEdificios) =>
+        prevEdificios.filter((edificio) => edificio.id_edificio !== id_edificio)
+      );
       setSelectedEdificio(null);
       setIsEdificioModalOpen(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error : any) {
+    } catch (error: any) {
       console.error("Error al eliminar edificio:", error);
       alert(error.message || "Error al eliminar edificio");
     }
+  };
+
+  const handleDownloadEdificios = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Edificios");
+
+    worksheet.columns = [
+      { header: "Nombre", key: "nombre", width: 20 },
+      { header: "Dirección", key: "dirección", width: 30 },
+      { header: "Sede", key: "sede", width: 20 },
+      { header: "Categoría", key: "categoría", width: 15 },
+      { header: "Propiedad", key: "propiedad", width: 15 },
+      { header: "Área Terreno", key: "area_terreno", width: 15 },
+      { header: "Área Construida", key: "area_construida", width: 15 },
+      { header: "Cert. Uso Suelo", key: "cert_uso_suelo", width: 15 },
+      { header: "Correo Titular", key: "correo_titular", width: 25 },
+    ];
+
+    filteredEdificios.forEach((edificio) => {
+      worksheet.addRow({
+        nombre: edificio.nombre,
+        dirección: edificio.dirección,
+        sede:
+          sedes.find((sede) => sede.id_sede === edificio.id_sede)?.nombre || "",
+        categoría: edificio.categoría,
+        propiedad: edificio.propiedad,
+        area_terreno: edificio.area_terreno,
+        area_construida: edificio.area_construida,
+        cert_uso_suelo: edificio.cert_uso_suelo
+          ? "DISPONIBLE"
+          : "NO DISPONIBLE",
+        correo_titular: edificio.correo_titular,
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const date = new Date().toISOString().split("T")[0];
+    const filtersString = Object.entries(edificioFilters)
+      .filter(([_, value]) => value)
+      .map(([key, value]) => `${key}-${value}`)
+      .join("_");
+
+    const fileName = `edificios_${filtersString}_${date}.xlsx`;
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handlePageChange = (page: number) => {
@@ -194,12 +280,18 @@ const GestionSedes: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="p-4 bg-gray-50 min-h-screen text-black flex items-center justify-center">Cargando...</div>;
+    return (
+      <div className="p-4 bg-gray-50 min-h-screen text-black flex items-center justify-center">
+        Cargando...
+      </div>
+    );
   }
 
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-[#034f00]">Gestión de Infraestructura</h1>
+      <h1 className="text-2xl font-bold text-[#034f00]">
+        Gestión de Infraestructura
+      </h1>
       {/* Filtros */}
       {rolSimulado === "admin" && (
         <>
@@ -215,7 +307,9 @@ const GestionSedes: React.FC = () => {
               />
               <select
                 value={filters.municipio}
-                onChange={(e) => handleFilterChange("municipio", e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange("municipio", e.target.value)
+                }
                 className="p-2 border rounded text-black"
               >
                 <option value="">Todos los municipios</option>
@@ -267,17 +361,23 @@ const GestionSedes: React.FC = () => {
       {/* Filtros de Edificios */}
       <div className="mt-2 space-y-2">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-black">Edificios de las Sedes seleccionadas</h2>
+          <h2 className="text-xl font-bold text-black">
+            Edificios de las Sedes seleccionadas
+          </h2>
           <input
             type="text"
             placeholder="Filtrar por nombre"
             value={edificioFilters.nombre}
-            onChange={(e) => handleEdificioFilterChange("nombre", e.target.value)}
+            onChange={(e) =>
+              handleEdificioFilterChange("nombre", e.target.value)
+            }
             className="p-2 border rounded text-black"
           />
           <select
             value={edificioFilters.categoria}
-            onChange={(e) => handleEdificioFilterChange("categoria", e.target.value)}
+            onChange={(e) =>
+              handleEdificioFilterChange("categoria", e.target.value)
+            }
             className="p-2 border rounded text-black"
           >
             <option value="">Todas las categorías</option>
@@ -293,8 +393,28 @@ const GestionSedes: React.FC = () => {
           >
             Reiniciar Filtros
           </button>
+          <button
+            onClick={handleDownloadEdificios}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+          >
+            Descargar Excel
+          </button>
         </div>
+        <button
+          onClick={() => setIsDetailsModalOpen(true)}
+          className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
+        >
+          Ver Detalles
+        </button>
       </div>
+
+      {/* Modals */}
+      <DetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        selectedSedes={selectedSedes}
+      />
+
       {/* Tabla de Edificios */}
       <div className="mt-2">
         <EdificioTable
@@ -317,25 +437,31 @@ const GestionSedes: React.FC = () => {
         setEditMode={setEditMode}
         editedSede={selectedSede}
         handleEditField={(field, value) => {
-          setSelectedSede((prev) => (prev ? { ...prev, [field]: value } : null));
+          setSelectedSede((prev) =>
+            prev ? { ...prev, [field]: value } : null
+          );
         }}
         showSuccess={showSuccess}
       />
-      <EdificioDetailsModal
-        edificio={selectedEdificio}
-        isOpen={isEdificioModalOpen}
-        onClose={() => setIsEdificioModalOpen(false)}
-        onSave={handleSaveEdificio}
-        onDelete={handleDeleteEdificio}
-        editMode={editMode}
-        setEditMode={setEditMode}
-        editedEdificio={selectedEdificio}
-        handleEditField={(field, value) => {
-          setSelectedEdificio((prev) => (prev ? { ...prev, [field]: value } : null));
-        }}
-        showSuccess={showSuccess}
-        sedes={sedes}
-      />
+      {selectedEdificio && (
+        <EdificioDetailsModal
+          edificio={selectedEdificio}
+          isOpen={isEdificioModalOpen}
+          onClose={() => setIsEdificioModalOpen(false)}
+          onSave={handleSaveEdificio}
+          onDelete={handleDeleteEdificio}
+          editMode={editMode}
+          setEditMode={setEditMode}
+          editedEdificio={selectedEdificio}
+          handleEditField={(field, value) => {
+            setSelectedEdificio((prev) =>
+              prev ? { ...prev, [field]: value } : null
+            );
+          }}
+          showSuccess={showSuccess}
+          sedes={sedes}
+        />
+      )}
       <AddSedeModal
         isOpen={isAddSedeModalOpen}
         onClose={() => setIsAddSedeModalOpen(false)}

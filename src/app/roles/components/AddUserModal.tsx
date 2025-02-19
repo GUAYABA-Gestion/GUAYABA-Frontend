@@ -27,7 +27,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
     telefono: "",
     rol: "user",
     detalles: "",
-    id_sede: 0, // Valor por defecto cambiado a 0
+    id_sede: 0,
     id_persona: 0,
     sede_nombre: "",
     es_manual: true,
@@ -35,7 +35,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
   const [showCsvInfo, setShowCsvInfo] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Cambiamos a un array de errores por fila
   const [validationErrors, setValidationErrors] = useState<
     Array<{ nombre: boolean; correo: boolean; telefono: boolean; id_sede: boolean }>
   >([]);
@@ -44,7 +43,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
     const updatedUsers = [...users];
     updatedUsers[index] = { ...updatedUsers[index], [e.target.name]: e.target.value };
 
-    // Actualizar nombre de sede si cambia id_sede
     if (e.target.name === "id_sede") {
       const selectedSede = sedes.find(sede => sede.id_sede === Number(e.target.value));
       updatedUsers[index].sede_nombre = selectedSede?.nombre || "";
@@ -52,7 +50,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
 
     setUsers(updatedUsers);
 
-    // Limpiar error específico de la fila
     const updatedErrors = [...validationErrors];
     updatedErrors[index] = {
       ...updatedErrors[index],
@@ -64,7 +61,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
   const handleAddRow = () => {
     setUsers([...users, { 
       ...newUser,
-      id_sede: 0, // Valor por defecto para nuevas filas
+      id_sede: 0,
       sede_nombre: "" 
     }]);
     setValidationErrors([...validationErrors, { nombre: false, correo: false, telefono: false, id_sede: false }]);
@@ -74,7 +71,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
     const updatedUsers = users.filter((_, i) => i !== index);
     setUsers(updatedUsers);
 
-    // Remove validation errors for the removed row
     const updatedErrors = validationErrors.filter((_, i) => i !== index);
     setValidationErrors(updatedErrors);
   };
@@ -118,18 +114,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
       return;
     }
 
-    // Validar cada fila individualmente
     const newValidationErrors = users.map(user => ({
-      nombre : validateTextNotNull(user.nombre),
-      correo: validateCorreo(user.correo),
-      telefono: validateTelefono(user.telefono),
+      nombre: !validateTextNotNull(user.nombre),
+      correo: !validateCorreo(user.correo),
+      telefono: !validateTelefono(user.telefono),
       id_sede: !user.id_sede || user.id_sede === 0
     }));
 
     setValidationErrors(newValidationErrors);
 
     const hasErrors = newValidationErrors.some(error => 
-      error.correo || error.telefono || error.id_sede
+      error.nombre || error.correo || error.telefono || error.id_sede
     );
 
     if (hasErrors) {
@@ -172,7 +167,14 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
       { header: "id_sede", key: "id_sede", width: 10 },
     ];
 
-    worksheet.addRow(["", "", "", "user", "", 0]);
+    worksheet.addRow(["Nombre Ejemplo", "ejemplo@correo.com", "1234567890", "user", "Detalles Ejemplo", 1]);
+
+    worksheet.getCell("A1").note = "Nombre: Nombre del usuario";
+    worksheet.getCell("B1").note = "Correo: Correo electrónico del usuario";
+    worksheet.getCell("C1").note = "Teléfono: Número de teléfono de 10 dígitos";
+    worksheet.getCell("D1").note = 'Rol: Puede ser "admin", "coord", "maint" o "user"';
+    worksheet.getCell("E1").note = "Detalles: Detalles adicionales sobre el usuario";
+    worksheet.getCell("F1").note = "ID de la sede. Los IDs de las sedes disponibles son: " + sedes.map(sede => `${sede.id_sede}: ${sede.nombre}`).join(", ");
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -184,7 +186,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
     document.body.removeChild(link);
   };
 
-  // Ordenar las sedes por id_sede
   const sortedSedes = [...sedes].sort((a, b) => a.id_sede - b.id_sede);
 
   return (
@@ -296,6 +297,22 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
           + Añadir Fila
         </button>
 
+        {Object.values(validationErrors).some((errors) => Object.values(errors).some((error) => error)) && (
+          <div className="mt-4 text-red-500">
+            <ul>
+              {Object.values(validationErrors).some((errors) => errors.nombre) && <li>Nombre: Campo obligatorio</li>}
+              {Object.values(validationErrors).some((errors) => errors.correo) && <li>Correo: Formato de correo inválido</li>}
+              {Object.values(validationErrors).some((errors) => errors.telefono) && <li>Teléfono: Debe ser un número de 10 cifras</li>}
+              {Object.values(validationErrors).some((errors) => errors.id_sede) && <li>Sede: Asegúrese de seleccionar una sede válida</li>}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-4 flex space-x-4">
+          <button onClick={handleSubmit} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Guardar Usuarios</button>
+          <button onClick={handleClose} className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">Cancelar</button>
+        </div>
+
         <div className="mt-4">
           <label className="flex items-center">
             <input
@@ -317,38 +334,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
             </button>
 
             <div className="mt-4 text-black">
-              <h3 className="font-bold">Instrucciones para llenar el Excel:</h3>
-              <ul className="list-disc list-inside">
-                <li>Nombre: Nombre del usuario</li>
-                <li>Correo: Correo electrónico del usuario</li>
-                <li>Teléfono: Número de teléfono de 10 dígitos</li>
-                <li>Rol: Puede ser "admin", "coord", "maint" o "user"</li>
-                <li>Detalles: Detalles adicionales sobre el usuario</li>
-                <li>Sede: ID de la sede. Los IDs de las sedes disponibles son:</li>
-                <ul className="list-disc list-inside ml-4">
-                  {sortedSedes.map((sede) => (
-                    <li key={sede.id_sede}>{sede.id_sede}: {sede.nombre}</li>
-                  ))}
-                </ul>
-              </ul>
               <p><b>Por favor, guarde el archivo como CSV UTF-8 antes de subirlo.</b></p>
             </div>
           </>
-        )}
-
-        <div className="mt-4 flex space-x-4">
-          <button onClick={handleSubmit} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Guardar Usuarios</button>
-          <button onClick={handleClose} className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">Cancelar</button>
-        </div>
-
-        {Object.values(validationErrors).some((errors) => Object.values(errors).some((error) => error)) && (
-          <div className="mt-4 text-red-500">
-            <ul>
-              {Object.values(validationErrors).some((errors) => errors.correo) && <li>Correo: Formato de correo inválido</li>}
-              {Object.values(validationErrors).some((errors) => errors.telefono) && <li>Teléfono: Debe ser un número de 10 cifras</li>}
-              {Object.values(validationErrors).some((errors) => errors.id_sede) && <li>Sede: Asegúrese de seleccionar una sede válida</li>}
-            </ul>
-          </div>
         )}
       </div>
     </div>

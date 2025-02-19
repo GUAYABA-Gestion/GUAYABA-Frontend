@@ -4,6 +4,11 @@ import Papa from "papaparse";
 import ExcelJS from "exceljs";
 import { addUsersManual } from "../../api/auth/UserActions";
 import { User, Sede } from "../../../types/api";
+import {
+  validateCorreo,
+  validateTelefono,
+  validateTextNotNull,
+} from "../../api/auth/validation";
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -32,7 +37,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
 
   // Cambiamos a un array de errores por fila
   const [validationErrors, setValidationErrors] = useState<
-    Array<{ correo: boolean; telefono: boolean; id_sede: boolean }>
+    Array<{ nombre: boolean; correo: boolean; telefono: boolean; id_sede: boolean }>
   >([]);
 
   const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -62,7 +67,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
       id_sede: 0, // Valor por defecto para nuevas filas
       sede_nombre: "" 
     }]);
-    setValidationErrors([...validationErrors, { correo: false, telefono: false, id_sede: false }]);
+    setValidationErrors([...validationErrors, { nombre: false, correo: false, telefono: false, id_sede: false }]);
   };
 
   const handleRemoveRow = (index: number) => {
@@ -101,7 +106,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
         }
 
         setUsers([...users, ...parsedUsers]);
-        setValidationErrors([...validationErrors, ...parsedUsers.map(() => ({ correo: false, telefono: false, id_sede: false }))]);
+        setValidationErrors([...validationErrors, ...parsedUsers.map(() => ({ nombre:false, correo: false, telefono: false, id_sede: false }))]);
       },
       error: (err) => console.error("Error al leer CSV:", err.message),
     });
@@ -115,8 +120,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, sedes, onU
 
     // Validar cada fila individualmente
     const newValidationErrors = users.map(user => ({
-      correo: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.correo),
-      telefono: !/^\d{10}$/.test(user.telefono),
+      nombre : validateTextNotNull(user.nombre),
+      correo: validateCorreo(user.correo),
+      telefono: validateTelefono(user.telefono),
       id_sede: !user.id_sede || user.id_sede === 0
     }));
 

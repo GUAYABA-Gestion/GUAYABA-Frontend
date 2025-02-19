@@ -46,11 +46,11 @@ const SedeTable = ({
         <table className="w-full border-collapse border border-gray-300 table-fixed">
           <thead>
             <tr className="bg-[#80BA7F] text-white">
-              <th className="border border-gray-300 p-2 w-1/4">Seleccionar</th>
+              <th className="border border-gray-300 p-2 w-1/6">Seleccionar</th>
               <th className="border border-gray-300 p-2 w-1/4">Nombre</th>
               <th className="border border-gray-300 p-2 w-1/4">Municipio</th>
-              <th className="border border-gray-300 p-2 w-1/4">Coordinador</th>
-              <th className="border border-gray-300 p-2 w-1/4">Acciones</th>
+              <th className="border border-gray-300 p-2 w-1/3">Coordinador</th>
+              <th className="border border-gray-300 p-2 w-1/5">Acciones</th>
             </tr>
           </thead>
           <tbody>

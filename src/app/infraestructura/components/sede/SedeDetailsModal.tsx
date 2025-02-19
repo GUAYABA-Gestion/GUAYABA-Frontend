@@ -4,6 +4,7 @@ import { User, Sede, Municipio } from "../../../../types/api";
 import { fetchMunicipios } from "../../../api/auth/MunicipioActions";
 import { getAdmins } from "../../../api/auth/UserActions";
 import { updateSede } from "../../../api/auth/SedeActions";
+import { validateTextNotNull } from "../../../api/auth/validation";
 
 interface SedeDetailsModalProps {
   sede: Sede | null;
@@ -33,6 +34,10 @@ const SedeDetailsModal = ({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
   const [coordinadores, setCoordinadores] = useState<User[]>([]);
+  const [validationErrors, setValidationErrors] = useState({
+    nombre: false,
+    municipio: false,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,10 +61,30 @@ const SedeDetailsModal = ({
   };
 
   const handleSave = async () => {
+    const errors = {
+      nombre: !validateTextNotNull(editedSede.nombre),
+      municipio: !editedSede.municipio,
+    };
+
+    setValidationErrors(errors);
+
+    if (Object.values(errors).some((error) => error)) {
+      alert("Por favor corrija los errores antes de guardar.");
+      return;
+    }
+
     const updatedSede = await updateSede(editedSede);
     if (updatedSede) {
       onSave(updatedSede);
     }
+  };
+
+  const handleClose = () => {
+    setValidationErrors({
+      nombre: false,
+      municipio: false,
+    });
+    onClose();
   };
 
   return (
@@ -99,9 +124,14 @@ const SedeDetailsModal = ({
                   type="text"
                   value={editedSede.nombre || ""}
                   onChange={(e) => handleEditField("nombre", e.target.value)}
-                  className="mt-1 p-2 border rounded w-full text-black"
+                  className={`mt-1 p-2 border rounded w-full text-black ${
+                    validationErrors.nombre ? "outline outline-red-500" : ""
+                  }`}
                   disabled={!editMode}
                 />
+                {validationErrors.nombre && (
+                  <p className="text-red-500 text-sm">Nombre no puede ser vacío.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -110,7 +140,9 @@ const SedeDetailsModal = ({
                 <select
                   value={editedSede.municipio || ""}
                   onChange={(e) => handleEditField("municipio", parseInt(e.target.value))}
-                  className="mt-1 p-2 border rounded w-full text-black max-h-32 overflow-y-auto"
+                  className={`mt-1 p-2 border rounded w-full text-black ${
+                    validationErrors.municipio ? "outline outline-red-500" : ""
+                  }`}
                   disabled={!editMode}
                 >
                   <option value="">Seleccione un municipio</option>
@@ -120,6 +152,9 @@ const SedeDetailsModal = ({
                     </option>
                   ))}
                 </select>
+                {validationErrors.municipio && (
+                  <p className="text-red-500 text-sm">Debe seleccionar un municipio.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -129,7 +164,7 @@ const SedeDetailsModal = ({
                   <select
                     value={editedSede.coordinador || ""}
                     onChange={(e) => handleEditField("coordinador", parseInt(e.target.value))}
-                    className="mt-1 p-2 border rounded w-full text-black max-h-32 overflow-y-auto"
+                    className="mt-1 p-2 border rounded w-full text-black"
                     disabled={!editMode}
                   >
                     <option value="">Seleccione un coordinador</option>
@@ -151,7 +186,7 @@ const SedeDetailsModal = ({
               </div>
             </div>
             {showSuccess && (
-              <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">
+              <div className="my-4 p-3 bg-green-100 text-green-700 rounded-lg">
                 ¡Datos actualizados correctamente!
               </div>
             )}
@@ -167,7 +202,7 @@ const SedeDetailsModal = ({
                   <button
                     onClick={() => {
                       setEditMode(false);
-                      onClose();
+                      handleClose();
                     }}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
@@ -189,7 +224,7 @@ const SedeDetailsModal = ({
                     Eliminar
                   </button>
                   <button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
                     Cerrar

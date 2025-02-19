@@ -8,12 +8,18 @@ interface EdificioTableProps {
     categoria: string;
   };
   onEdificioClick: (edificio: Edificio) => void;
+  currentPage: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
 }
 
 const EdificioTable = ({
   edificios,
   filters,
   onEdificioClick,
+  currentPage,
+  itemsPerPage,
+  onPageChange,
 }: EdificioTableProps) => {
   const filteredEdificios = edificios.filter((edificio) => {
     return (
@@ -21,6 +27,10 @@ const EdificioTable = ({
       (filters.categoria === "" || edificio.categoría === filters.categoria)
     );
   });
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedEdificios = filteredEdificios.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(filteredEdificios.length / itemsPerPage);
 
   return (
     <div className="p-4 bg-gray-50">
@@ -36,8 +46,8 @@ const EdificioTable = ({
             </tr>
           </thead>
           <tbody>
-            {filteredEdificios.length > 0 ? (
-              filteredEdificios.map((edificio, index) => (
+            {paginatedEdificios.length > 0 ? (
+              paginatedEdificios.map((edificio, index) => (
                 <tr
                   key={edificio.id_edificio}
                   className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
@@ -70,6 +80,18 @@ const EdificioTable = ({
             )}
           </tbody>
         </table>
+      </div>
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-4">
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            onClick={() => onPageChange(index + 1)}
+            className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

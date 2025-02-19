@@ -2,6 +2,11 @@
 import { useState } from "react";
 import { User, Sede } from "../../../types/api";
 import { getUserReferences } from "../../api/auth/UserActions";
+import {
+  validateCorreo,
+  validateTelefono,
+  validateTextNotNull,
+} from "../../api/auth/validation";
 
 interface UserDetailsModalProps {
   user: User | null;
@@ -28,10 +33,16 @@ const UserDetailsModal = ({
   editedUser,
   handleEditField,
   sedes,
-  showSuccess 
+  showSuccess,
 }: UserDetailsModalProps) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [references, setReferences] = useState<string[]>([]);
+  const [validationErrors, setValidationErrors] = useState({
+    nombre: false,
+    correo: false,
+    telefono: false,
+    id_sede: false,
+  });
 
   if (!isOpen || !user || !editedUser) return null;
 
@@ -50,6 +61,34 @@ const UserDetailsModal = ({
     setConfirmDelete(false);
   };
 
+  const handleSave = async () => {
+    const errors = {
+      nombre: !validateTextNotNull(editedUser.nombre),
+      correo: !validateCorreo(editedUser.correo),
+      telefono: !validateTelefono(editedUser.telefono),
+      id_sede: !editedUser.id_sede,
+    };
+
+    setValidationErrors(errors);
+
+    if (Object.values(errors).some((error) => error)) {
+      alert("Por favor corrija los errores antes de guardar.");
+      return;
+    }
+
+    await onSave();
+  };
+
+  const handleClose = () => {
+    setValidationErrors({
+      nombre: false,
+      correo: false,
+      telefono: false,
+      id_sede: false,
+    });
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg max-w-md w-full">
@@ -60,7 +99,10 @@ const UserDetailsModal = ({
             <p>¿Está seguro? Esta acción no se puede deshacer.</p>
             {references.length > 0 && (
               <>
-                <p>Si se elimina este usuario se eliminaría su referencia en la(s) tabla(s):</p>
+                <p>
+                  Si se elimina este usuario se eliminaría su referencia en
+                  la(s) tabla(s):
+                </p>
                 <ul className="list-disc list-inside">
                   {references.map((ref, index) => (
                     <li key={index}>{ref}</li>
@@ -103,9 +145,14 @@ const UserDetailsModal = ({
                   type="text"
                   value={editedUser.nombre || ""}
                   onChange={(e) => handleEditField("nombre", e.target.value)}
-                  className="mt-1 p-2 border rounded w-full text-black"
+                  className={`mt-1 p-2 border rounded w-full text-black ${
+                    validationErrors.nombre ? "outline outline-red-500" : ""
+                  }`}
                   disabled={!editMode || !user.es_manual}
                 />
+                {validationErrors.nombre && (
+                  <p className="text-red-500 text-sm">Ingrese un nombre.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -115,9 +162,14 @@ const UserDetailsModal = ({
                   type="text"
                   value={editedUser.correo || ""}
                   onChange={(e) => handleEditField("correo", e.target.value)}
-                  className="mt-1 p-2 border rounded w-full text-black"
+                  className={`mt-1 p-2 border rounded w-full text-black ${
+                    validationErrors.correo ? "outline outline-red-500" : ""
+                  }`}
                   disabled={!editMode || !user.es_manual}
                 />
+                {validationErrors.correo && (
+                  <p className="text-red-500 text-sm">Ingrese un correo apropiado.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -127,9 +179,14 @@ const UserDetailsModal = ({
                   type="text"
                   value={editedUser.telefono || ""}
                   onChange={(e) => handleEditField("telefono", e.target.value)}
-                  className="mt-1 p-2 border rounded w-full text-black"
+                  className={`mt-1 p-2 border rounded w-full text-black ${
+                    validationErrors.telefono ? "outline outline-red-500" : ""
+                  }`}
                   disabled={!editMode}
                 />
+                {validationErrors.telefono && (
+                  <p className="text-red-500 text-sm">Ingrese un número de 10 cifras.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -154,7 +211,9 @@ const UserDetailsModal = ({
                 <select
                   value={editedUser.id_sede || ""}
                   onChange={(e) => handleEditField("id_sede", e.target.value)}
-                  className="mt-1 p-2 border rounded w-full text-black"
+                  className={`mt-1 p-2 border rounded w-full text-black ${
+                    validationErrors.id_sede ? "outline outline-red-500" : ""
+                  }`}
                   disabled={!editMode}
                 >
                   <option value="">Seleccione una sede</option>
@@ -164,6 +223,9 @@ const UserDetailsModal = ({
                     </option>
                   ))}
                 </select>
+                {validationErrors.id_sede && (
+                  <p className="text-red-500 text-sm">Debe seleccionar una sede.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -186,9 +248,7 @@ const UserDetailsModal = ({
               {editMode ? (
                 <>
                   <button
-                    onClick={async () => {
-                      await onSave();
-                    }}
+                    onClick={handleSave}
                     className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                   >
                     Guardar Cambios
@@ -196,7 +256,7 @@ const UserDetailsModal = ({
                   <button
                     onClick={() => {
                       setEditMode(false);
-                      onClose();
+                      handleClose();
                     }}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
@@ -220,7 +280,7 @@ const UserDetailsModal = ({
                     </button>
                   )}
                   <button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
                     Cerrar

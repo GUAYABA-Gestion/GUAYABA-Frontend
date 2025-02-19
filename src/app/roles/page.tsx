@@ -94,7 +94,7 @@ const AdminDashboard = () => {
 
   const handleFilterChange = (filter: string, value: string) => {
     setFilters(prev => ({ ...prev, [filter]: value }));
-    setCurrentPage(1); // Resetear la paginación a la primera página
+    setCurrentPage(1); // Reset pagination to the first page
   };
 
   const getRolCompleto = (rol: string) => {
@@ -234,7 +234,7 @@ const AdminDashboard = () => {
             <button
               onClick={() => {
                 setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
-                setCurrentPage(1); // Resetear la paginación a la primera página
+                setCurrentPage(1); // Reset pagination to the first page
               }}
               className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
             >
@@ -273,7 +273,7 @@ const AdminDashboard = () => {
               onFilterChange={handleFilterChange}
               resetFilters={() => {
                 setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
-                setCurrentPage(1); // Resetear la paginación a la primera página
+                setCurrentPage(1); // Reset pagination to the first page
               }}
             />
         </div>

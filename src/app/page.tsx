@@ -24,9 +24,12 @@ export default function Home() {
           </p>
           {/* Botones */}
           <div className="mt-6 flex justify-center space-x-4">
-            <button className="bg-[#80BA7F] text-white px-6 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300">
+          <form method="get" action="/wompi">
+            <button
+            className="bg-[#80BA7F] text-white px-6 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300">
               Pagar Licencia
             </button>
+            </form>
             <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg shadow-md hover:bg-gray-300 transition duration-300">
               Contáctanos
             </button>

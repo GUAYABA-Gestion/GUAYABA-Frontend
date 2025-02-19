@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "crypto-js": "^4.2.0",
+    "cryptojs": "^2.5.3",
     "exceljs": "^4.4.0",
     "install": "^0.13.0",
     "js-cookie": "^3.0.5",

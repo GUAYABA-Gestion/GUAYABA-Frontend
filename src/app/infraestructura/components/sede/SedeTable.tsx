@@ -10,6 +10,7 @@ interface SedeTableProps {
   onSedeSelect: (id: number) => void;
   onSedeDeselect: (id: number) => void;
   onSedeClick: (sede: Sede) => void;
+  rolSimulado: string; // Añadir el rol simulado
 }
 
 const SedeTable = ({
@@ -20,6 +21,7 @@ const SedeTable = ({
   onSedeSelect,
   onSedeDeselect,
   onSedeClick,
+  rolSimulado,
 }: SedeTableProps) => {
   const handleCheckboxChange = (id: number) => {
     if (selectedSedes.includes(id)) {
@@ -50,7 +52,9 @@ const SedeTable = ({
               <th className="border border-gray-300 p-2 w-1/4">Nombre</th>
               <th className="border border-gray-300 p-2 w-1/4">Municipio</th>
               <th className="border border-gray-300 p-2 w-1/3">Coordinador</th>
-              <th className="border border-gray-300 p-2 w-1/5">Acciones</th>
+              {rolSimulado === "admin" && (
+                <th className="border border-gray-300 p-2 w-1/5">Acciones</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -76,14 +80,16 @@ const SedeTable = ({
                   <td className="border border-gray-300 p-2 text-black">
                     {getCoordinadorCorreo(sede.coordinador)}
                   </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <button
-                      onClick={() => onSedeClick(sede)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                    >
-                      Ver Detalles
-                    </button>
-                  </td>
+                  {rolSimulado === "admin" && (
+                    <td className="border border-gray-300 p-2 text-center">
+                      <button
+                        onClick={() => onSedeClick(sede)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      >
+                        Ver Detalles
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

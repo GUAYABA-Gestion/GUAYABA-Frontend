@@ -11,6 +11,7 @@ interface EdificioTableProps {
   currentPage: number;
   itemsPerPage: number;
   onPageChange: (page: number) => void;
+  rolSimulado: string; // Añadir el rol simulado
 }
 
 const EdificioTable = ({
@@ -20,6 +21,7 @@ const EdificioTable = ({
   currentPage,
   itemsPerPage,
   onPageChange,
+  rolSimulado,
 }: EdificioTableProps) => {
   const filteredEdificios = edificios.filter((edificio) => {
     return (
@@ -42,7 +44,9 @@ const EdificioTable = ({
               <th className="border border-gray-300 p-2 w-1/4">Nombre</th>
               <th className="border border-gray-300 p-2 w-1/4">Dirección</th>
               <th className="border border-gray-300 p-2 w-1/4">Categoría</th>
-              <th className="border border-gray-300 p-2 w-1/4">Acciones</th>
+              {(rolSimulado === "admin" || rolSimulado === "coord") && (
+                <th className="border border-gray-300 p-2 w-1/4">Acciones</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -61,14 +65,16 @@ const EdificioTable = ({
                   <td className="border border-gray-300 p-2 text-black">
                     {edificio.categoría}
                   </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <button
-                      onClick={() => onEdificioClick(edificio)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                    >
-                      Ver Detalles
-                    </button>
-                  </td>
+                  {(rolSimulado === "admin" || rolSimulado === "coord") && (
+                    <td className="border border-gray-300 p-2 text-center">
+                      <button
+                        onClick={() => onEdificioClick(edificio)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      >
+                        Ver Detalles
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

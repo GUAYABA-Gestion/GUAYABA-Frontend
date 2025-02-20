@@ -38,20 +38,22 @@ const Header = () => {
       { path: "/roles", label: "Gestión de Roles" },
       { path: "/infraestructura", label: "Gestión de Infraestructura" },
       { path: "/edificios", label: "Gestión de Edificios" },
-      { path: "/account", label: "Account" },
+      { path: "/account", label: "Cuenta" },
     ],
     coord: [
-      { path: "/infraestructura", label: "Gestión de Infraestructura" },
+      { path: "/infraestructura", label: "Gestión de Sede" },
       { path: "/edificios", label: "Gestión de Edificios" },
-      { path: "/account", label: "Account" },
+      { path: "/account", label: "Cuenta" },
     ],
     maint: [
-      { path: "/edificios", label: "Gestión de Edificios" },
-      { path: "/account", label: "Account" },
+      { path: "/infraestructura", label: "Información Sede" },
+      { path: "/edificios", label: "Información edificios" },
+      { path: "/account", label: "Cuenta" },
     ],
     user: [
+      { path: "/infraestructura", label: "Buscador de edificios" },
       { path: "/edificios", label: "Edificios" },
-      { path: "/account", label: "Account" },
+      { path: "/account", label: "Cuenta" },
     ],
     none: [],
   };
@@ -195,7 +197,7 @@ const Header = () => {
                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 6h-6"
                 ></path>
               </svg>
-              Logout
+              Cerrar Sesión
             </button>
           </li>
         )}
@@ -239,7 +241,7 @@ const Header = () => {
                       d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 6h-6"
                     ></path>
                   </svg>
-                  Logout
+                  Cerrar sesión
                 </button>
               </li>
             </>

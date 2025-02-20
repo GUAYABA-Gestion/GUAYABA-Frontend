@@ -24,10 +24,11 @@ import { Header } from "../../../components";
 
 const GestionSedes: React.FC = () => {
   const { data: session } = useSession();
-  const { rolSimulado } = useRol();
+  const { rolSimulado, idSede } = useRol();
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
+  const [filteredSedes, setFilteredSedes] = useState<Sede[]>([]);
   const [coordinadores, setCoordinadores] = useState<User[]>([]);
   const [selectedSedes, setSelectedSedes] = useState<number[]>([]);
   const [edificios, setEdificios] = useState<Edificio[]>([]);
@@ -60,7 +61,18 @@ const GestionSedes: React.FC = () => {
       setIsLoading(true);
       const sedesData = await fetchSedes();
       setSedes(sedesData);
-      setSelectedSedes(sedesData.map((sede: Sede) => sede.id_sede)); // Select all sedes by default
+      if (rolSimulado === "admin") {
+        setSelectedSedes(sedesData.map((sede: Sede) => sede.id_sede)); // Select all sedes by default
+        setFilteredSedes(sedesData);
+      } else {
+        const userSede = sedesData.find(
+          (sede: Sede) => sede.id_sede === idSede
+        );
+        if (userSede) {
+          setSelectedSedes([userSede.id_sede]);
+          setFilteredSedes([userSede]);
+        }
+      }
       const municipiosData = await fetchMunicipios();
       setMunicipios(municipiosData);
       const coordinadoresData = await getAdmins();
@@ -68,7 +80,7 @@ const GestionSedes: React.FC = () => {
       setIsLoading(false);
     };
     fetchData();
-  }, []);
+  }, [rolSimulado, idSede]);
 
   useEffect(() => {
     const handleResize = () =>
@@ -91,6 +103,18 @@ const GestionSedes: React.FC = () => {
   const handleFilterChange = (filter: string, value: string) => {
     setFilters((prev) => ({ ...prev, [filter]: value }));
     setCurrentPage(1); // Reset pagination to the first page
+    if (rolSimulado === "admin") {
+      const filtered = sedes.filter((sede) => {
+        const nombreMatch = sede.nombre
+          .toLowerCase()
+          .includes(filters.nombre.toLowerCase());
+        const municipioMatch = filters.municipio
+          ? getMunicipioNombre(sede.municipio) === filters.municipio
+          : true;
+        return nombreMatch && municipioMatch;
+      });
+      setFilteredSedes(filtered);
+    }
   };
 
   const handleEdificioFilterChange = (filter: string, value: string) => {
@@ -132,16 +156,6 @@ const GestionSedes: React.FC = () => {
   const uniqueCategorias = Array.from(
     new Set(edificios.map((edificio) => edificio.categoría))
   );
-
-  const filteredSedes = sedes.filter((sede) => {
-    const nombreMatch = sede.nombre
-      .toLowerCase()
-      .includes(filters.nombre.toLowerCase());
-    const municipioMatch = filters.municipio
-      ? getMunicipioNombre(sede.municipio) === filters.municipio
-      : true;
-    return nombreMatch && municipioMatch;
-  });
 
   const filteredEdificios = edificios.filter(
     (edificio) =>
@@ -291,37 +305,25 @@ const GestionSedes: React.FC = () => {
     );
   }
 
-  if (rolSimulado !== "admin") {
-    return (
-      <div className="bg-gray-50 min-h-screen">
-        <Header />
-        <div className="flex items-center justify-center">
-          <div className="bg-white p-8 rounded-lg shadow-md text-center">
-            <h2 className="text-2xl font-bold text-black">
-              Acceso Restringido
-            </h2>
-            <p className="text-gray-600">
-              Esta vista solo está disponible para administradores.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />
       <div className="mt-4 p-4">
         <h1 className="text-2xl font-bold text-[#034f00]">
-          Gestión de Infraestructura
+          {rolSimulado === "admin" && "Gestión de Infraestructura"}
+          {rolSimulado === "coord" && "Gestión de Sede"}
+          {rolSimulado === "maint" && "Informes Sede"}
+          {rolSimulado === "user" && "Buscador de edificios"}
         </h1>
         {/* Filtros */}
-        {rolSimulado === "admin" && (
-          <>
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center space-x-4">
-                <h2 className="text-xl font-bold text-black">Sedes</h2>
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-xl font-bold text-black">
+              {rolSimulado === "admin" && "Sedes"}
+              {rolSimulado !== "admin" && "Sede"}
+            </h2>
+            {rolSimulado === "admin" && (
+              <>
                 <input
                   type="text"
                   placeholder="Filtrar por nombre"
@@ -352,9 +354,13 @@ const GestionSedes: React.FC = () => {
                 >
                   Reiniciar Filtros
                 </button>
-              </div>
-            </div>
-            <div className="mt-4 flex space-x-4">
+              </>
+            )}
+          </div>
+        </div>
+        <div className="mt-4 flex space-x-4">
+          {rolSimulado === "admin" && (
+            <>
               <button
                 onClick={() => setIsAddSedeModalOpen(true)}
                 className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
@@ -367,9 +373,17 @@ const GestionSedes: React.FC = () => {
               >
                 + Añadir Edificios
               </button>
-            </div>
-          </>
-        )}
+            </>
+          )}
+          {rolSimulado === "coord" && (
+            <button
+              onClick={() => setIsAddEdificioModalOpen(true)}
+              className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
+            >
+              + Añadir Edificios
+            </button>
+          )}
+        </div>
         {/* Tabla de Sedes */}
         <div className="mt-2">
           <SedeTable
@@ -380,13 +394,16 @@ const GestionSedes: React.FC = () => {
             onSedeSelect={handleSedeSelect}
             onSedeDeselect={handleSedeDeselect}
             onSedeClick={handleSedeClick}
+            rolSimulado={rolSimulado} // Pasar el rol simulado
           />
         </div>
         {/* Filtros de Edificios */}
         <div className="mt-2 space-y-2">
           <div className="flex items-center space-x-4">
             <h2 className="text-xl font-bold text-black">
-              Edificios de las Sedes seleccionadas
+              {rolSimulado === "admin" || rolSimulado === "coord"
+                ? "Edificios de las Sedes seleccionadas"
+                : "Edificios de la Sede"}
             </h2>
             <input
               type="text"
@@ -417,26 +434,30 @@ const GestionSedes: React.FC = () => {
             >
               Reiniciar Filtros
             </button>
-            <button
-              onClick={handleDownloadEdificios}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
-            >
-              Descargar Excel
-            </button>
+            {(rolSimulado === "admin" || rolSimulado === "coord") && (
+              <button
+                onClick={handleDownloadEdificios}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+              >
+                Descargar Excel
+              </button>
+            )}
           </div>
-          <button
-            onClick={() => setIsDetailsModalOpen(true)}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
-          >
-            Ver Detalles
-          </button>
+          {rolSimulado !== "user" && (
+            <button
+              onClick={() => setIsDetailsModalOpen(true)}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
+            >
+              Ver Detalles
+            </button>
+          )}
         </div>
-
         {/* Modals */}
         <DetailsModal
           isOpen={isDetailsModalOpen}
           onClose={() => setIsDetailsModalOpen(false)}
           selectedSedes={selectedSedes}
+          rolSimulado={rolSimulado} // Pasar el rol simulado
         />
 
         {/* Tabla de Edificios */}
@@ -448,6 +469,7 @@ const GestionSedes: React.FC = () => {
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
             onPageChange={handlePageChange}
+            rolSimulado={rolSimulado} // Pasar el rol simulado
           />
         </div>
         {/* Modals */}

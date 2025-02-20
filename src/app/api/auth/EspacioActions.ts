@@ -97,7 +97,7 @@ export const fetchEspaciosByEdificios = async (ids_edificios: number[]): Promise
     }
 
     const data = await response.json();
-    return data;
+    return data.data;
   } catch (error) {
     console.error("Error al obtener espacios desde edificios:", error);
     return [];

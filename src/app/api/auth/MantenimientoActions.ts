@@ -97,7 +97,7 @@ export const fetchMantenimientosByEspacios = async (ids_espacios: number[]): Pro
     }
 
     const data = await response.json();
-    return data;
+    return data.data;
   } catch (error) {
     console.error("Error al obtener mantenimientos desde espacios:", error);
     return [];

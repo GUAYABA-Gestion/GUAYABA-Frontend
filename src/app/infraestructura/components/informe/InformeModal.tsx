@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Sede, Espacio, Mantenimiento } from "../../../../types/api";
-import { fetchEspacios, fetchMantenimientos } from "../../api/auth/InformeActions";
+import { Sede, Espacio, Mantenimiento, Evento } from "../../../../types/api";
+import { fetchEspaciosByEdificios } from "../../../api/auth/EspacioActions";
+import { fetchMantenimientosByEspacios } from "../../../api/auth/MantenimientoActions";
+import { fetchEventosByEspacios } from "../../../api/auth/EventoActions";
 import { Chart } from "react-chartjs-2";
 import jsPDF from "jspdf";
 
@@ -14,6 +16,7 @@ interface DetailsModalProps {
 const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, selectedSedes }) => {
   const [espacios, setEspacios] = useState<Espacio[]>([]);
   const [mantenimientos, setMantenimientos] = useState<Mantenimiento[]>([]);
+  const [eventos, setEventos] = useState<Evento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>("");
 
@@ -21,10 +24,18 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, selectedSe
     if (isOpen) {
       const fetchData = async () => {
         setIsLoading(true);
-        const espaciosData = await fetchEspacios(selectedSedes);
-        const mantenimientosData = await fetchMantenimientos(selectedSedes);
+        // Obtener los IDs de los edificios filtrados
+        const edificios = selectedSedes; // Aquí deberías obtener los IDs de los edificios filtrados
+        const espaciosData = await fetchEspaciosByEdificios(edificios);
         setEspacios(espaciosData);
+
+        const ids_espacios = espaciosData.map((espacio) => espacio.id_espacio);
+        const mantenimientosData = await fetchMantenimientosByEspacios(ids_espacios);
         setMantenimientos(mantenimientosData);
+
+        const eventosData = await fetchEventosByEspacios(ids_espacios);
+        setEventos(eventosData);
+
         setIsLoading(false);
       };
       fetchData();
@@ -33,7 +44,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, selectedSe
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    doc.text("Informe de Espacios y Mantenimientos", 10, 10);
+    doc.text("Informe de Espacios, Mantenimientos y Eventos", 10, 10);
     // Agregar más contenido al PDF
     doc.save("informe.pdf");
   };
@@ -43,7 +54,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, selectedSe
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
-        <h2 className="text-xl font-bold mb-4 text-black">Detalles de Espacios y Mantenimientos</h2>
+        <h2 className="text-xl font-bold mb-4 text-black">Detalles de Espacios, Mantenimientos y Eventos</h2>
         {isLoading ? (
           <p>Cargando...</p>
         ) : (
@@ -61,7 +72,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, selectedSe
                 <option value="baja">Baja</option>
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <h3 className="text-lg font-bold text-black">Espacios</h3>
                 <ul>
@@ -77,9 +88,17 @@ const DetailsModal: React.FC<DetailsModalProps> = ({ isOpen, onClose, selectedSe
                     .filter((mantenimiento) => !filter || mantenimiento.prioridad === filter)
                     .map((mantenimiento) => (
                       <li key={mantenimiento.id_mantenimiento}>
-                        {mantenimiento.nombre} - {mantenimiento.prioridad}
+                        {mantenimiento.detalle} - {mantenimiento.prioridad}
                       </li>
                     ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-black">Eventos</h3>
+                <ul>
+                  {eventos.map((evento) => (
+                    <li key={evento.id_evento}>{evento.nombre}</li>
+                  ))}
                 </ul>
               </div>
             </div>

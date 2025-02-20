@@ -77,3 +77,14 @@ export interface Espacio {
   capacidad: string;
   mediciónmt2: number;
 }
+
+export interface Evento {
+  id_evento: number;
+  id_sede: number;
+  nombre: string;
+  descripcion: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  tipo: string;
+  estado: string;
+}

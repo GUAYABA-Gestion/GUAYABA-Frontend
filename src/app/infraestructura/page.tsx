@@ -18,8 +18,9 @@ import AddSedeModal from "./components/sede/AddSedeModal";
 import AddEdificioModal from "./components/edificio/AddEdificioModal";
 import { fetchMunicipios } from "../api/auth/MunicipioActions";
 import { getAdmins } from "../api/auth/UserActions";
-import ExcelJS from "exceljs"; // Añadir esta
-import DetailsModal from "./components/informe/InformeModal"; // Añadir esta importación
+import ExcelJS from "exceljs";
+import DetailsModal from "./components/informe/InformeModal";
+import { Header } from "../../../components";
 
 const GestionSedes: React.FC = () => {
   const { data: session } = useSession();
@@ -279,210 +280,234 @@ const GestionSedes: React.FC = () => {
     setCurrentPage(page);
   };
 
-  if (isLoading) {
+  if (isLoading || rolSimulado === undefined) {
     return (
-      <div className="p-4 bg-gray-50 min-h-screen text-black flex items-center justify-center">
-        Cargando...
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-700">Cargando datos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (rolSimulado !== "admin") {
+    return (
+      <div className="bg-gray-50 min-h-screen">
+        <Header />
+        <div className="flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <h2 className="text-2xl font-bold text-black">
+              Acceso Restringido
+            </h2>
+            <p className="text-gray-600">
+              Esta vista solo está disponible para administradores.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-[#034f00]">
-        Gestión de Infraestructura
-      </h1>
-      {/* Filtros */}
-      {rolSimulado === "admin" && (
-        <>
-          <div className="mt-2 space-y-2">
-            <div className="flex items-center space-x-4">
-              <h2 className="text-xl font-bold text-black">Sedes</h2>
-              <input
-                type="text"
-                placeholder="Filtrar por nombre"
-                value={filters.nombre}
-                onChange={(e) => handleFilterChange("nombre", e.target.value)}
-                className="p-2 border rounded text-black"
-              />
-              <select
-                value={filters.municipio}
-                onChange={(e) =>
-                  handleFilterChange("municipio", e.target.value)
-                }
-                className="p-2 border rounded text-black"
-              >
-                <option value="">Todos los municipios</option>
-                {uniqueMunicipios.map((municipio) => (
-                  <option key={municipio} value={municipio}>
-                    {municipio}
-                  </option>
-                ))}
-              </select>
+    <div className="bg-gray-50 min-h-screen">
+      <Header />
+      <div className="mt-4 p-4">
+        <h1 className="text-2xl font-bold text-[#034f00]">
+          Gestión de Infraestructura
+        </h1>
+        {/* Filtros */}
+        {rolSimulado === "admin" && (
+          <>
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center space-x-4">
+                <h2 className="text-xl font-bold text-black">Sedes</h2>
+                <input
+                  type="text"
+                  placeholder="Filtrar por nombre"
+                  value={filters.nombre}
+                  onChange={(e) => handleFilterChange("nombre", e.target.value)}
+                  className="p-2 border rounded text-black"
+                />
+                <select
+                  value={filters.municipio}
+                  onChange={(e) =>
+                    handleFilterChange("municipio", e.target.value)
+                  }
+                  className="p-2 border rounded text-black"
+                >
+                  <option value="">Todos los municipios</option>
+                  {uniqueMunicipios.map((municipio) => (
+                    <option key={municipio} value={municipio}>
+                      {municipio}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => {
+                    setFilters({ nombre: "", municipio: "" });
+                    setCurrentPage(1); // Reset pagination to the first page
+                  }}
+                  className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
+                >
+                  Reiniciar Filtros
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 flex space-x-4">
               <button
-                onClick={() => {
-                  setFilters({ nombre: "", municipio: "" });
-                  setCurrentPage(1); // Reset pagination to the first page
-                }}
-                className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
+                onClick={() => setIsAddSedeModalOpen(true)}
+                className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
               >
-                Reiniciar Filtros
+                + Añadir Sedes
+              </button>
+              <button
+                onClick={() => setIsAddEdificioModalOpen(true)}
+                className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
+              >
+                + Añadir Edificios
               </button>
             </div>
-          </div>
-          <div className="mt-4 flex space-x-4">
-            <button
-              onClick={() => setIsAddSedeModalOpen(true)}
-              className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
-            >
-              + Añadir Sedes
-            </button>
-            <button
-              onClick={() => setIsAddEdificioModalOpen(true)}
-              className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
-            >
-              + Añadir Edificios
-            </button>
-          </div>
-        </>
-      )}
-      {/* Tabla de Sedes */}
-      <div className="mt-2">
-        <SedeTable
-          sedes={filteredSedes}
-          municipios={municipios}
-          coordinadores={coordinadores}
-          selectedSedes={selectedSedes}
-          onSedeSelect={handleSedeSelect}
-          onSedeDeselect={handleSedeDeselect}
-          onSedeClick={handleSedeClick}
-        />
-      </div>
-      {/* Filtros de Edificios */}
-      <div className="mt-2 space-y-2">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-black">
-            Edificios de las Sedes seleccionadas
-          </h2>
-          <input
-            type="text"
-            placeholder="Filtrar por nombre"
-            value={edificioFilters.nombre}
-            onChange={(e) =>
-              handleEdificioFilterChange("nombre", e.target.value)
-            }
-            className="p-2 border rounded text-black"
+          </>
+        )}
+        {/* Tabla de Sedes */}
+        <div className="mt-2">
+          <SedeTable
+            sedes={filteredSedes}
+            municipios={municipios}
+            coordinadores={coordinadores}
+            selectedSedes={selectedSedes}
+            onSedeSelect={handleSedeSelect}
+            onSedeDeselect={handleSedeDeselect}
+            onSedeClick={handleSedeClick}
           />
-          <select
-            value={edificioFilters.categoria}
-            onChange={(e) =>
-              handleEdificioFilterChange("categoria", e.target.value)
-            }
-            className="p-2 border rounded text-black"
-          >
-            <option value="">Todas las categorías</option>
-            {uniqueCategorias.map((categoria) => (
-              <option key={categoria} value={categoria}>
-                {categoria}
-              </option>
-            ))}
-          </select>
+        </div>
+        {/* Filtros de Edificios */}
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-xl font-bold text-black">
+              Edificios de las Sedes seleccionadas
+            </h2>
+            <input
+              type="text"
+              placeholder="Filtrar por nombre"
+              value={edificioFilters.nombre}
+              onChange={(e) =>
+                handleEdificioFilterChange("nombre", e.target.value)
+              }
+              className="p-2 border rounded text-black"
+            />
+            <select
+              value={edificioFilters.categoria}
+              onChange={(e) =>
+                handleEdificioFilterChange("categoria", e.target.value)
+              }
+              className="p-2 border rounded text-black"
+            >
+              <option value="">Todas las categorías</option>
+              {uniqueCategorias.map((categoria) => (
+                <option key={categoria} value={categoria}>
+                  {categoria}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleResetEdificioFilters}
+              className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
+            >
+              Reiniciar Filtros
+            </button>
+            <button
+              onClick={handleDownloadEdificios}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+            >
+              Descargar Excel
+            </button>
+          </div>
           <button
-            onClick={handleResetEdificioFilters}
-            className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
+            onClick={() => setIsDetailsModalOpen(true)}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
           >
-            Reiniciar Filtros
-          </button>
-          <button
-            onClick={handleDownloadEdificios}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
-          >
-            Descargar Excel
+            Ver Detalles
           </button>
         </div>
-        <button
-          onClick={() => setIsDetailsModalOpen(true)}
-          className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
-        >
-          Ver Detalles
-        </button>
-      </div>
 
-      {/* Modals */}
-      <DetailsModal
-        isOpen={isDetailsModalOpen}
-        onClose={() => setIsDetailsModalOpen(false)}
-        selectedSedes={selectedSedes}
-      />
-
-      {/* Tabla de Edificios */}
-      <div className="mt-2">
-        <EdificioTable
-          edificios={filteredEdificios}
-          filters={edificioFilters}
-          onEdificioClick={handleEdificioClick}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
+        {/* Modals */}
+        <DetailsModal
+          isOpen={isDetailsModalOpen}
+          onClose={() => setIsDetailsModalOpen(false)}
+          selectedSedes={selectedSedes}
         />
-      </div>
-      {/* Modals */}
-      <SedeDetailsModal
-        sede={selectedSede}
-        isOpen={isSedeModalOpen}
-        onClose={() => setIsSedeModalOpen(false)}
-        onSave={handleSaveSede}
-        onDelete={handleDeleteSede}
-        editMode={editMode}
-        setEditMode={setEditMode}
-        editedSede={selectedSede}
-        handleEditField={(field, value) => {
-          setSelectedSede((prev) =>
-            prev ? { ...prev, [field]: value } : null
-          );
-        }}
-        showSuccess={showSuccess}
-      />
-      {selectedEdificio && (
-        <EdificioDetailsModal
-          edificio={selectedEdificio}
-          isOpen={isEdificioModalOpen}
-          onClose={() => setIsEdificioModalOpen(false)}
-          onSave={handleSaveEdificio}
-          onDelete={handleDeleteEdificio}
+
+        {/* Tabla de Edificios */}
+        <div className="mt-2">
+          <EdificioTable
+            edificios={filteredEdificios}
+            filters={edificioFilters}
+            onEdificioClick={handleEdificioClick}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+          />
+        </div>
+        {/* Modals */}
+        <SedeDetailsModal
+          sede={selectedSede}
+          isOpen={isSedeModalOpen}
+          onClose={() => setIsSedeModalOpen(false)}
+          onSave={handleSaveSede}
+          onDelete={handleDeleteSede}
           editMode={editMode}
           setEditMode={setEditMode}
-          editedEdificio={selectedEdificio}
+          editedSede={selectedSede}
           handleEditField={(field, value) => {
-            setSelectedEdificio((prev) =>
+            setSelectedSede((prev) =>
               prev ? { ...prev, [field]: value } : null
             );
           }}
           showSuccess={showSuccess}
-          sedes={sedes}
         />
-      )}
-      <AddSedeModal
-        isOpen={isAddSedeModalOpen}
-        onClose={() => setIsAddSedeModalOpen(false)}
-        municipios={municipios}
-        coordinadores={coordinadores}
-        onSedeAdded={handleAddSedes}
-        showSuccessMessage={() => {
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
-        }}
-      />
-      <AddEdificioModal
-        isOpen={isAddEdificioModalOpen}
-        onClose={() => setIsAddEdificioModalOpen(false)}
-        sedes={sedes}
-        onEdificiosAdded={handleAddEdificios}
-        showSuccessMessage={() => {
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
-        }}
-      />
+        {selectedEdificio && (
+          <EdificioDetailsModal
+            edificio={selectedEdificio}
+            isOpen={isEdificioModalOpen}
+            onClose={() => setIsEdificioModalOpen(false)}
+            onSave={handleSaveEdificio}
+            onDelete={handleDeleteEdificio}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            editedEdificio={selectedEdificio}
+            handleEditField={(field, value) => {
+              setSelectedEdificio((prev) =>
+                prev ? { ...prev, [field]: value } : null
+              );
+            }}
+            showSuccess={showSuccess}
+            sedes={sedes}
+          />
+        )}
+        <AddSedeModal
+          isOpen={isAddSedeModalOpen}
+          onClose={() => setIsAddSedeModalOpen(false)}
+          municipios={municipios}
+          coordinadores={coordinadores}
+          onSedeAdded={handleAddSedes}
+          showSuccessMessage={() => {
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+          }}
+        />
+        <AddEdificioModal
+          isOpen={isAddEdificioModalOpen}
+          onClose={() => setIsAddEdificioModalOpen(false)}
+          sedes={sedes}
+          onEdificiosAdded={handleAddEdificios}
+          showSuccessMessage={() => {
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+          }}
+        />
+      </div>
     </div>
   );
 };

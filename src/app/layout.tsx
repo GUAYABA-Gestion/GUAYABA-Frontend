@@ -2,7 +2,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import SessionWrapper from "../../components/SessionWrapper";
-import Navbar from "../../components/Navbar";
 import { RolProvider } from "../../context/RolContext"; // Importar el RolProvider
 import "./globals.css";
 
@@ -45,11 +44,9 @@ export default function RootLayout({
         {/* Wrap with SessionWrapper first, then include RolProvider */}
         <SessionWrapper>
           <RolProvider>
-            <div className="flex">
-              {/* Navbar on the left */}
-              <Navbar />
-              {/* Main content on the right */}
-              <main className="flex-grow p-4">{children}</main>
+            <div className="flex flex-col min-h-screen w-full">
+              {/* Main content */}
+              <main className="flex-grow">{children}</main>
             </div>
           </RolProvider>
         </SessionWrapper>

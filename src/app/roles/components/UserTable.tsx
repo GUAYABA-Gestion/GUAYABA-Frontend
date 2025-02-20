@@ -60,9 +60,9 @@ const UserTable = ({
     );
   });
 
-  const indexOfLastUser = currentPage * itemsPerPage;
-  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
@@ -78,8 +78,8 @@ const UserTable = ({
             </tr>
           </thead>
           <tbody>
-            {currentUsers.length > 0 ? (
-              currentUsers.map((user, index) => (
+            {paginatedUsers.length > 0 ? (
+              paginatedUsers.map((user, index) => (
                 <tr
                   key={user.id_persona}
                   className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} ${
@@ -118,27 +118,16 @@ const UserTable = ({
       </div>
 
       {/* Paginación */}
-      <div className="mt-4 flex justify-center space-x-2">
-        <button
-          onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
-          disabled={currentPage === 1}
-          className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300 disabled:opacity-50"
-        >
-          Anterior
-        </button>
-        <span className="flex items-center px-4 py-2 text-black">
-          Página {currentPage} de{" "}
-          {Math.ceil(filteredUsers.length / itemsPerPage)}
-        </span>
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={
-            currentPage === Math.ceil(filteredUsers.length / itemsPerPage)
-          }
-          className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300 disabled:opacity-50"
-        >
-          Siguiente
-        </button>
+      <div className="flex justify-center mt-4">
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            onClick={() => onPageChange(index + 1)}
+            className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

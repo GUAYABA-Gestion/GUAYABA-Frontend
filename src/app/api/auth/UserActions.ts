@@ -120,3 +120,20 @@ export const getAdmins = async () => {
     return [];
   }
 };
+
+export const fetchUser = async () => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
+      headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al obtener datos del usuario");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error al obtener datos del usuario:", error);
+    throw error; // Relanzar el error para manejarlo en el componente
+  }
+};

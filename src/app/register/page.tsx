@@ -149,9 +149,14 @@ export default function Register() {
     }
   };
 
+  const handleCancel = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
+  };
+
   if (isChecking) {
     return (
-      <div className="min-h-screen p-4">
+      <div className="min-h-screen">
         <Header />
         <main className="max-w-md mx-auto mt-8 text-center">
           <div className="animate-pulse">
@@ -165,7 +170,7 @@ export default function Register() {
 
   if (!session) {
     return (
-      <div className="min-h-screen p-4 bg-gray-50">
+      <div className="min-h-screen bg-gray-50">
         <Header />
         <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Registro</h1>
@@ -187,7 +192,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
@@ -255,20 +260,28 @@ export default function Register() {
           </label>
         </div>
 
-        <button
-          onClick={handleRegistration}
-          disabled={isLoading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              Registrando...
-            </div>
-          ) : (
-            "Finalizar Registro"
-          )}
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={handleRegistration}
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Registrando...
+              </div>
+            ) : (
+              "Finalizar Registro"
+            )}
+          </button>
+          <button
+            onClick={handleCancel}
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
       </main>
     </div>
   );

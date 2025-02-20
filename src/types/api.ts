@@ -73,8 +73,11 @@ export interface Espacio {
   id_edificio: number;
   nombre: string;
   estado: string;
+  clasificacion: string;
+  uso: string;
   tipo: string;
-  capacidad: string;
+  piso: string;
+  capacidad: number;
   mediciónmt2: number;
 }
 

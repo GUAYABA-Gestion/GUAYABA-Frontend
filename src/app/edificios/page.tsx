@@ -2,36 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { Sede, Edificio, Municipio, User, Espacio } from "../../types/api";
+import { useSearchParams } from "next/navigation";
+import { Sede, Espacio } from "../../types/api";
 import { useRol } from "../../../context/RolContext";
 import { fetchSedes, deleteSede } from "../api/auth/SedeActions";
-import { fetchEspacios, deleteEspacio, updateEspacio } from "../api/auth/EspacioActions";
-import SedeTable from "./components/sede/SedeTable";
+import { fetchEspacios, deleteEspacio, updateEspacio, fetchEspaciosByEdificios } from "../api/auth/EspacioActions";
 import EspacioTable from "./components/espacio/EspacioTable";
-import SedeDetailsModal from "./components/sede/SedeDetailsModal";
 import EspacioDetailsModal from "./components/espacio/EspacioDetailsModal";
-import AddSedeModal from "./components/sede/AddSedeModal";  
-import { fetchMunicipios } from "../api/auth/MunicipioActions";
-import { getAdmins } from "../api/auth/UserActions";
 
-const GestionSedes: React.FC = () => {
-  const router = useRouter();
-  const { id } = router.query; // Obtiene el id de la URL
-  const [edificio, setEdificio] = useState(null);
-
+const GestionEspacios: React.FC = () => {
+  const searchParams = useSearchParams(); // Obtiene el id de la URL
+  const id = searchParams.get("id");
+  console.log(id)
   const { data: session } = useSession();
   const { rolSimulado } = useRol();
 
   const [sedes, setSedes] = useState<Sede[]>([]);
-  const [municipios, setMunicipios] = useState<Municipio[]>([]);
-  const [coordinadores, setCoordinadores] = useState<User[]>([]);
-  const [selectedSedes, setSelectedSedes] = useState<number[]>([]);
   const [espacios, setEspacios] = useState<Espacio[]>([]);
-  const [filters, setFilters] = useState({
-    nombre: "",
-    municipio: "",
-  });
   const [espacioFilters, setEspacioFilters] = useState({
     nombre: "",
     estado: "",
@@ -45,8 +32,6 @@ const GestionSedes: React.FC = () => {
   const [selectedEspacio, setSelectedEspacio] = useState<Espacio | null>(null);
   const [isSedeModalOpen, setIsSedeModalOpen] = useState(false);
   const [isEspacioModalOpen, setIsEspacioModalOpen] = useState(false);
-  const [isAddSedeModalOpen, setIsAddSedeModalOpen] = useState(false); // Estado para el modal de añadir sede
-  const [isAddEspacioModalOpen, setIsAddEspacioModalOpen] = useState(false); // Estado para el modal de añadir edificio
   const [editMode, setEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,22 +39,13 @@ const GestionSedes: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const sedesData = await fetchSedes();
-      setSedes(sedesData);
-      setSelectedSedes(sedesData.map((sede: Sede) => sede.id_sede)); // Select all sedes by default
-      const municipiosData = await fetchMunicipios();
-      setMunicipios(municipiosData);
-      const coordinadoresData = await getAdmins();
-      setCoordinadores(coordinadoresData);
-
-      // Si hay un ID en la URL, buscar el edificio correspondiente
       if (id) {
         try {
-          const res = await fetch(`/api/edificios/${id}`);
-          const data = await res.json();
-          setEdificio(data);
+          console.log("OLAAAAAAAAAAA")
+          const espaciosData = await fetchEspaciosByEdificios([Number(id)]);
+          setEspacios(espaciosData);
         } catch (error) {
-          console.error("Error cargando edificio:", error);
+          console.error("Error cargando espacios:", error);
         }
       }
 
@@ -85,21 +61,6 @@ const GestionSedes: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    const fetchEspaciosData = async () => {
-      setIsLoading(true);
-      const espaciosData = await fetchEspacios();
-      setEspacios(espaciosData);
-      setIsLoading(false);
-    };
-    fetchEspaciosData();
-  }, []);
-
-  const handleFilterChange = (filter: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [filter]: value }));
-    setCurrentPage(1); // Reset pagination to the first page
-  };
-
   const handleEspacioFilterChange = (filter: string, value: string) => {
     setEspacioFilters((prev) => ({ ...prev, [filter]: value }));
     setCurrentPage(1); // Reset pagination to the first page
@@ -110,37 +71,15 @@ const GestionSedes: React.FC = () => {
     setCurrentPage(1); // Reset pagination to the first page
   };
 
-  const handleSedeSelect = (id: number) => {
-    setSelectedSedes((prev) => [...prev, id]);
-  };
-
-  const handleSedeDeselect = (id: number) => {
-    setSelectedSedes((prev) => prev.filter((sedeId) => sedeId !== id));
-  };
-
-  const handleSedeClick = (sede: Sede) => {
-    setSelectedSede(sede);
-    setIsSedeModalOpen(true);
-  };
 
   const handleEspacioClick = (espacio: Espacio) => {
     setSelectedEspacio(espacio);
     setIsEspacioModalOpen(true);
   };
 
-  const getMunicipioNombre = (id: number) => {
-    const municipio = municipios.find((m: Municipio) => m.id === id);
-    return municipio ? municipio.nombre : "Sin municipio";
-  };
 
-  const uniqueMunicipios = Array.from(new Set(sedes.map((sede) => getMunicipioNombre(sede.municipio))));
   const uniqueCategorias = Array.from(new Set(espacios.map((espacio) => espacio.estado)));
 
-  const filteredSedes = sedes.filter((sede) => {
-    const nombreMatch = sede.nombre.toLowerCase().includes(filters.nombre.toLowerCase());
-    const municipioMatch = filters.municipio ? getMunicipioNombre(sede.municipio) === filters.municipio : true;
-    return nombreMatch && municipioMatch;
-  });
 
   const filteredEspacios = espacios.filter(
     (espacio) =>
@@ -150,14 +89,6 @@ const GestionSedes: React.FC = () => {
       (espacioFilters.clasificacion === "" || espacio.clasificacion === espacioFilters.clasificacion) 
   );
 
-  const handleSaveSede = (updatedSede: Sede) => {
-    setSedes((prevSedes) =>
-      prevSedes.map((sede) => (sede.id_sede === updatedSede.id_sede ? updatedSede : sede))
-    );
-    setSelectedSede(updatedSede); // Update the selected Sede
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
 
   const handleSaveEspacio = (updatedEspacio: Espacio) => {
     setEspacios((prevEspacios) =>
@@ -168,31 +99,6 @@ const GestionSedes: React.FC = () => {
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
-  const handleAddSedes = (newSedes: Sede[]) => {
-    setSedes((prevSedes) => [...prevSedes, ...newSedes]);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleAddEspacios = (newEspacios: Espacio[]) => {
-    setEspacios((prevEspacios) => [...prevEspacios, ...newEspacios]);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleDeleteSede = async (id_sede: number) => {
-    try {
-      await deleteSede(id_sede);
-      setSedes((prevSedes) => prevSedes.filter((sede) => sede.id_sede !== id_sede));
-      setSelectedSede(null);
-      setIsSedeModalOpen(false);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error : any) {
-      console.error("Error al eliminar sede:", error);
-      alert(error.message || "Error al eliminar sede");
-    }
-  };
 
   const handleDeleteEspacio = async (id_espacio: number) => {
     try {
@@ -222,7 +128,7 @@ const GestionSedes: React.FC = () => {
       {/* Filtros de Edificios */}
       <div className="mt-2 space-y-2">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-black">Edificios de las Sedes seleccionadas</h2>
+          <h2 className="text-xl font-bold text-black">Espacios del Edificio</h2>
           <input
             type="text"
             placeholder="Filtrar por nombre"
@@ -281,4 +187,4 @@ const GestionSedes: React.FC = () => {
   );
 };
 
-export default GestionSedes;
+export default GestionEspacios;

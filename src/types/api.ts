@@ -83,9 +83,11 @@ export interface Espacio {
 
 export interface Evento {
   id_evento: number;
-  id_sede: number;
+  id_espacio: number;
   nombre: string;
   descripcion: string;
+  hora_inicio: string;
+  hora_fin: string;
   fecha_inicio: string;
   fecha_fin: string;
   tipo: string;

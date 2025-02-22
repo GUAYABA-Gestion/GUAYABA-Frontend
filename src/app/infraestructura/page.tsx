@@ -462,6 +462,7 @@ const GestionSedes: React.FC = () => {
           isOpen={isDetailsModalOpen}
           onClose={() => setIsDetailsModalOpen(false)}
           selectedSedes={selectedSedes}
+          filteredEdificios={filteredEdificios}
           rolSimulado={rolSimulado} // Pasar el rol simulado
         />
 

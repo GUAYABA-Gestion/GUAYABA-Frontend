@@ -68,62 +68,70 @@ const UserTable = ({
     <div className="p-4 bg-gray-50 min-h-screen">
       {/* Tabla */}
       <div className="mt-6">
-        <table className="w-full border-collapse border border-gray-300 table-fixed">
-          <thead>
-            <tr className="bg-[#80BA7F] text-white">
-              <th className="border border-gray-300 p-2 w-1/4">Correo</th>
-              <th className="border border-gray-300 p-2 w-1/4">Rol</th>
-              <th className="border border-gray-300 p-2 w-1/4">Sede</th>
-              <th className="border border-gray-300 p-2 w-1/4">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedUsers.length > 0 ? (
-              paginatedUsers.map((user, index) => (
-                <tr
-                  key={user.id_persona}
-                  className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} ${
-                    user.es_manual ? "border-l-4 border-red-500" : ""
-                  }`}
-                >
-                  <td className="border border-gray-300 p-2 text-black">
-                    {user.correo}
-                  </td>
-                  <td className="border border-gray-300 p-2 text-black">
-                    {getRolCompleto(user.rol)}
-                  </td>
-                  <td className="border border-gray-300 p-2 text-black">
-                    {getSedeNombre(user.id_sede)}
-                  </td>
-
-                  <td className="border border-gray-300 p-2 text-center">
-                    <button
-                      onClick={() => onUserClick(user)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                    >
-                      Ver Detalles
-                    </button>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-[#80BA7F] text-white">
+                <th className="border border-gray-300 px-4 py-2 min-w-[250px]">Correo</th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Rol</th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Sede</th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedUsers.length > 0 ? (
+                paginatedUsers.map((user, index) => (
+                  <tr
+                    key={user.id_persona}
+                    className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} ${
+                      user.es_manual ? "border-l-4 border-red-500" : ""
+                    }`}
+                  >
+                    <td className="border border-gray-300 p-2 text-black text-sm">
+                      {user.correo}
+                    </td>
+                    <td className="border border-gray-300 p-2 text-black text-sm">
+                      {getRolCompleto(user.rol)}
+                    </td>
+                    <td className="border border-gray-300 p-2 text-black text-sm">
+                      {getSedeNombre(user.id_sede)}
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <button
+                        onClick={() => onUserClick(user)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                      >
+                        Ver Detalles
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td 
+                    colSpan={4} 
+                    className="border border-gray-300 p-2 text-center text-gray-600 text-sm"
+                  >
+                    No hay personas para mostrar.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="border border-gray-300 p-2 text-center text-gray-600">
-                  No hay personas para mostrar.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
+  
       {/* Paginación */}
       <div className="flex justify-center mt-4">
         {Array.from({ length: totalPages }, (_, index) => (
           <button
             key={index}
             onClick={() => onPageChange(index + 1)}
-            className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+            className={`mx-1 px-3 py-1 rounded text-sm ${
+              currentPage === index + 1
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-black hover:bg-gray-300"
+            }`}
           >
             {index + 1}
           </button>

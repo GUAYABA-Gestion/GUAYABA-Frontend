@@ -1,16 +1,44 @@
 import Cookies from "js-cookie";
 import { Espacio } from "../../../types/api";
 
-export const fetchEspacios = async (): Promise<Espacio[]> => {
+export const fetchEspaciosByEdificios = async (ids_edificios: number[]): Promise<Espacio[]> => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/espacios/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/espacios/by-edificios`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("jwt")}`,
+      },
+      body: JSON.stringify({ ids_edificios }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al obtener espacios desde edificios");
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error al obtener espacios desde edificios:", error);
+    return [];
+  }
+};
+
+export const fetchEspacioById = async (id: string): Promise<Espacio | null> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/espacios/${id}`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
+
+    if (!response.ok) {
+      throw new Error("Error al obtener el espacio");
+    }
+
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error al obtener espacios:", error);
-    return [];
+    console.error("Error al obtener el espacio:", error);
+    return null;
   }
 };
 
@@ -78,28 +106,5 @@ export const addEspaciosManual = async (espacios: Espacio[]) => {
   } catch (error) {
     console.error("Error al añadir espacios:", error);
     throw error; // Relanzar el error para manejarlo en el componente
-  }
-};
-
-export const fetchEspaciosByEdificios = async (ids_edificios: number[]): Promise<Espacio[]> => {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/espacios/by-edificios`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Cookies.get("jwt")}`,
-      },
-      body: JSON.stringify({ ids_edificios }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Error al obtener espacios desde edificios");
-    }
-
-    const data = await response.json();
-    return data.data;
-  } catch (error) {
-    console.error("Error al obtener espacios desde edificios:", error);
-    return [];
   }
 };

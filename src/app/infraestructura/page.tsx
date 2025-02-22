@@ -57,6 +57,11 @@ const GestionSedes: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // Añadir este estado
 
   useEffect(() => {
+
+    if (rolSimulado === null || idSede === null) {
+      return; // Esperar a que el rol y la sede estén disponibles
+    }
+
     const fetchData = async () => {
       setIsLoading(true);
       const sedesData = await fetchSedes();
@@ -528,10 +533,14 @@ const GestionSedes: React.FC = () => {
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 3000);
           }}
+          rolSimulado={rolSimulado} // Pasar el rol simulado
+          idSede={idSede} // Pasar el id de la sede
+          coordinadores={coordinadores}
         />
       </div>
     </div>
   );
 };
+
 
 export default GestionSedes;

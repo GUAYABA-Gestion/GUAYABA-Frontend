@@ -1,31 +1,23 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import AddEdificioManual from "./AddEdificioManual";
 import AddEdificioCSV from "./AddEdificioCSV";
-import { Sede, Edificio, User } from "../../../../types/api";
-import { fetchUsers } from "../../../api/auth/UserActions";
+import { Edificio, Sede, User } from "../../../../types/api";
 
 interface AddEdificioModalProps {
   isOpen: boolean;
   onClose: () => void;
-  sedes: Sede[];
   onEdificiosAdded: (newEdificios: Edificio[]) => void;
+  sedes: Sede[];
+  coordinadores: User[]; // Añadir coordinadores como prop 
   showSuccessMessage: () => void;
+  rolSimulado: string; // Añadir rolSimulado como prop
+  idSede: number | null; // Añadir idSede como prop
 }
 
-const AddEdificioModal: React.FC<AddEdificioModalProps> = ({ isOpen, onClose, sedes, onEdificiosAdded, showSuccessMessage }) => {
+const AddEdificioModal: React.FC<AddEdificioModalProps> = ({ isOpen, onClose, onEdificiosAdded, sedes, coordinadores, showSuccessMessage, rolSimulado, idSede }) => {
   const [edificios, setEdificios] = useState<Edificio[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [showCsvInfo, setShowCsvInfo] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const usersData = await fetchUsers();
-      setUsers(usersData);
-    };
-    fetchData();
-  }, []);
 
   const handleEdificiosAdded = (newEdificios: Edificio[]) => {
     setEdificios([...edificios, ...newEdificios]);
@@ -34,7 +26,6 @@ const AddEdificioModal: React.FC<AddEdificioModalProps> = ({ isOpen, onClose, se
 
   const handleClose = () => {
     setEdificios([]);
-    setError(null);
     onClose();
   };
 
@@ -44,20 +35,20 @@ const AddEdificioModal: React.FC<AddEdificioModalProps> = ({ isOpen, onClose, se
 
   return (
     <div className={`fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 ${isOpen ? "visible" : "invisible"}`}>
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full max-h-screen overflow-y-auto">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-[95vw] max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-black">Añadir Edificios</h2>
-
-        {error && <div className="mb-4 text-red-500">{error}</div>}
 
         <AddEdificioManual
           isOpen={isOpen}
           onClose={handleClose}
-          sedes={sedes}
           onEdificiosAdded={handleEdificiosAdded}
-          showSuccessMessage={showSuccessMessage}
           edificios={edificios}
           setEdificios={setEdificios}
-          users={users}
+          sedes={sedes}
+          rolSimulado={rolSimulado} // Pasar rolSimulado al componente
+          idSede={idSede} // Pasar idSede al componente
+          showSuccessMessage={showSuccessMessage} // Pasar showSuccessMessage al componente
+          users={coordinadores} // Pasar users al componente (debes reemplazar [] con la lista de usuarios correspondiente)
         />
 
         <div className="mt-4">
@@ -74,13 +65,15 @@ const AddEdificioModal: React.FC<AddEdificioModalProps> = ({ isOpen, onClose, se
 
         {showCsvInfo && (
           <AddEdificioCSV
-            sedes={sedes}
             onEdificiosAdded={handleEdificiosAdded}
-            showSuccessMessage={showSuccessMessage}
             onClose={handleClose}
             edificios={edificios}
             setEdificios={setEdificios}
-            users={users}
+            sedes={sedes}
+            rolSimulado={rolSimulado} // Pasar rolSimulado al componente
+            idSede={idSede} // Pasar idSede al componente
+            showSuccessMessage={showSuccessMessage} // Pasar showSuccessMessage al componente
+            users={coordinadores} // Pasar users al componente (debes reemplazar [] con la lista de usuarios correspondiente)
           />
         )}
       </div>

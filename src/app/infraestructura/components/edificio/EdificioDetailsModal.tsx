@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Edificio, Sede, User } from "../../../../types/api";
 import { validateTextNotNull, validatePositiveNumber, validateCorreo } from "../../../api/auth/validation";
 import { fetchUsers } from "../../../api/auth/UserActions";
+import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/auth/desplegableValues";
 
 interface EdificioDetailsModalProps {
   isOpen: boolean;
@@ -67,10 +68,6 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
 
   if (!isOpen || !edificio || !editedEdificio) return null;
 
-  const categorias = ["CAT", "PRINCIPAL", "SEDE", "SEDE Y CAT", "OTRO"];
-  const propiedades = ["PROPIO", "ARRENDADO", "NO OPERACIONAL"];
-  const certUsoSueloOptions = ["DISPONIBLE", "NO DISPONIBLE"];
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
@@ -129,7 +126,7 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
               className="mt-1 p-2 border rounded w-full text-black"
               disabled={!editMode}
             >
-              {categorias.map((categoria) => (
+              {categoriasEdificio.map((categoria) => (
                 <option key={categoria} value={categoria}>
                   {categoria}
                 </option>
@@ -144,7 +141,7 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
               className="mt-1 p-2 border rounded w-full text-black"
               disabled={!editMode}
             >
-              {propiedades.map((propiedad) => (
+              {propiedadesEdificio.map((propiedad) => (
                 <option key={propiedad} value={propiedad}>
                   {propiedad}
                 </option>
@@ -185,7 +182,7 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
               className="mt-1 p-2 border rounded w-full text-black"
               disabled={!editMode}
             >
-              {certUsoSueloOptions.map((option) => (
+              {certUsoSuelo.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>

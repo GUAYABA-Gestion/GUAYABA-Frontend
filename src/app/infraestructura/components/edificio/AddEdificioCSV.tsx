@@ -3,6 +3,7 @@ import { useState } from "react";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
 import { Edificio, Sede, User } from "../../../../types/api";
+import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/auth/desplegableValues";
 
 interface AddEdificioCSVProps {
   edificios: Edificio[];
@@ -12,9 +13,11 @@ interface AddEdificioCSVProps {
   onEdificiosAdded: (newEdificios: Edificio[]) => void;
   showSuccessMessage: () => void;
   onClose: () => void;
+  idSede: number | null; // Añadir idSede como prop
+  rolSimulado: string; // Añadir rolSimulado como prop
 }
 
-const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios, sedes, users, onEdificiosAdded, showSuccessMessage, onClose }) => {
+const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios, sedes, users, onEdificiosAdded, showSuccessMessage, onClose, idSede, rolSimulado }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios
         const parsedEdificios: Edificio[] = result.data.map((row: any) => ({
           nombre: row.nombre || "",
           dirección: row.dirección || "",
-          id_sede: Number(row.id_sede) || 0,
+          id_sede: rolSimulado === "coord" ? idSede ?? 0 : Number(row.id_sede) || 0, // Asignar idSede fijo si el rol es coordinador
           categoría: row.categoría || "",
           propiedad: row.propiedad || "",
           area_terreno: Number(row.area_terreno) || 0,
@@ -65,16 +68,16 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios
       { header: "correo_titular", key: "correo_titular", width: 25 },
     ];
 
-    worksheet.addRow(["Edificio Ejemplo", "Dirección Ejemplo", 1, "CAT", "PROPIO", 1000, 800, "DISPONIBLE", "ejemplo@correo.com"]);
+    worksheet.addRow(["Edificio Ejemplo", "Dirección Ejemplo", idSede ?? 1, "CAT", "PROPIO", 1000, 800, "DISPONIBLE", "ejemplo@correo.com"]);
 
     worksheet.getCell("A1").note = "Nombre: Nombre del edificio";
     worksheet.getCell("B1").note = "Dirección: Dirección del edificio";
-    worksheet.getCell("C1").note = "ID de la sede. Los IDs de las sedes disponibles son: " + sedes.map(sede => `${sede.id_sede}: ${sede.nombre}`).join(", ");
-    worksheet.getCell("D1").note = 'Categoría: Categoría del edificio. Los valores aceptados son: "CAT", "PRINCIPAL", "SEDE", "SEDE Y CAT", "OTRO"';
-    worksheet.getCell("E1").note = 'Propiedad: Propiedad del edificio. Los valores aceptados son: "PROPIO", "ARRENDADO", "NO OPERACIONAL"';
+    worksheet.getCell("C1").note = rolSimulado === "coord" ? `ID de la sede: ${idSede}` : "ID de la sede. Los IDs de las sedes disponibles son: " + sedes.map(sede => `${sede.id_sede}: ${sede.nombre}`).join(", ");
+    worksheet.getCell("D1").note = `Categoría: Categoría del edificio. Los valores aceptados son: ${categoriasEdificio.join(", ")}`;
+    worksheet.getCell("E1").note = `Propiedad: Propiedad del edificio. Los valores aceptados son: ${propiedadesEdificio.join(", ")}`;
     worksheet.getCell("F1").note = "Área del terreno en metros cuadrados";
     worksheet.getCell("G1").note = "Área construida en metros cuadrados";
-    worksheet.getCell("H1").note = 'Cert. Uso Suelo: Puede ser "DISPONIBLE" o "NO DISPONIBLE"';
+    worksheet.getCell("H1").note = `Cert. Uso Suelo: Puede ser ${certUsoSuelo.join(" o ")}`;
     worksheet.getCell("I1").note = "Correo Titular: Correo electrónico del titular del edificio (puede dejarse vacío)";
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -89,6 +92,7 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios
 
   return (
     <div className="mt-4">
+      {error && <div className="mb-4 text-red-500">{error}</div>}
       <input type="file" accept=".csv" onChange={handleFileUpload} className="mt-4 text-black" />
 
       <button onClick={handleDownloadTemplate} className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition duration-300">

@@ -48,8 +48,7 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
       const data = await response.json();
       setRolSimulado(data.rol);
       setIdSede(data.id_sede);
-      console.log(data.id_sede);
-      
+
     } catch (error) {
       console.error("Error:", error);
       handleLogout();

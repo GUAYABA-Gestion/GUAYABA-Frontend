@@ -36,23 +36,20 @@ const Header = () => {
   const rutasPorRol: Record<string, { path: string; label: string }[]> = {
     admin: [
       { path: "/roles", label: "Gestión de Roles" },
+      { path: "/historial", label: "Auditoría" },
       { path: "/infraestructura", label: "Gestión de Infraestructura" },
-      { path: "/edificios", label: "Gestión de Edificios" },
       { path: "/account", label: "Cuenta" },
     ],
     coord: [
       { path: "/infraestructura", label: "Gestión de Sede" },
-      { path: "/edificios", label: "Gestión de Edificios" },
       { path: "/account", label: "Cuenta" },
     ],
     maint: [
       { path: "/infraestructura", label: "Información Sede" },
-      { path: "/edificios", label: "Información edificios" },
       { path: "/account", label: "Cuenta" },
     ],
     user: [
       { path: "/infraestructura", label: "Buscador de edificios" },
-      { path: "/edificios", label: "Edificios" },
       { path: "/account", label: "Cuenta" },
     ],
     none: [],

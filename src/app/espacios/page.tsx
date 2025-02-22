@@ -1,189 +1,190 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Edificio, Espacio, Sede } from "../../types/api";
+import { fetchEdificioById } from "../api/auth/EdificioActions";
+import { fetchEspaciosByEdificios } from "../api/auth/EspacioActions";
+import { fetchSedeById } from "../api/auth/SedeActions";
+import EspacioTable from "./components/espacio/EspacioTable";
+import EspacioDetailsModal from "./components/espacio/EspacioDetailsModal";
+import AddEspacioModal from "./components/espacio/AddEspacioModal";
+import { Header } from "../../../components";
 import { useRol } from "../../../context/RolContext";
+import Link from "next/link";
 
-// Interfaces para los datos
-interface Espacio {
-  id_sede: number;
-  nombre: string;
-  municipio: string;
-  coordinador: string;
-}
-/*
-interface Edificio {
-  id_edificio: number;
-  id_sede: number;
-  id_titular: number;
-  nombre: string;
-  dirección: string;
-  categoría: string;
-  propiedad: string;
-  area_terreno: number;
-  area_construida: number;
-  cert_uso_suelo: boolean;
-}
-*/
-const GestionEspacio: React.FC = () => {
-  const { rolSimulado } = useRol();
+const GestionEspacios: React.FC = () => {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const idEdificio = searchParams.get("idEdificio");
+  const { rolSimulado, idSede } = useRol();
 
-  // Datos simulados
-  const sedes: Espacio[] = [
-    { id_sede: 1, nombre: "Sede Norte", municipio: "Bogotá", coordinador: "Juan Pérez" },
-    { id_sede: 2, nombre: "Sede Sur", municipio: "Medellín", coordinador: "Ana Gómez" },
-  ];
-/*
-  const edificios: Edificio[] = [
-    {
-      id_edificio: 1,
-      id_sede: 1,
-      id_titular: 101,
-      nombre: "Edificio A",
-      dirección: "Calle 123",
-      categoría: "Académico",
-      propiedad: "Pública",
-      area_terreno: 5000,
-      area_construida: 4500,
-      cert_uso_suelo: true,
-    },
-    {
-      id_edificio: 2,
-      id_sede: 2,
-      id_titular: 102,
-      nombre: "Edificio B",
-      dirección: "Carrera 45",
-      categoría: "Administrativo",
-      propiedad: "Privada",
-      area_terreno: 3000,
-      area_construida: 2800,
-      cert_uso_suelo: false,
-    },
-  ];
-*/
-  const [sedeSeleccionada, setSedeSeleccionada] = useState<number | null>(null);
+  const [edificio, setEdificio] = useState<Edificio | null>(null);
+  const [sede, setSede] = useState<Sede | null>(null);
+  const [espacios, setEspacios] = useState<Espacio[]>([]);
+  const [selectedEspacio, setSelectedEspacio] = useState<Espacio | null>(null);
+  const [selectedEspacioId, setSelectedEspacioId] = useState<number | null>(null);
+  const [isEspacioModalOpen, setIsEspacioModalOpen] = useState(false);
+  const [isAddEspacioModalOpen, setIsAddEspacioModalOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("espacios");
+  const [error, setError] = useState<string | null>(null);
 
-  // Seleccionar automáticamente la primera sede para administradores
   useEffect(() => {
-    if (rolSimulado === "admin" && sedes.length > 0) {
-      setSedeSeleccionada(sedes[0].id_sede);
+    if (!idEdificio) {
+      setError("No se ha proporcionado un ID de edificio. (Idealmente) Debe seleccionarse desde la página de Infraestructura");
+      return;
     }
-  }, [rolSimulado]);
 
-  // Filtrar sedes visibles según el rol
-  const sedesVisibles: Sede[] =
-    rolSimulado === "admin"
-      ? sedes
-      : rolSimulado === "coordinador"
-      ? sedes.filter((sede) => sede.coordinador === "Ana Gómez") // Lógica del coordinador autenticado
-      : sedes.filter((sede) => edificios.some((edificio) => edificio.id_sede === sede.id_sede));
+    if (rolSimulado === null || idSede === null) {
+      return; // Esperar a que el rol y la sede estén disponibles
+    }
 
-  // Filtrar edificios visibles según el rol y sede seleccionada
-  const edificiosVisibles: Partial<Edificio>[] =
-    rolSimulado === "admin" || rolSimulado === "coordinador"
-      ? edificios.filter((edificio) => !sedeSeleccionada || edificio.id_sede === sedeSeleccionada)
-      : edificios
-          .filter((edificio) => !sedeSeleccionada || edificio.id_sede === sedeSeleccionada)
-          .map(({ id_edificio, nombre }) => ({ id_edificio, nombre })); // Mostrar solo nombres
+    const fetchData = async () => {
+      if (idEdificio) {
+        const edificioData = await fetchEdificioById(idEdificio as string);
+        if (edificioData && rolSimulado !== "admin" && edificioData.id_sede !== idSede) {
+          setError("No tiene permiso para acceder a este edificio. Seleccione un edificio válido desde la página de Infraestructura.");
+          return;
+        }
+        setEdificio(edificioData);
+        const espaciosData = await fetchEspaciosByEdificios([parseInt(idEdificio as string)]);
+        setEspacios(espaciosData);
+        if (edificioData && edificioData.id_sede) {
+          const sedeData = await fetchSedeById(edificioData.id_sede);
+          setSede(sedeData);
+        }
+      }
+    };
+    fetchData();
+  }, [idEdificio, rolSimulado, idSede]);
+
+  const handleEspacioClick = (espacio: Espacio) => {
+    setSelectedEspacio(espacio);
+    setIsEspacioModalOpen(true);
+  };
+
+  const handleAddEspacio = (newEspacios: Espacio[]) => {
+    setEspacios((prevEspacios) => [...prevEspacios, ...newEspacios]);
+  };
+
+  const handleEspacioSelect = (id: number) => {
+    const selected = espacios.find((espacio) => espacio.id_espacio === id) || null;
+    setSelectedEspacioId(id);
+    setSelectedEspacio(selected);
+  };
+
+  const handleSaveEspacio = (updatedEspacio: Espacio) => {
+    setEspacios((prevEspacios) =>
+      prevEspacios.map((espacio) =>
+        espacio.id_espacio === updatedEspacio.id_espacio ? updatedEspacio : espacio
+      )
+    );
+    setSelectedEspacio(updatedEspacio);
+  };
+
+  const handleDeleteEspacio = (id_espacio: number) => {
+    setEspacios((prevEspacios) => prevEspacios.filter((espacio) => espacio.id_espacio !== id_espacio));
+    setSelectedEspacio(null);
+    setSelectedEspacioId(null);
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow text-center">
+          <h1 className="text-2xl font-bold text-[#034f00]">Gestión de Espacios</h1>
+          <p className="text-gray-700 mt-4">{error}</p>
+          <div className="mt-6">
+            <Link
+              href="/infraestructura"
+              className="bg-red-600 text-white px-6 py-3 text-lg rounded-lg shadow-md hover:bg-red-700 transition duration-300"
+            >
+              Volver a Infraestructura
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Gestión de Sedes</h1>
-
-      {/* Tabla de Sedes */}
-      {sedesVisibles.length > 0 && (
+    <div className="bg-gray-50 min-h-screen">
+      <Header />
+      <div className="mt-4 p-4">
+        <h1 className="text-2xl font-bold text-[#034f00]">Gestión de Espacios</h1>
+        {edificio && (
+          <div className="mt-4">
+            <h2 className="text-xl font-bold text-black">Edificio: {edificio.nombre}</h2>
+            <p className="text-gray-700">Dirección: {edificio.dirección}</p>
+            {sede && <p className="text-gray-700">Sede: {sede.nombre}</p>}
+            <p className="text-gray-700">Categoría: {edificio.categoría}</p>
+          </div>
+        )}
         <div className="mt-4">
-          <h2 className="text-xl font-semibold">Sedes Disponibles</h2>
-          <table className="w-full border-collapse border border-gray-300 mt-2">
-            <thead>
-              <tr>
-                <th className="border border-gray-300 p-2">Nombre</th>
-                <th className="border border-gray-300 p-2">Municipio</th>
-                {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
-                  <th className="border border-gray-300 p-2">Coordinador</th>
-                ) : null}
-                <th className="border border-gray-300 p-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sedesVisibles.map((sede) => (
-                <tr key={sede.id_sede}>
-                  <td className="border border-gray-300 p-2">{sede.nombre}</td>
-                  <td className="border border-gray-300 p-2">{sede.municipio}</td>
-                  {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
-                    <td className="border border-gray-300 p-2">{sede.coordinador}</td>
-                  ) : null}
-                  <td className="border border-gray-300 p-2">
-                    <button
-                      onClick={() => setSedeSeleccionada(sede.id_sede)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                      Ver Edificios
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setSelectedTab("espacios")}
+              className={`px-4 py-2 rounded-lg ${selectedTab === "espacios" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+            >
+              Espacios
+            </button>
+            {selectedEspacio && (
+              <button
+                onClick={() => setSelectedTab("eventos_mantenimientos")}
+                className={`px-4 py-2 rounded-lg ${selectedTab === "eventos_mantenimientos" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Eventos y Mantenimientos
+              </button>
+            )}
+          </div>
+          {(rolSimulado === "admin" || rolSimulado === "coord") && (
+                  <button
+                    onClick={() => setIsAddEspacioModalOpen(true)}
+                    className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300 mt-4"
+                  >
+                    + Añadir Espacios
+                  </button>
+                )}
+          <div className="mt-4">
+            {selectedTab === "espacios" && (
+              <>
+                <EspacioTable
+                  espacios={espacios}
+                  onEspacioClick={handleEspacioClick}
+                  onEspacioSelect={handleEspacioSelect}
+                  selectedEspacioId={selectedEspacioId}
+                  rol={rolSimulado} // Pasar el rol al componente
+                />
+              </>
+            )}
+            {selectedTab === "eventos_mantenimientos" && selectedEspacio && (
+              <div>
+                <h2 className="text-xl font-bold text-black">Espacio: {selectedEspacio.nombre}</h2>
+                <p className="text-gray-700">Descripción:</p>
+                {/* Aquí irán los componentes de eventos y mantenimientos */}
+              </div>
+            )}
+          </div>
         </div>
-      )}
-
-      {/* Tabla de Edificios */}
-      {edificiosVisibles.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold">
-            {sedeSeleccionada
-              ? `Edificios de la Sede: ${
-                  sedes.find((sede) => sede.id_sede === sedeSeleccionada)?.nombre
-                }`
-              : "Lista de Edificios"}
-          </h2>
-          <table className="w-full border-collapse border border-gray-300 mt-2">
-            <thead>
-              <tr>
-                <th className="border border-gray-300 p-2">Nombre</th>
-                {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
-                  <>
-                    <th className="border border-gray-300 p-2">Dirección</th>
-                    <th className="border border-gray-300 p-2">Categoría</th>
-                    <th className="border border-gray-300 p-2">Propiedad</th>
-                    <th className="border border-gray-300 p-2">Área Terreno</th>
-                    <th className="border border-gray-300 p-2">Área Construida</th>
-                    <th className="border border-gray-300 p-2">Cert. Uso de Suelo</th>
-                  </>
-                ) : null}
-              </tr>
-            </thead>
-            <tbody>
-              {edificiosVisibles.map((edificio: Partial<Edificio>) => (
-                <tr key={edificio.id_edificio}>
-                  <td className="border border-gray-300 p-2">
-                    <a
-                      href={`/edificios/${edificio.id_edificio}`}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {edificio.nombre}
-                    </a>
-                  </td>
-                  {rolSimulado === "admin" || rolSimulado === "coordinador" ? (
-                    <>
-                      <td className="border border-gray-300 p-2">{edificio.dirección}</td>
-                      <td className="border border-gray-300 p-2">{edificio.categoría}</td>
-                      <td className="border border-gray-300 p-2">{edificio.propiedad}</td>
-                      <td className="border border-gray-300 p-2">{edificio.area_terreno} m²</td>
-                      <td className="border border-gray-300 p-2">{edificio.area_construida} m²</td>
-                      <td className="border border-gray-300 p-2">
-                        {edificio.cert_uso_suelo ? "Sí" : "No"}
-                      </td>
-                    </>
-                  ) : null}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        <EspacioDetailsModal
+          espacio={selectedEspacio}
+          isOpen={isEspacioModalOpen}
+          onClose={() => setIsEspacioModalOpen(false)}
+          onSave={handleSaveEspacio}
+          onDelete={handleDeleteEspacio}
+        />
+        <AddEspacioModal
+          isOpen={isAddEspacioModalOpen}
+          onClose={() => setIsAddEspacioModalOpen(false)}
+          onEspaciosAdded={handleAddEspacio}
+          idEdificio={parseInt(idEdificio as string)} // Pasar idEdificio al componente
+        />
+      </div>
     </div>
   );
 };
 
-export default GestionEspacio;
+export default GestionEspacios;

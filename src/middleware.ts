@@ -10,17 +10,18 @@ export function middleware(req: NextRequest) {
     "/sedes",
     "/mantenimiento",
     "/infraestructura",
+    "/espacios",
     "/reportes",
     "/roles",
   ];
 
   // Verificar si la ruta solicitada está protegida
-  const isProtectedRoute = protectedRoutes.includes(req.nextUrl.pathname);
+  const isProtectedRoute = protectedRoutes.some(route => req.nextUrl.pathname.startsWith(route));
 
   if (isProtectedRoute && !token) {
     // Redirige al login con callbackUrl para retornar después de iniciar sesión
     const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname); // Guarda la ruta original
+    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search); // Guarda la ruta original con parámetros
     return NextResponse.redirect(loginUrl);
   }
 
@@ -30,5 +31,5 @@ export function middleware(req: NextRequest) {
 
 // Configuración para aplicar el middleware en las rutas protegidas
 export const config = {
-  matcher: ["/roles","/account", "/sedes", "/infraestructura","/mantenimiento", "/reportes"], // Rutas protegidas
+  matcher: ["/roles", "/account", "/sedes", "/infraestructura", "/espacios", "/mantenimiento", "/reportes"], // Rutas protegidas
 };

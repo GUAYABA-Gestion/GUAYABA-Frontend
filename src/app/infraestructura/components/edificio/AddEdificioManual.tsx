@@ -1,57 +1,53 @@
 "use client";
-import { useState, useEffect } from "react";
-import { addEdificiosManual } from "../../../api/auth/EdificioActions";
+import { useState } from "react";
+import { addEdificiosManual } from "../../../api/EdificioActions";
 import { Edificio, Sede, User } from "../../../../types/api";
-import { validateTextNotNull, validatePositiveNumber, validateCorreo } from "../../../api/auth/validation";
-import { fetchUsers } from "../../../api/auth/UserActions";
-import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/auth/desplegableValues";
+import { validateTextNotNull, validatePositiveNumber, validateCorreo } from "../../../api/validation";
+import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/desplegableValues";
 
 interface AddEdificioManualProps {
-  isOpen: boolean;
   onClose: () => void;
-  sedes: Sede[];
   onEdificiosAdded: (newEdificios: Edificio[]) => void;
-  showSuccessMessage: () => void;
   edificios: Edificio[];
   setEdificios: (edificios: Edificio[]) => void;
-  users: User[];
-  rolSimulado: string; // Añadir rolSimulado como prop
-  idSede: number | null; // Añadir idSede como prop
+  sedes: Sede[];
+  coordinadores: User[];
+  rolSimulado: string;
+  idSede: number | null;
 }
 
-const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, sedes, onEdificiosAdded, showSuccessMessage, edificios, setEdificios, users, rolSimulado, idSede }) => {
+const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
+  onClose,
+  onEdificiosAdded,
+  edificios,
+  setEdificios,
+  sedes,
+  coordinadores,
+  rolSimulado,
+  idSede,
+}) => {
   const [error, setError] = useState<string | null>(null);
-  const [newEdificio, setNewEdificio] = useState<Edificio>({
-    nombre: "",
-    dirección: "",
-    id_sede: idSede ?? 0, // Asignar idSede por defecto
-    categoría: "",
-    propiedad: "",
-    area_terreno: 0,
-    area_construida: 0,
-    cert_uso_suelo: false,
-    id_edificio: 0,
-    id_titular: null,
-    correo_titular: "",
-    nombre_sede: "",
-    nombre_titular: ""
-  });
-
   const [validationErrors, setValidationErrors] = useState<
-    Array<{ nombre: boolean; dirección: boolean; id_sede: boolean; area_terreno: boolean; area_construida: boolean; correo_titular: boolean }>
+    Array<{ nombre: boolean; dirección: boolean; id_sede: boolean; categoría: boolean; propiedad: boolean; area_terreno: boolean; area_construida: boolean; correo_titular: boolean }>
   >([]);
 
   const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const updatedEdificios = [...edificios];
-    updatedEdificios[index] = { ...updatedEdificios[index], [e.target.name]: e.target.value };
+    const { name, value } = e.target;
 
-    if (e.target.name === "id_sede") {
-      const selectedSede = sedes.find(sede => sede.id_sede === Number(e.target.value));
+    if (name === "cert_uso_suelo") {
+      updatedEdificios[index] = { ...updatedEdificios[index], [name]: value === "DISPONIBLE" };
+    } else {
+      updatedEdificios[index] = { ...updatedEdificios[index], [name]: value };
+    }
+
+    if (name === "id_sede") {
+      const selectedSede = sedes.find(sede => sede.id_sede === Number(value));
       updatedEdificios[index].id_sede = selectedSede?.id_sede || 0;
     }
 
-    if (e.target.name === "correo_titular") {
-      const selectedUser = users.find(user => user.correo === e.target.value);
+    if (name === "correo_titular") {
+      const selectedUser = coordinadores.find(user => user.correo === value);
       updatedEdificios[index].id_titular = selectedUser?.id_persona || null;
     }
 
@@ -60,17 +56,27 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
     const updatedErrors = [...validationErrors];
     updatedErrors[index] = {
       ...updatedErrors[index],
-      [e.target.name]: false
+      [name]: false
     };
     setValidationErrors(updatedErrors);
   };
 
   const handleAddRow = () => {
     setEdificios([...edificios, { 
-      ...newEdificio,
+      id_edificio: 0,
+      nombre: "",
+      dirección: "",
       id_sede: idSede ?? 0, // Asignar idSede por defecto
+      categoría: "",
+      propiedad: "",
+      area_terreno: 0,
+      area_construida: 0,
+      cert_uso_suelo: false,
+      id_titular: null,
+      correo_titular: "",
+      nombre_sede: ""
     }]);
-    setValidationErrors([...validationErrors, { nombre: false, dirección: false, id_sede: false, area_terreno: false, area_construida: false, correo_titular: false }]);
+    setValidationErrors([...validationErrors, { nombre: false, dirección: false, id_sede: false, categoría: false, propiedad: false, area_terreno: false, area_construida: false, correo_titular: false }]);
   };
 
   const handleRemoveRow = (index: number) => {
@@ -91,15 +97,17 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
       nombre: !validateTextNotNull(edificio.nombre),
       dirección: !validateTextNotNull(edificio.dirección),
       id_sede: rolSimulado === "coord" && edificio.id_sede !== idSede, // Validar que el id_sede sea el correcto solo si el rol es coordinador
+      categoría: edificio.categoría === "",
+      propiedad: edificio.propiedad === "",
       area_terreno: !validatePositiveNumber(edificio.area_terreno),
       area_construida: !validatePositiveNumber(edificio.area_construida),
-      correo_titular: edificio.correo_titular ? !validateCorreo(edificio.correo_titular) || !users.some(user => user.correo === edificio.correo_titular) : false,
+      correo_titular: edificio.correo_titular ? !validateCorreo(edificio.correo_titular) || !coordinadores.some(user => user.correo === edificio.correo_titular) : false,
     }));
 
     setValidationErrors(newValidationErrors);
 
     const hasErrors = newValidationErrors.some(error => 
-      error.nombre || error.dirección || error.id_sede || error.area_terreno || error.area_construida || error.correo_titular
+      error.nombre || error.dirección || error.id_sede || error.categoría || error.propiedad || error.area_terreno || error.area_construida || error.correo_titular
     );
 
     if (hasErrors) {
@@ -110,7 +118,6 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
     try {
       const response = await addEdificiosManual(edificios);
       onEdificiosAdded(response.edificios);
-      showSuccessMessage();
       setEdificios([]);
       setValidationErrors([]);
       onClose();
@@ -150,7 +157,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
             <tbody>
               {edificios.map((edificio, index) => (
                 <tr key={index}>
-                  <td className="border border-gray-300 p-1">
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.nombre ? "outline outline-red-500" : ""}`}>
                     <input
                       type="text"
                       name="nombre"
@@ -181,21 +188,25 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
                       {rolSimulado === "coord" ? (
                         <option value={idSede ?? 0}>{sedes.find(sede => sede.id_sede === idSede)?.nombre}</option>
                       ) : (
-                        sedes.map((sede) => (
-                          <option key={sede.id_sede} value={sede.id_sede}>
-                            {sede.nombre}
-                          </option>
-                        ))
+                        <>
+                          <option value="">Seleccione una sede</option>
+                          {sedes.map((sede) => (
+                            <option key={sede.id_sede} value={sede.id_sede}>
+                              {sede.nombre}
+                            </option>
+                          ))}
+                        </>
                       )}
                     </select>
                   </td>
-                  <td className="border border-gray-300 p-1">
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.categoría ? "outline outline-red-500" : ""}`}>
                     <select
                       name="categoría"
                       value={edificio.categoría}
                       onChange={(e) => handleInputChange(index, e)}
                       className="w-full px-2 py-1 text-sm text-black"
                     >
+                      <option value="">Seleccione una categoría</option>
                       {categoriasEdificio.map((categoria) => (
                         <option key={categoria} value={categoria}>
                           {categoria}
@@ -203,13 +214,14 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
                       ))}
                     </select>
                   </td>
-                  <td className="border border-gray-300 p-1">
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.propiedad ? "outline outline-red-500" : ""}`}>
                     <select
                       name="propiedad"
                       value={edificio.propiedad}
                       onChange={(e) => handleInputChange(index, e)}
                       className="w-full px-2 py-1 text-sm text-black"
                     >
+                      <option value="">Seleccione una propiedad</option>
                       {propiedadesEdificio.map((propiedad) => (
                         <option key={propiedad} value={propiedad}>
                           {propiedad}
@@ -262,7 +274,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                     <datalist id="correos-titulares">
-                      {users.map((user) => (
+                      {coordinadores.map((user) => (
                         <option key={user.id_persona} value={user.correo}>
                           {user.correo}
                         </option>
@@ -312,6 +324,8 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({ isOpen, onClose, 
             {Object.values(validationErrors).some((errors) => errors.nombre) && <li>Nombre: Campo obligatorio</li>}
             {Object.values(validationErrors).some((errors) => errors.dirección) && <li>Dirección: Campo obligatorio</li>}
             {Object.values(validationErrors).some((errors) => errors.id_sede) && <li>Sede: Seleccione una sede válida</li>}
+            {Object.values(validationErrors).some((errors) => errors.categoría) && <li>Categoría: Seleccione una categoría válida</li>}
+            {Object.values(validationErrors).some((errors) => errors.propiedad) && <li>Propiedad: Seleccione una propiedad válida</li>}
             {Object.values(validationErrors).some((errors) => errors.area_terreno) && <li>Área Terreno: Debe ser un número positivo</li>}
             {Object.values(validationErrors).some((errors) => errors.area_construida) && <li>Área Construida: Debe ser un número positivo</li>}
             {Object.values(validationErrors).some((errors) => errors.correo_titular) && <li>Correo Titular: Debe ser un correo válido y existente</li>}

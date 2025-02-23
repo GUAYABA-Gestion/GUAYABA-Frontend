@@ -90,13 +90,12 @@ const GestionMantenimiento: React.FC = () => {
 
   // Fetch data once the role is available
   useEffect(() => {
-    if (!rolSimulado || rolSimulado === "none") return;
-    
+
     fetchMantenimientos();
     
   },);
 
-  if (!rolSimulado || rolSimulado === "none" || isLoading) {
+  if (isLoading) {
     return (
       <div className="p-4 text-gray-600">
         <h1 className="text-2xl font-bold mb-6">Cargando...</h1>

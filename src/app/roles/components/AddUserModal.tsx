@@ -2,13 +2,13 @@
 import { useState } from "react";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
-import { addUsersManual } from "../../api/auth/UserActions";
+import { addUsersManual } from "../../api/UserActions";
 import { User, Sede } from "../../../types/api";
 import {
   validateCorreo,
   validateTelefono,
   validateTextNotNull,
-} from "../../api/auth/validation";
+} from "../../api/validation";
 
 interface AddUserModalProps {
   isOpen: boolean;

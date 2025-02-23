@@ -13,7 +13,6 @@ export default function Login() {
   const searchParams = useSearchParams(); // Obtener parámetros de la URL
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
 
   // Obtener el callbackUrl de los parámetros de la URL
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -43,7 +42,6 @@ export default function Login() {
 
           if (data.exists) {
             setAuthCookie(data.token);
-            await fetchUserData();
             await signOut({ redirect: false });
             router.push(callbackUrl); // Redirigir al callbackUrl después del login
           } else {

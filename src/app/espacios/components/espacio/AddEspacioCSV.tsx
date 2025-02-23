@@ -4,7 +4,7 @@ import { useState } from "react";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
 import { Espacio } from "../../../../types/api";
-import { estadosEspacio, clasificacionesEspacio, usosEspacio, tiposEspacio, pisosEspacio } from "../../../api/auth/desplegableValues";
+import { estadosEspacio, clasificacionesEspacio, usosEspacio, tiposEspacio, pisosEspacio } from "../../../api/desplegableValues";
 
 interface AddEspacioCSVProps {
   onEspaciosAdded: (newEspacios: Espacio[]) => void;

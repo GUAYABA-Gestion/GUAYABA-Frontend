@@ -2,25 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Sede, Edificio, Municipio, User } from "../../types/api";
+import { Sede, Municipio, User, Edificio } from "../../types/api";
 import { useRol } from "../../../context/RolContext";
-import { fetchSedes, deleteSede } from "../api/auth/SedeActions";
-import {
-  fetchEdificios,
-  deleteEdificio,
-  updateEdificio,
-} from "../api/auth/EdificioActions";
-import SedeTable from "./components/sede/SedeTable";
-import EdificioTable from "./components/edificio/EdificioTable";
-import SedeDetailsModal from "./components/sede/SedeDetailsModal";
-import EdificioDetailsModal from "./components/edificio/EdificioDetailsModal";
-import AddSedeModal from "./components/sede/AddSedeModal";
-import AddEdificioModal from "./components/edificio/AddEdificioModal";
-import { fetchMunicipios } from "../api/auth/MunicipioActions";
-import { getAdmins } from "../api/auth/UserActions";
-import ExcelJS from "exceljs";
-import DetailsModal from "./components/informe/InformeModal";
+import { fetchSedes } from "../api/SedeActions";
+import { fetchMunicipios } from "../api/MunicipioActions";
+import { getAdmins } from "../api/UserActions";
+import { fetchEdificios } from "../api/EdificioActions";
 import { Header } from "../../../components";
+import SedeManager from "./components/sede/SedeManager";
+import EdificioManager from "./components/edificio/EdificioManager";
 
 const GestionSedes: React.FC = () => {
   const { data: session } = useSession();
@@ -28,278 +18,42 @@ const GestionSedes: React.FC = () => {
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
-  const [filteredSedes, setFilteredSedes] = useState<Sede[]>([]);
   const [coordinadores, setCoordinadores] = useState<User[]>([]);
   const [selectedSedes, setSelectedSedes] = useState<number[]>([]);
   const [edificios, setEdificios] = useState<Edificio[]>([]);
-  const [filters, setFilters] = useState({
-    nombre: "",
-    municipio: "",
-  });
-  const [edificioFilters, setEdificioFilters] = useState({
-    nombre: "",
-    categoria: "",
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  const [selectedSede, setSelectedSede] = useState<Sede | null>(null);
-  const [selectedEdificio, setSelectedEdificio] = useState<Edificio | null>(
-    null
-  );
-  const [isSedeModalOpen, setIsSedeModalOpen] = useState(false);
-  const [isEdificioModalOpen, setIsEdificioModalOpen] = useState(false);
-  const [isAddSedeModalOpen, setIsAddSedeModalOpen] = useState(false); // Estado para el modal de añadir sede
-  const [isAddEdificioModalOpen, setIsAddEdificioModalOpen] = useState(false); // Estado para el modal de añadir edificio
-  const [editMode, setEditMode] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // Añadir este estado
 
   useEffect(() => {
-
-    if (rolSimulado === null || idSede === null) {
-      return; // Esperar a que el rol y la sede estén disponibles
-    }
-
     const fetchData = async () => {
       setIsLoading(true);
       const sedesData = await fetchSedes();
+      sedesData.sort((a: Sede, b: Sede) => a.id_sede - b.id_sede);
       setSedes(sedesData);
       if (rolSimulado === "admin") {
         setSelectedSedes(sedesData.map((sede: Sede) => sede.id_sede)); // Select all sedes by default
-        setFilteredSedes(sedesData);
       } else {
         const userSede = sedesData.find(
           (sede: Sede) => sede.id_sede === idSede
         );
         if (userSede) {
           setSelectedSedes([userSede.id_sede]);
-          setFilteredSedes([userSede]);
         }
       }
       const municipiosData = await fetchMunicipios();
-      setMunicipios(municipiosData);
+      municipiosData.sort((a: Municipio, b: Municipio) => a.nombre.localeCompare(b.nombre));
+      setMunicipios(municipiosData);      
       const coordinadoresData = await getAdmins();
+      coordinadoresData.sort((a: User, b: User) => a.id_persona - b.id_persona);
       setCoordinadores(coordinadoresData);
+      const edificiosData = await fetchEdificios();
+      edificiosData.sort((a: Edificio, b: Edificio) => a.id_sede - b.id_sede);
+      setEdificios(edificiosData);
       setIsLoading(false);
     };
     fetchData();
   }, [rolSimulado, idSede]);
 
-  useEffect(() => {
-    const handleResize = () =>
-      setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const fetchEdificiosData = async () => {
-      setIsLoading(true);
-      const edificiosData = await fetchEdificios();
-      setEdificios(edificiosData);
-      setIsLoading(false);
-    };
-    fetchEdificiosData();
-  }, []);
-
-  const handleFilterChange = (filter: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [filter]: value }));
-    setCurrentPage(1); // Reset pagination to the first page
-    if (rolSimulado === "admin") {
-      const filtered = sedes.filter((sede) => {
-        const nombreMatch = sede.nombre
-          .toLowerCase()
-          .includes(filters.nombre.toLowerCase());
-        const municipioMatch = filters.municipio
-          ? getMunicipioNombre(sede.municipio) === filters.municipio
-          : true;
-        return nombreMatch && municipioMatch;
-      });
-      setFilteredSedes(filtered);
-    }
-  };
-
-  const handleEdificioFilterChange = (filter: string, value: string) => {
-    setEdificioFilters((prev) => ({ ...prev, [filter]: value }));
-    setCurrentPage(1); // Reset pagination to the first page
-  };
-
-  const handleResetEdificioFilters = () => {
-    setEdificioFilters({ nombre: "", categoria: "" });
-    setCurrentPage(1); // Reset pagination to the first page
-  };
-
-  const handleSedeSelect = (id: number) => {
-    setSelectedSedes((prev) => [...prev, id]);
-  };
-
-  const handleSedeDeselect = (id: number) => {
-    setSelectedSedes((prev) => prev.filter((sedeId) => sedeId !== id));
-  };
-
-  const handleSedeClick = (sede: Sede) => {
-    setSelectedSede(sede);
-    setIsSedeModalOpen(true);
-  };
-
-  const handleEdificioClick = (edificio: Edificio) => {
-    setSelectedEdificio(edificio);
-    setIsEdificioModalOpen(true);
-  };
-
-  const getMunicipioNombre = (id: number) => {
-    const municipio = municipios.find((m: Municipio) => m.id === id);
-    return municipio ? municipio.nombre : "Sin municipio";
-  };
-
-  const uniqueMunicipios = Array.from(
-    new Set(sedes.map((sede) => getMunicipioNombre(sede.municipio)))
-  );
-  const uniqueCategorias = Array.from(
-    new Set(edificios.map((edificio) => edificio.categoría))
-  );
-
-  const filteredEdificios = edificios.filter(
-    (edificio) =>
-      selectedSedes.includes(edificio.id_sede) &&
-      (edificioFilters.nombre === "" ||
-        edificio.nombre
-          .toLowerCase()
-          .includes(edificioFilters.nombre.toLowerCase())) &&
-      (edificioFilters.categoria === "" ||
-        edificio.categoría === edificioFilters.categoria)
-  );
-
-  const handleSaveSede = (updatedSede: Sede) => {
-    setSedes((prevSedes) =>
-      prevSedes.map((sede) =>
-        sede.id_sede === updatedSede.id_sede ? updatedSede : sede
-      )
-    );
-    setSelectedSede(updatedSede); // Update the selected Sede
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleSaveEdificio = (updatedEdificio: Edificio) => {
-    setEdificios((prevEdificios) =>
-      prevEdificios.map((edificio) =>
-        edificio.id_edificio === updatedEdificio.id_edificio
-          ? updatedEdificio
-          : edificio
-      )
-    );
-    setSelectedEdificio(updatedEdificio); // Update the selected Edificio
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleAddSedes = (newSedes: Sede[]) => {
-    setSedes((prevSedes) => [...prevSedes, ...newSedes]);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleAddEdificios = (newEdificios: Edificio[]) => {
-    setEdificios((prevEdificios) => [...prevEdificios, ...newEdificios]);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleDeleteSede = async (id_sede: number) => {
-    try {
-      await deleteSede(id_sede);
-      setSedes((prevSedes) =>
-        prevSedes.filter((sede) => sede.id_sede !== id_sede)
-      );
-      setSelectedSede(null);
-      setIsSedeModalOpen(false);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error: any) {
-      console.error("Error al eliminar sede:", error);
-      alert(error.message || "Error al eliminar sede");
-    }
-  };
-
-  const handleDeleteEdificio = async (id_edificio: number) => {
-    try {
-      await deleteEdificio(id_edificio);
-      setEdificios((prevEdificios) =>
-        prevEdificios.filter((edificio) => edificio.id_edificio !== id_edificio)
-      );
-      setSelectedEdificio(null);
-      setIsEdificioModalOpen(false);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error: any) {
-      console.error("Error al eliminar edificio:", error);
-      alert(error.message || "Error al eliminar edificio");
-    }
-  };
-
-  const handleDownloadEdificios = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Edificios");
-
-    worksheet.columns = [
-      { header: "Nombre", key: "nombre", width: 20 },
-      { header: "Dirección", key: "dirección", width: 30 },
-      { header: "Sede", key: "sede", width: 20 },
-      { header: "Categoría", key: "categoría", width: 15 },
-      { header: "Propiedad", key: "propiedad", width: 15 },
-      { header: "Área Terreno", key: "area_terreno", width: 15 },
-      { header: "Área Construida", key: "area_construida", width: 15 },
-      { header: "Cert. Uso Suelo", key: "cert_uso_suelo", width: 15 },
-      { header: "Correo Titular", key: "correo_titular", width: 25 },
-    ];
-
-    filteredEdificios.forEach((edificio) => {
-      worksheet.addRow({
-        nombre: edificio.nombre,
-        dirección: edificio.dirección,
-        sede:
-          sedes.find((sede) => sede.id_sede === edificio.id_sede)?.nombre || "",
-        categoría: edificio.categoría,
-        propiedad: edificio.propiedad,
-        area_terreno: edificio.area_terreno,
-        area_construida: edificio.area_construida,
-        cert_uso_suelo: edificio.cert_uso_suelo
-          ? "DISPONIBLE"
-          : "NO DISPONIBLE",
-        correo_titular: edificio.correo_titular,
-      });
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const date = new Date().toISOString().split("T")[0];
-    const filtersString = Object.entries(edificioFilters)
-      .filter(([_, value]) => value)
-      .map(([key, value]) => `${key}-${value}`)
-      .join("_");
-
-    const fileName = `edificios_${filtersString}_${date}.xlsx`;
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  if (isLoading || rolSimulado === undefined) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -320,228 +74,30 @@ const GestionSedes: React.FC = () => {
           {rolSimulado === "maint" && "Informes Sede"}
           {rolSimulado === "user" && "Buscador de edificios"}
         </h1>
-        {/* Filtros */}
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-xl font-bold text-black">
-              {rolSimulado === "admin" && "Sedes"}
-              {rolSimulado !== "admin" && "Sede"}
-            </h2>
-            {rolSimulado === "admin" && (
-              <>
-                <input
-                  type="text"
-                  placeholder="Filtrar por nombre"
-                  value={filters.nombre}
-                  onChange={(e) => handleFilterChange("nombre", e.target.value)}
-                  className="p-2 border rounded text-black"
-                />
-                <select
-                  value={filters.municipio}
-                  onChange={(e) =>
-                    handleFilterChange("municipio", e.target.value)
-                  }
-                  className="p-2 border rounded text-black"
-                >
-                  <option value="">Todos los municipios</option>
-                  {uniqueMunicipios.map((municipio) => (
-                    <option key={municipio} value={municipio}>
-                      {municipio}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => {
-                    setFilters({ nombre: "", municipio: "" });
-                    setCurrentPage(1); // Reset pagination to the first page
-                  }}
-                  className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
-                >
-                  Reiniciar Filtros
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-        <div className="mt-4 flex space-x-4">
-          {rolSimulado === "admin" && (
-            <>
-              <button
-                onClick={() => setIsAddSedeModalOpen(true)}
-                className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
-              >
-                + Añadir Sedes
-              </button>
-              <button
-                onClick={() => setIsAddEdificioModalOpen(true)}
-                className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
-              >
-                + Añadir Edificios
-              </button>
-            </>
-          )}
-          {rolSimulado === "coord" && (
-            <button
-              onClick={() => setIsAddEdificioModalOpen(true)}
-              className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
-            >
-              + Añadir Edificios
-            </button>
-          )}
-        </div>
-        {/* Tabla de Sedes */}
-        <div className="mt-2">
-          <SedeTable
-            sedes={filteredSedes}
-            municipios={municipios}
-            coordinadores={coordinadores}
-            selectedSedes={selectedSedes}
-            onSedeSelect={handleSedeSelect}
-            onSedeDeselect={handleSedeDeselect}
-            onSedeClick={handleSedeClick}
-            rolSimulado={rolSimulado} // Pasar el rol simulado
-          />
-        </div>
-        {/* Filtros de Edificios */}
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-xl font-bold text-black">
-              {rolSimulado === "admin" || rolSimulado === "coord"
-                ? "Edificios de las Sedes seleccionadas"
-                : "Edificios de la Sede"}
-            </h2>
-            <input
-              type="text"
-              placeholder="Filtrar por nombre"
-              value={edificioFilters.nombre}
-              onChange={(e) =>
-                handleEdificioFilterChange("nombre", e.target.value)
-              }
-              className="p-2 border rounded text-black"
-            />
-            <select
-              value={edificioFilters.categoria}
-              onChange={(e) =>
-                handleEdificioFilterChange("categoria", e.target.value)
-              }
-              className="p-2 border rounded text-black"
-            >
-              <option value="">Todas las categorías</option>
-              {uniqueCategorias.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {categoria}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={handleResetEdificioFilters}
-              className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
-            >
-              Reiniciar Filtros
-            </button>
-            {(rolSimulado === "admin" || rolSimulado === "coord") && (
-              <button
-                onClick={handleDownloadEdificios}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
-              >
-                Descargar Excel
-              </button>
-            )}
-          </div>
-          {rolSimulado !== "user" && (
-            <button
-              onClick={() => setIsDetailsModalOpen(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
-            >
-              Ver Detalles
-            </button>
-          )}
-        </div>
-        {/* Modals */}
-        <DetailsModal
-          isOpen={isDetailsModalOpen}
-          onClose={() => setIsDetailsModalOpen(false)}
-          selectedSedes={selectedSedes}
-          filteredEdificios={filteredEdificios}
-          rolSimulado={rolSimulado} // Pasar el rol simulado
-        />
-
-        {/* Tabla de Edificios */}
-        <div className="mt-2">
-          <EdificioTable
-            edificios={filteredEdificios}
-            filters={edificioFilters}
-            onEdificioClick={handleEdificioClick}
-            currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
-            rolSimulado={rolSimulado} // Pasar el rol simulado
-          />
-        </div>
-        {/* Modals */}
-        <SedeDetailsModal
-          sede={selectedSede}
-          isOpen={isSedeModalOpen}
-          onClose={() => setIsSedeModalOpen(false)}
-          onSave={handleSaveSede}
-          onDelete={handleDeleteSede}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          editedSede={selectedSede}
-          handleEditField={(field, value) => {
-            setSelectedSede((prev) =>
-              prev ? { ...prev, [field]: value } : null
-            );
-          }}
-          showSuccess={showSuccess}
-        />
-        {selectedEdificio && (
-          <EdificioDetailsModal
-            edificio={selectedEdificio}
-            isOpen={isEdificioModalOpen}
-            onClose={() => setIsEdificioModalOpen(false)}
-            onSave={handleSaveEdificio}
-            onDelete={handleDeleteEdificio}
-            editMode={editMode}
-            setEditMode={setEditMode}
-            editedEdificio={selectedEdificio}
-            handleEditField={(field, value) => {
-              setSelectedEdificio((prev) =>
-                prev ? { ...prev, [field]: value } : null
-              );
-            }}
-            showSuccess={showSuccess}
-            sedes={sedes}
-          />
-        )}
-        <AddSedeModal
-          isOpen={isAddSedeModalOpen}
-          onClose={() => setIsAddSedeModalOpen(false)}
+        <SedeManager
+          sedes={sedes}
           municipios={municipios}
           coordinadores={coordinadores}
-          onSedeAdded={handleAddSedes}
-          showSuccessMessage={() => {
-            setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 3000);
-          }}
+          selectedSedes={selectedSedes}
+          setSelectedSedes={setSelectedSedes}
+          rolSimulado={rolSimulado}
+          idSede={idSede}
+          setSedes={setSedes} // Pasamos setSedes al SedeManager
         />
-        <AddEdificioModal
-          isOpen={isAddEdificioModalOpen}
-          onClose={() => setIsAddEdificioModalOpen(false)}
+        <EdificioManager
+          edificios={edificios}
           sedes={sedes}
-          onEdificiosAdded={handleAddEdificios}
-          showSuccessMessage={() => {
-            setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 3000);
-          }}
-          rolSimulado={rolSimulado} // Pasar el rol simulado
-          idSede={idSede} // Pasar el id de la sede
+          municipios={municipios}
           coordinadores={coordinadores}
+          selectedSedes={selectedSedes}
+          setSelectedSedes={setSelectedSedes}
+          rolSimulado={rolSimulado}
+          idSede={idSede}
+          setEdificios={setEdificios} // Pasamos setEdificios al EdificioManager
         />
       </div>
     </div>
   );
 };
-
 
 export default GestionSedes;

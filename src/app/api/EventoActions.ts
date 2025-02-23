@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Evento } from "../../../types/api";
+import { Evento } from "../../types/api";
 
 export const fetchEventos = async (): Promise<Evento[]> => {
   try {

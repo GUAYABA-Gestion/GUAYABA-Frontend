@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
 import { User, Sede } from "../../../types/api";
-import { getUserReferences } from "../../api/auth/UserActions";
+import { getUserReferences } from "../../api/UserActions";
 import {
   validateCorreo,
   validateTelefono,
   validateTextNotNull,
-} from "../../api/auth/validation";
+} from "../../api/validation";
 
 interface UserDetailsModalProps {
   user: User | null;

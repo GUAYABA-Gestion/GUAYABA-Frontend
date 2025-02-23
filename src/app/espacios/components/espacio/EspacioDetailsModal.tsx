@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Espacio } from "../../../../types/api";
-import { updateEspacio, deleteEspacio } from "../../../api/auth/EspacioActions";
-import { estadosEspacio, clasificacionesEspacio, usosEspacio, tiposEspacio, pisosEspacio } from "../../../api/auth/desplegableValues";
-import { validateTextNotNull, validatePositiveNumber } from "../../../api/auth/validation";
+import { updateEspacio, deleteEspacio } from "../../../api/EspacioActions";
+import { estadosEspacio, clasificacionesEspacio, usosEspacio, tiposEspacio, pisosEspacio } from "../../../api/desplegableValues";
+import { validateTextNotNull, validatePositiveNumber } from "../../../api/validation";
 
 interface EspacioDetailsModalProps {
   espacio: Espacio | null;

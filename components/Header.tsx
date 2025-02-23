@@ -10,7 +10,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
-  const { rolSimulado, cambiarRol } = useRol(); // Usar el contexto de rol
+  const { rolSimulado } = useRol(); // Usar el contexto de rol
 
   // Verificar autenticación solo en el cliente
   useEffect(() => {
@@ -24,7 +24,6 @@ const Header = () => {
 
     // Cerrar la sesión de Google con NextAuth
     await signOut({ redirect: false });
-    cambiarRol("none");
     // Redirigir al login
     router.push("/login");
   };

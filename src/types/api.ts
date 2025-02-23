@@ -31,7 +31,6 @@ export interface Edificio {
   area_construida: number;
   cert_uso_suelo: boolean;
   nombre_sede: string;
-  nombre_titular: string | null;
   correo_titular: string | null;
 }
 

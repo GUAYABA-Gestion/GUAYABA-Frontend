@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Espacio } from "../../../../types/api";
-import { estadosEspacio, clasificacionesEspacio, usosEspacio, tiposEspacio, pisosEspacio } from "../../../api/auth/desplegableValues";
-import { validateTextNotNull, validatePositiveNumber } from "../../../api/auth/validation";
-import { addEspaciosManual } from "../../../api/auth/EspacioActions";
+import { estadosEspacio, clasificacionesEspacio, usosEspacio, tiposEspacio, pisosEspacio } from "../../../api/desplegableValues";
+import { validateTextNotNull, validatePositiveNumber } from "../../../api/validation";
+import { addEspaciosManual } from "../../../api/EspacioActions";
 
 interface AddEspacioManualProps {
   isOpen: boolean;

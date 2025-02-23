@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Header } from "../../../components";
-import { validateCorreo } from "../api/auth/validation";
+import { validateCorreo } from "../api/validation";
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });

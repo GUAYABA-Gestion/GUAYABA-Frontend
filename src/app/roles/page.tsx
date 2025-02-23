@@ -12,7 +12,7 @@ import {
   fetchSedes,
   updateUser,
   deleteUserManual,
-} from "../api/auth/UserActions";
+} from "../api/UserActions";
 
 const AdminDashboard = () => {
   const { rolSimulado } = useRol();
@@ -37,8 +37,10 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const usersData = await fetchUsers();
-        const sedesData = await fetchSedes();
+        usersData.sort((a: User, b: User) => a.id_persona - b.id_persona);
         setUsers(usersData);
+        const sedesData = await fetchSedes();
+        sedesData.sort((a: Sede, b: Sede) => a.id_sede - b.id_sede);
         setSedes(sedesData);
       } catch (error) {
         console.error("Error al cargar los datos:", error);
@@ -189,7 +191,7 @@ const AdminDashboard = () => {
     document.body.removeChild(link);
   };
 
-  if (isLoading || rolSimulado === undefined) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

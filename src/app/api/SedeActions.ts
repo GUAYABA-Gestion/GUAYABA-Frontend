@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Sede } from "../../../types/api";
+import { Sede } from "../../types/api";
 
 export const fetchSedes = async () => {
   try {

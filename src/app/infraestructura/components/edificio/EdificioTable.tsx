@@ -1,5 +1,6 @@
 "use client";
-import { Edificio } from "../../../../types/api";
+import { Edificio, Sede } from "../../../../types/api";
+import ExcelExportButton from "./ExcelExportButton";
 
 interface EdificioTableProps {
   edificios: Edificio[];
@@ -12,9 +13,15 @@ interface EdificioTableProps {
   itemsPerPage: number;
   onPageChange: (page: number) => void;
   rolSimulado: string; // Añadir el rol simulado
+  sedes: Sede[];
+  onAddEdificioClick: () => void;
+  onFilterChange: (filter: string, value: string) => void;
+  onResetFilters: () => void;
+  uniqueCategorias: string[];
+  selectedSedes: number[]; // Recibimos selectedSedes como prop
 }
 
-const EdificioTable = ({
+const EdificioTable: React.FC<EdificioTableProps> = ({
   edificios,
   filters,
   onEdificioClick,
@@ -22,14 +29,24 @@ const EdificioTable = ({
   itemsPerPage,
   onPageChange,
   rolSimulado,
-}: EdificioTableProps) => {
-  const filteredEdificios = edificios.filter((edificio) => {
-    return (
-      (filters.nombre === "" ||
-        edificio.nombre.toLowerCase().includes(filters.nombre.toLowerCase())) &&
-      (filters.categoria === "" || edificio.categoría === filters.categoria)
-    );
-  });
+  sedes,
+  onAddEdificioClick,
+  onFilterChange,
+  onResetFilters,
+  uniqueCategorias,
+  selectedSedes,
+}) => {
+  const filteredEdificios = edificios
+    .filter((edificio) => selectedSedes.includes(edificio.id_sede))
+    .filter((edificio) => {
+      return (
+        (filters.nombre === "" ||
+          edificio.nombre
+            .toLowerCase()
+            .includes(filters.nombre.toLowerCase())) &&
+        (filters.categoria === "" || edificio.categoría === filters.categoria)
+      );
+    });
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedEdificios = filteredEdificios.slice(
@@ -40,16 +57,70 @@ const EdificioTable = ({
 
   return (
     <div className="p-4 bg-gray-50">
+      {/* Filtros y botón de Añadir Edificios */}
+      <div className="mt-2 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            placeholder="Filtrar por nombre"
+            value={filters.nombre}
+            onChange={(e) => onFilterChange("nombre", e.target.value)}
+            className="p-2 border rounded text-black text-sm w-full md:w-auto"
+          />
+          <select
+            value={filters.categoria}
+            onChange={(e) => onFilterChange("categoria", e.target.value)}
+            className="p-2 border rounded text-black text-sm w-full md:w-auto"
+          >
+            <option value="">Filtrar por categoría</option>
+            {uniqueCategorias.map((categoria) => (
+              <option key={categoria} value={categoria}>
+                {categoria}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={onResetFilters}
+            className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300 text-sm w-full md:w-auto"
+          >
+            Reiniciar Filtros
+          </button>
+          {(rolSimulado === "admin" || rolSimulado === "coord") && (
+            <button
+              onClick={onAddEdificioClick}
+              className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300 text-sm w-full md:w-auto"
+            >
+              + Añadir Edificios
+            </button>
+          )}
+          {(rolSimulado !== "user") && (
+          <ExcelExportButton
+            edificios={edificios}
+            sedes={sedes}
+            filters={filters}
+          />
+          )}
+        </div>
+      </div>
+
       {/* Tabla */}
       <div className="mt-4">
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-[#80BA7F] text-white">
-                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Nombre</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[250px]">Dirección</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Categoría</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[250px]">Acciones</th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                  Nombre
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[250px]">
+                  Dirección
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                  Categoría
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[250px]">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -57,7 +128,9 @@ const EdificioTable = ({
                 paginatedEdificios.map((edificio, index) => (
                   <tr
                     key={edificio.id_edificio}
-                    className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                    }`}
                   >
                     <td className="border border-gray-300 p-2 text-black text-sm">
                       {edificio.nombre}
@@ -70,13 +143,16 @@ const EdificioTable = ({
                     </td>
                     <td className="border border-gray-300 p-2 text-center">
                       <div className="flex justify-center space-x-2">
-                        {(rolSimulado === "admin" || rolSimulado === "coord") && (
-                          <button
-                            onClick={() => onEdificioClick(edificio)}
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                          >
-                            Ver Detalles
-                          </button>
+                        {(rolSimulado === "admin" ||
+                          rolSimulado === "coord") && (
+                          <>
+                            <button
+                              onClick={() => onEdificioClick(edificio)}
+                              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                            >
+                              Ver Detalles
+                            </button>
+                          </>
                         )}
                         <button
                           onClick={() =>
@@ -104,7 +180,7 @@ const EdificioTable = ({
           </table>
         </div>
       </div>
-  
+
       {/* Pagination Controls */}
       <div className="flex justify-center mt-4">
         {Array.from({ length: totalPages }, (_, index) => (

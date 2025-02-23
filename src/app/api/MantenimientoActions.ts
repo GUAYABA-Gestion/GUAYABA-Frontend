@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Mantenimiento } from "../../../types/api";
+import { Mantenimiento } from "../../types/api";
 
 export const fetchMantenimientos = async (): Promise<Mantenimiento[]> => {
   try {

@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Sede, Espacio, Edificio } from "../../../../types/api";
-import { fetchEventosByEspacios } from "../../../api/auth/EventoActions";
-import { fetchEspaciosByEdificios } from "../../../api/auth/EspacioActions";
+import { fetchEventosByEspacios } from "../../../api/EventoActions";
+import { fetchEspaciosByEdificios } from "../../../api/EspacioActions";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 

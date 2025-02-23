@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Espacio } from "../../../types/api";
+import { Espacio } from "../../types/api";
 
 export const fetchEspaciosByEdificios = async (ids_edificios: number[]): Promise<Espacio[]> => {
   try {

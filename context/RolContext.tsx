@@ -15,6 +15,7 @@ const RolContext = createContext<{
 export const RolProvider = ({ children }: { children: ReactNode }) => {
   const [rolSimulado, setRolSimulado] = useState<string | "none">("none");
   const [idSede, setIdSede] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter(); // Si usas App Router
 
   const handleLogout = () => {
@@ -32,6 +33,7 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
     if (!jwt) {
       setRolSimulado("none");
       setIdSede(null);
+      setIsLoading(false);
       return;
     }
 
@@ -48,6 +50,7 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
       const data = await response.json();
       setRolSimulado(data.rol);
       setIdSede(data.id_sede);
+      setIsLoading(false);
 
     } catch (error) {
       console.error("Error:", error);
@@ -60,8 +63,8 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <RolContext.Provider value={{ rolSimulado, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData }}>
-      {children}
+    <RolContext.Provider value={{ rolSimulado /*: 'coord' */, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData }}>
+      {!isLoading && children}
     </RolContext.Provider>
   );
 };

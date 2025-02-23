@@ -3,21 +3,25 @@ import { useState } from "react";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
 import { Edificio, Sede, User } from "../../../../types/api";
-import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/auth/desplegableValues";
+import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/desplegableValues";
 
 interface AddEdificioCSVProps {
-  edificios: Edificio[];
-  setEdificios: (edificios: Edificio[]) => void;
-  sedes: Sede[];
-  users: User[];
-  onEdificiosAdded: (newEdificios: Edificio[]) => void;
-  showSuccessMessage: () => void;
+  onEdificiosParsed: (parsedEdificios: Edificio[]) => void;
   onClose: () => void;
-  idSede: number | null; // Añadir idSede como prop
-  rolSimulado: string; // Añadir rolSimulado como prop
+  sedes: Sede[];
+  coordinadores: User[];
+  rolSimulado: string;
+  idSede: number | null;
 }
 
-const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios, sedes, users, onEdificiosAdded, showSuccessMessage, onClose, idSede, rolSimulado }) => {
+const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({
+  onEdificiosParsed,
+  onClose,
+  sedes,
+  coordinadores,
+  rolSimulado,
+  idSede,
+}) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +35,7 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios
       skipEmptyLines: true,
       complete: (result) => {
         const parsedEdificios: Edificio[] = result.data.map((row: any) => ({
+          id_edificio: 0,
           nombre: row.nombre || "",
           dirección: row.dirección || "",
           id_sede: rolSimulado === "coord" ? idSede ?? 0 : Number(row.id_sede) || 0, // Asignar idSede fijo si el rol es coordinador
@@ -39,14 +44,13 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({ edificios, setEdificios
           area_terreno: Number(row.area_terreno) || 0,
           area_construida: Number(row.area_construida) || 0,
           cert_uso_suelo: row.cert_uso_suelo === "DISPONIBLE",
-          id_edificio: 0,
           id_titular: 0,
           correo_titular: row.correo_titular || "",
           nombre_sede: "",
           nombre_titular: ""
         }));
 
-        setEdificios([...edificios, ...parsedEdificios]);
+        onEdificiosParsed(parsedEdificios);
       },
       error: (err) => console.error("Error al leer CSV:", err.message),
     });

@@ -6,7 +6,7 @@ import { deleteEdificio } from "../../../api/EdificioActions";
 import EdificioTable from "./EdificioTable";
 import EdificioDetailsModal from "./EdificioDetailsModal";
 import AddEdificioModal from "./AddEdificioModal";
-import ExcelExportButton from "./ExcelExportButton";
+import InformeModal from "../informe/InformeModal";
 import { categoriasEdificio } from "../../../api/desplegableValues";
 
 interface EdificioManagerProps {
@@ -35,14 +35,13 @@ const EdificioManager: React.FC<EdificioManagerProps> = ({
   const [selectedEdificio, setSelectedEdificio] = useState<Edificio | null>(null);
   const [isEdificioModalOpen, setIsEdificioModalOpen] = useState(false);
   const [isAddEdificioModalOpen, setIsAddEdificioModalOpen] = useState(false);
+  const [isInformeModalOpen, setIsInformeModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     nombre: "",
     categoria: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [editMode, setEditMode] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleEdificioClick = (edificio: Edificio) => {
     setSelectedEdificio(edificio);
@@ -72,6 +71,10 @@ const EdificioManager: React.FC<EdificioManagerProps> = ({
     setIsAddEdificioModalOpen(true);
   };
 
+  const handleGenerateInformeClick = () => {
+    setIsInformeModalOpen(true);
+  };
+
   const handleFilterChange = (filter: string, value: string) => {
     setFilters((prev) => ({ ...prev, [filter]: value }));
     setCurrentPage(1); // Reset pagination to the first page
@@ -84,12 +87,6 @@ const EdificioManager: React.FC<EdificioManagerProps> = ({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const handleEditField = (field: string, value: any) => {
-    if (selectedEdificio) {
-      setSelectedEdificio({ ...selectedEdificio, [field]: value });
-    }
   };
 
   const filteredEdificios = edificios.filter((edificio) =>
@@ -118,6 +115,7 @@ const EdificioManager: React.FC<EdificioManagerProps> = ({
         onResetFilters={handleResetFilters}
         uniqueCategorias={categoriasEdificio}
         selectedSedes={selectedSedes} // Pasamos selectedSedes al EdificioTable
+        onGenerateInformeClick={handleGenerateInformeClick} // Pasamos la función para manejar el click del botón de generar informe
       />
 
       <EdificioDetailsModal
@@ -138,6 +136,15 @@ const EdificioManager: React.FC<EdificioManagerProps> = ({
         rolSimulado={rolSimulado}
         idSede={idSede}
       />
+      {isInformeModalOpen && (
+        <InformeModal
+          isOpen={isInformeModalOpen}
+          onClose={() => setIsInformeModalOpen(false)}
+          selectedSedes={selectedSedes}
+          filteredEdificios={filteredEdificios}
+          rolSimulado={rolSimulado}
+        />
+      )}
     </div>
   );
 };

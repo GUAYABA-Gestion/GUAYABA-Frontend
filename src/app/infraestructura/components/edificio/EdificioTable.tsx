@@ -19,6 +19,7 @@ interface EdificioTableProps {
   onResetFilters: () => void;
   uniqueCategorias: string[];
   selectedSedes: number[]; // Recibimos selectedSedes como prop
+  onGenerateInformeClick: () => void; // Añadir prop para manejar el click del botón de generar informe
 }
 
 const EdificioTable: React.FC<EdificioTableProps> = ({
@@ -35,6 +36,7 @@ const EdificioTable: React.FC<EdificioTableProps> = ({
   onResetFilters,
   uniqueCategorias,
   selectedSedes,
+  onGenerateInformeClick, // Añadir prop para manejar el click del botón de generar informe
 }) => {
   const filteredEdificios = edificios
     .filter((edificio) => selectedSedes.includes(edificio.id_sede))
@@ -94,11 +96,19 @@ const EdificioTable: React.FC<EdificioTableProps> = ({
             </button>
           )}
           {(rolSimulado !== "user") && (
-          <ExcelExportButton
-            edificios={edificios}
-            sedes={sedes}
-            filters={filters}
-          />
+            <>
+              <ExcelExportButton
+                edificios={filteredEdificios}
+                sedes={sedes}
+                filters={filters}
+              />
+              <button
+                onClick={onGenerateInformeClick} // Llamar a la función pasada por prop
+                className="bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-600 transition duration-300 text-sm w-full md:w-auto"
+              >
+                Generar Informe
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -145,14 +155,12 @@ const EdificioTable: React.FC<EdificioTableProps> = ({
                       <div className="flex justify-center space-x-2">
                         {(rolSimulado === "admin" ||
                           rolSimulado === "coord") && (
-                          <>
-                            <button
-                              onClick={() => onEdificioClick(edificio)}
-                              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                            >
-                              Ver Detalles
-                            </button>
-                          </>
+                          <button
+                            onClick={() => onEdificioClick(edificio)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                          >
+                            Ver Detalles
+                          </button>
                         )}
                         <button
                           onClick={() =>

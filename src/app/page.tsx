@@ -112,7 +112,7 @@ export default function Home() {
                 Innovación
               </h4>
               <p className="text-gray-600">
-                Desarrollamos una solución tecnológicas avanzada que aborda las
+                Desarrollamos una solución tecnológica avanzada que aborda las
                 necesidades actuales del sector educativo, facilitando la
                 modernización y sostenibilidad en la gestión de infraestructura.
               </p>

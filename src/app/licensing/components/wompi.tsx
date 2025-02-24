@@ -16,7 +16,7 @@ interface WompiProps {
 }
 
 const Wompi: React.FC<WompiProps> = ({
-  publicKey = process.env.WOMPI_PUBKEY,
+  publicKey = process.env.NEXT_PUBLIC_WOMPI_PUBKEY,
   currency = "COP",
   amountInCents = 1000000,
   reference = "REF_Test1",
@@ -69,7 +69,7 @@ const Wompi: React.FC<WompiProps> = ({
       serviceReference +
       serviceAmount +
       currency +
-      process.env.WOMPI_INTEGRITY;
+      process.env.NEXT_PUBLIC_WOMPI_INTEGRITY;
     computedSignatureIntegrity = createHash("sha256")
       .update(computedSignature, "utf8")
       .digest("hex")

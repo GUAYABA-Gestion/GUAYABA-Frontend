@@ -6,7 +6,7 @@ const Footer = () => {
         {/* Sección 1: Información */}
         <div>
           <h3 className="text-lg font-bold mb-4">Guayaba</h3>
-          <p className="text-sm mb-4">Mejorando la gestión de tus espacios.</p>
+          <p className="text-sm mb-4">Más orden, mejores decisiones, mayor impacto.</p>
         </div>
 
         {/* Sección 2: Información legal */}

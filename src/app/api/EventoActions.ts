@@ -97,8 +97,9 @@ export const fetchEventosByEspacios = async (ids_espacios: number[]): Promise<Ev
       const errorData = await response.json();
       throw new Error(errorData.error || "Error al obtener eventos desde espacios");
     }
-
-    return response.json();
+    
+    const data = await response.json();
+    return data.data;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }

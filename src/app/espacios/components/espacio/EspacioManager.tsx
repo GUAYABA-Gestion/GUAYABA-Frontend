@@ -4,7 +4,7 @@ import { useState } from "react";
 import EspacioTable from "./EspacioTable";
 import EspacioDetailsModal from "./EspacioDetailsModal";
 import AddEspacioModal from "./AddEspacioModal";
-import { Espacio } from "../../../../types/api";
+import { Espacio, User } from "../../../../types/api";
 
 interface EspacioManagerProps {
   espacios: Espacio[];

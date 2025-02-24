@@ -80,3 +80,63 @@ export const pisosEspacio = [
   "Cubierta",
   "Z_General",
 ];
+
+export const estadosMantenimiento = [
+  "Activo",
+  "Inactivo",
+  "Pendiente",
+  "Completo",
+  "En Progreso"
+];
+
+export const tipoContratoMantenimiento = [
+  "Interno",
+  "Externo"
+];
+
+export const tiposMantenimiento = [
+  "Preventivo",
+  "Correctivo",
+  "Predictivo",
+  "Proactivo",
+  "Cauteloso",
+  "Sustitución",
+  "Reparación",
+  "Emergencia",
+  "Estándar",
+  "Programado"
+]
+
+export const necesidadMantenimiento = [
+  "Adecuación",
+  "Mantenimeinto",
+  "Reforma",
+  "No requiere"
+]
+
+export const prioridadMantenimiento = [
+  "Alta",
+  "Media",
+  "Baja"
+]
+
+export const detalleMantenimiento = [
+  "Adecuación puesto de trabajo",
+  "Arreglo Eléctrico",
+  "Arreglo piso",
+  "Aseo",
+  "Carpinteria",
+  "Cerrajería",
+  "Ejecución obra",
+  "Fachada",
+  "Fontanería",
+  "Limpieza Cubiertas",
+  "Luminarias",
+  "Mantenimiento Sillas",
+  "Pintura",
+  "Plomería",
+  "Tanque aguas",
+  "Traslados",
+  "Ventanería",
+  "Otro"
+]

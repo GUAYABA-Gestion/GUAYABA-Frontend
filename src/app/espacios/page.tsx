@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Edificio, Espacio, Sede } from "../../types/api";
+import { Edificio, Espacio, Sede, User } from "../../types/api";
 import { fetchEdificioById } from "../api/EdificioActions";
 import { fetchEspaciosByEdificios } from "../api/EspacioActions";
 import { fetchSedeById } from "../api/SedeActions";
+import { getMaints } from "../api/UserActions";
 import EspacioManager from "./components/espacio/EspacioManager";
 import { Footer, Header } from "../../../components";
 import { useRol } from "../../../context/RolContext";
@@ -18,7 +19,7 @@ const GestionEspacios: React.FC = () => {
   const searchParams = useSearchParams();
   const idEdificio = searchParams.get("idEdificio");
   const { rolSimulado, idSede } = useRol();
-
+  const [mantenimientos, setMantenimientos] = useState<User[]>([]);
   const [edificio, setEdificio] = useState<Edificio | null>(null);
   const [sede, setSede] = useState<Sede | null>(null);
   const [espacios, setEspacios] = useState<Espacio[]>([]);
@@ -56,6 +57,9 @@ const GestionEspacios: React.FC = () => {
           const sedeData = await fetchSedeById(edificioData.id_sede);
           setSede(sedeData);
         }
+        const mantenimientoData = await getMaints();
+              mantenimientoData.sort((a: User, b: User) => a.id_persona - b.id_persona);
+              setMantenimientos(mantenimientoData);
       }
     };
     fetchData();
@@ -196,6 +200,7 @@ const GestionEspacios: React.FC = () => {
               onEspaciosUpdated={setEspacios}
               idEdificio={parseInt(idEdificio as string)}
               rol={rolSimulado}
+              mantenimiento={mantenimientos}
               onEspacioSelect={setSelectedEspacio} // Pasar la función para manejar el espacio seleccionado
             />
           )}

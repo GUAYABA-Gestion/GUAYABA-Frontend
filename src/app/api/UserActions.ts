@@ -116,7 +116,19 @@ export const getAdmins = async () => {
     });
     return response.json();
   } catch (error) {
-    console.error("Error al obtener usuarios por rol:", error);
+    console.error("Error al obtener admins y coordinadores por rol:", error);
+    return [];
+  }
+};
+
+export const getMaints = async () => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/getMaints`, {
+      headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Error al obtener personal de mantenimiento por rol:", error);
     return [];
   }
 };

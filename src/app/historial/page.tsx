@@ -12,7 +12,7 @@ import { FiRefreshCw } from "react-icons/fi"; // Importar el icono de refrescar
 
 const Historial: React.FC = () => {
   const { data: session } = useSession();
-  const { rolSimulado } = useRol();
+  const { rolSimulado, verifyJwt } = useRol();
   const [logs, setHistorial] = useState<Log[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +22,9 @@ const Historial: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchHistorial = async () => {
+    const isValid = await verifyJwt();
+    if (!isValid) return;
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auditoria/audit`,
@@ -47,6 +50,9 @@ const Historial: React.FC = () => {
   };
 
   const fetchAllUsers = async () => {
+    const isValid = await verifyJwt();
+    if (!isValid) return;
+
     try {
       const usersData = await fetchUsers();
       setUsers(usersData);

@@ -15,7 +15,7 @@ import { FiRefreshCw } from "react-icons/fi"; // Importar el icono de refrescar
 
 const GestionSedes: React.FC = () => {
   const { data: session } = useSession();
-  const { rolSimulado, idSede } = useRol();
+  const { rolSimulado, idSede, verifyJwt } = useRol();
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
@@ -29,6 +29,9 @@ const GestionSedes: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
+    const isValid = await verifyJwt();
+    if (!isValid) return;
+
     setIsLoading(true);
     setError(null); // Reset error state before fetching data
 

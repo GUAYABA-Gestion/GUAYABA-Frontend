@@ -1,5 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import Cookies from "js-cookie";
 import { useRol } from "../../../context/RolContext";
 import { Header, Footer } from "../../../components";
 import UserManager from "./components/UserManager";
@@ -8,7 +11,8 @@ import { fetchUsers, fetchSedes } from "../api/UserActions";
 import { FiRefreshCw } from "react-icons/fi"; // Importar el icono de refrescar
 
 const AdminDashboard = () => {
-  const { rolSimulado } = useRol();
+  const { data: session } = useSession();
+  const { rolSimulado, verifyJwt } = useRol();
   const [users, setUsers] = useState<User[]>([]);
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,6 +22,9 @@ const AdminDashboard = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
+    const isValid = await verifyJwt();
+    if (!isValid) return;
+
     setIsLoading(true);
     setError(null); // Reset error state before fetching data
 

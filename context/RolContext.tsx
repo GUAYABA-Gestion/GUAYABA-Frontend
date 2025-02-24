@@ -10,6 +10,7 @@ const RolContext = createContext<{
   cambiarRol: (nuevoRol: string | "none") => void;
   cambiarSede: (nuevoIdSede: number | null) => void;
   fetchUserData: () => Promise<void>;
+  verifyJwt: () => Promise<boolean>;
 } | null>(null);
 
 export const RolProvider = ({ children }: { children: ReactNode }) => {
@@ -61,27 +62,35 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const verifyJwtPeriodically = () => {
-    const interval = setInterval(async () => {
-      const jwt = Cookies.get("jwt");
-      if (!jwt) {
+  const verifyJwt = async (): Promise<boolean> => {
+    const jwt = Cookies.get("jwt");
+    if (!jwt) {
+      handleLogout();
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+
+      if (!response.ok) {
         handleLogout();
-        clearInterval(interval);
-        return;
+        return false;
       }
 
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
-          headers: { Authorization: `Bearer ${jwt}` },
-        });
+      return true;
+    } catch (error) {
+      console.error("Error:", error);
+      handleLogout();
+      return false;
+    }
+  };
 
-        if (!response.ok) {
-          handleLogout();
-          clearInterval(interval);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        handleLogout();
+  const verifyJwtPeriodically = () => {
+    const interval = setInterval(async () => {
+      const isValid = await verifyJwt();
+      if (!isValid) {
         clearInterval(interval);
       }
     }, 300000); // Verificar cada 5 minutos (300000 ms)
@@ -93,7 +102,7 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <RolContext.Provider value={{ rolSimulado, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData }}>
+    <RolContext.Provider value={{ rolSimulado, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData, verifyJwt }}>
       {!isLoading && children}
     </RolContext.Provider>
   );

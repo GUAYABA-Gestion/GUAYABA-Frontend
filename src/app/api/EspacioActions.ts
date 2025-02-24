@@ -13,14 +13,14 @@ export const fetchEspaciosByEdificios = async (ids_edificios: number[]): Promise
     });
 
     if (!response.ok) {
-      throw new Error("Error al obtener espacios desde edificios");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener espacios desde edificios");
     }
 
     const data = await response.json();
     return data.data;
   } catch (error) {
-    console.error("Error al obtener espacios desde edificios:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -31,14 +31,14 @@ export const fetchEspacioById = async (id: string): Promise<Espacio | null> => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al obtener el espacio");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener el espacio");
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error al obtener el espacio:", error);
-    return null;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -54,14 +54,14 @@ export const updateEspacio = async (espacio: Espacio) => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al actualizar el espacio");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al actualizar el espacio");
     }
 
     const data = await response.json();
     return data.espacio;
   } catch (error) {
-    console.error("Error al actualizar el espacio:", error);
-    return null;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -81,7 +81,6 @@ export const deleteEspacio = async (id: number) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al eliminar espacio:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -104,7 +103,6 @@ export const addEspaciosManual = async (espacios: Espacio[]) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al añadir espacios:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };

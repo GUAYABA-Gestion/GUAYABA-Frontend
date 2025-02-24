@@ -6,11 +6,15 @@ export const fetchSedes = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/sedes`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
-    const data = await response.json();  
-    return data;
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener sedes");
+    }
+
+    return response.json();
   } catch (error) {
-    console.error("Error al obtener sedes:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -19,11 +23,15 @@ export const fetchSedeById = async (id: number): Promise<Sede> => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/${id}`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
-    const data = await response.json();
-    return data;
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener sede");
+    }
+
+    return response.json();
   } catch (error) {
-    console.error("Error al obtener sede:", error);
-    return null!;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -39,14 +47,13 @@ export const updateSede = async (sede: Sede) => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al actualizar la sede");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al actualizar la sede");
     }
 
-    const data = await response.json();
-    return data.sede;
+    return response.json();
   } catch (error) {
-    console.error("Error al actualizar la sede:", error);
-    return null;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -68,7 +75,6 @@ export const addSedesManual = async (sedes: Sede[]) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al añadir sedes:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -89,7 +95,6 @@ export const deleteSede = async (id: number) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al eliminar sede:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };

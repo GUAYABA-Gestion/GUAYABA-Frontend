@@ -49,21 +49,30 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
         return;
       }
 
-      const updatedSede = await updateSede(editedSede);
-      if (updatedSede) {
-        onSave(updatedSede);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-        setEditMode(false);
+      try {
+        const updatedSede = await updateSede(editedSede);
+        if (updatedSede) {
+          onSave(updatedSede);
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 3000);
+          setEditMode(false);
+        }
+      } catch (error: any) {
+        setError(`Error al guardar los cambios: ${error.message}`);
       }
     }
   };
 
   const handleDelete = async () => {
     if (sede) {
-      onDelete(sede.id_sede);
-      setConfirmDelete(false);
-      onClose();
+      try {
+        await deleteSede(sede.id_sede);
+        onDelete(sede.id_sede);
+        setConfirmDelete(false);
+        onClose();
+      } catch (error: any) {
+        setError(`Error al eliminar la sede: ${error.message}`);
+      }
     }
   };
 
@@ -106,6 +115,7 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
         ) : (
           <>
             <h2 className="text-xl font-bold mb-4 text-black">Detalles de la Sede</h2>
+            {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>

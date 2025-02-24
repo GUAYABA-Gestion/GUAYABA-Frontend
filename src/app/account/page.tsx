@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Footer, Header } from "../../../components";
 import { User, Sede } from "../../types/api";
 import Cookies from "js-cookie";
+import { fetchUser, fetchSedes } from "../api/UserActions"; // Importar las acciones
 
 const roleOptions = [
   { value: "admin", label: "Administrador" },
@@ -31,27 +32,15 @@ export default function Account() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`,
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("jwt")}`,
-            },
-          }
-        );
-
-        if (!response.ok) throw new Error("Error al obtener datos del usuario");
-
-        const data = await response.json();
+        const data = await fetchUser();
         setUserData(data);
         setSelectedRole(data.rol);
         setSelectedSede(data.id_sede);
         if (data.id_sede) {
           fetchSedeData();
         }
-      } catch (error) {
-        console.error("Error:", error);
-        setMessage("❌ Error al cargar los datos del usuario");
+      } catch (error: any) {
+        setMessage(`❌ Error al cargar los datos del usuario: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -59,29 +48,10 @@ export default function Account() {
 
     const fetchSedeData = async () => {
       try {
-        const jwt = Cookies.get("jwt");
-        if (!jwt) throw new Error("No hay sesión activa");
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/sedes`,
-          {
-            headers: {
-              Authorization: `Bearer ${jwt}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            response.status === 404
-              ? "Sede no encontrada"
-              : "Error al obtener datos de la sede"
-          );
-        }
-
-        setSedeData(await response.json());
-      } catch (error) {
-        console.error("Error:", error);
+        const data = await fetchSedes();
+        setSedeData(data);
+      } catch (error: any) {
+        setMessage(`❌ Error al cargar los datos de las sedes: ${error.message}`);
       }
     };
 
@@ -122,9 +92,8 @@ export default function Account() {
         setMessage(null);
         window.location.reload(); // Forzar un refresh para actualizar el header
       }, 1500);
-    } catch (error) {
-      console.error("Error:", error);
-      setMessage("❌ No se pudo actualizar los datos.");
+    } catch (error: any) {
+      setMessage(`❌ No se pudo actualizar los datos: ${error.message}`);
     }
   };
 
@@ -135,7 +104,6 @@ export default function Account() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-green-500 mx-auto mb-4"></div>
           <p className="text-gray-700">Cargando datos...</p>
         </div>
-
       </div>
     );
   }

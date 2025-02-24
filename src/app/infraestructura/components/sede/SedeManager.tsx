@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Sede, Municipio, User } from "../../../../types/api";
-import { deleteSede } from "../../../api/SedeActions";
 import SedeTable from "./SedeTable";
 import SedeDetailsModal from "./SedeDetailsModal";
 import AddSedeModal from "./AddSedeModal";
@@ -43,11 +42,11 @@ const SedeManager: React.FC<SedeManagerProps> = ({
   };
 
   const handleSedeSelect = (id: number) => {
-    setSelectedSedes((prev: number[]) => [...prev, id]);
+    setSelectedSedes([...selectedSedes, id]);
   };
 
   const handleSedeDeselect = (id: number) => {
-    setSelectedSedes((prev: number[]) => prev.filter((sedeId: number) => sedeId !== id));
+    setSelectedSedes(selectedSedes.filter((sedeId: number) => sedeId !== id));
   };
 
   const handleSaveSede = (updatedSede: Sede) => {
@@ -59,8 +58,7 @@ const SedeManager: React.FC<SedeManagerProps> = ({
     setSelectedSede(updatedSede);
   };
 
-  const handleDeleteSede = async (id_sede: number) => {
-    await deleteSede(id_sede);
+  const handleDeleteSede = (id_sede: number) => {
     const updatedSedes = sedes.filter((sede) => sede.id_sede !== id_sede);
     setSedes(updatedSedes); // Actualizamos el estado de las sedes
     setSelectedSedes(updatedSedes.map((sede) => sede.id_sede));

@@ -23,7 +23,7 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
   const [validationErrors, setValidationErrors] = useState<
     Array<{ nombre: boolean; municipio: boolean }>
   >([]);
-  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -58,7 +58,7 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
     setValidationErrors(errors);
 
     if (errors.some((error) => error.nombre || error.municipio)) {
-      alert("Por favor corrija los errores antes de enviar.");
+      setError("Por favor corrija los errores antes de enviar.");
       return;
     }
 
@@ -67,17 +67,17 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
       onSedesAdded(response.sedes);
       setSedes([]);
       setValidationErrors([]);
-      setErrorMessages([]);
+      setError(null);
       onClose();
     } catch (error: any) {
-      console.error("Error al añadir sedes:", error);
+      setError(`Error al añadir sedes: ${error.message}`);
     }
   };
 
   const handleClose = () => {
     setSedes([]);
     setValidationErrors([]);
-    setErrorMessages([]);
+    setError(null);
     onClose();
   };
 
@@ -85,6 +85,8 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
     <div className={`fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 ${isOpen ? "visible" : "invisible"}`}>
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full max-h-screen overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-black">Añadir Sedes</h2>
+
+        {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
 
         <div className="overflow-y-auto max-h-60">
           <table className="w-full border-collapse border border-gray-300 table-fixed">

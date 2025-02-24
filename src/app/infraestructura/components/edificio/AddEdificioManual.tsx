@@ -89,7 +89,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
 
   const handleSubmit = async () => {
     if (edificios.length === 0) {
-      alert("No hay edificios para añadir.");
+      setError("No hay edificios para añadir.");
       return;
     }
 
@@ -111,7 +111,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
     );
 
     if (hasErrors) {
-      alert("Por favor corrija los errores antes de enviar.");
+      setError("Por favor corrija los errores antes de enviar.");
       return;
     }
 
@@ -122,8 +122,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
       setValidationErrors([]);
       onClose();
     } catch (error: any) {
-      console.error("Error al añadir edificios:", error);
-      setError(error.message);
+      setError(`Error al añadir edificios: ${error.message}`);
     }
   };
 

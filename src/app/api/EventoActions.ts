@@ -6,11 +6,15 @@ export const fetchEventos = async (): Promise<Evento[]> => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos/`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
-    const data = await response.json();
-    return data;
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener eventos");
+    }
+
+    return response.json();
   } catch (error) {
-    console.error("Error al obtener eventos:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -26,14 +30,13 @@ export const updateEvento = async (evento: Evento) => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al actualizar el evento");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al actualizar el evento");
     }
 
-    const data = await response.json();
-    return data.evento;
+    return response.json();
   } catch (error) {
-    console.error("Error al actualizar el evento:", error);
-    return null;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -53,7 +56,6 @@ export const deleteEvento = async (id: number) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al eliminar evento:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -76,7 +78,6 @@ export const addEventosManual = async (eventos: Evento[]) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al añadir eventos:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -93,13 +94,12 @@ export const fetchEventosByEspacios = async (ids_espacios: number[]): Promise<Ev
     });
 
     if (!response.ok) {
-      throw new Error("Error al obtener eventos desde espacios");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener eventos desde espacios");
     }
 
-    const data = await response.json();
-    return data.data;
+    return response.json();
   } catch (error) {
-    console.error("Error al obtener eventos desde espacios:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };

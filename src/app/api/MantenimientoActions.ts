@@ -6,11 +6,15 @@ export const fetchMantenimientos = async (): Promise<Mantenimiento[]> => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/mantenimientos/`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
-    const data = await response.json();
-    return data;
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener mantenimientos");
+    }
+
+    return response.json();
   } catch (error) {
-    console.error("Error al obtener mantenimientos:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -26,14 +30,13 @@ export const updateMantenimiento = async (mantenimiento: Mantenimiento) => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al actualizar el mantenimiento");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al actualizar el mantenimiento");
     }
 
-    const data = await response.json();
-    return data.mantenimiento;
+    return response.json();
   } catch (error) {
-    console.error("Error al actualizar el mantenimiento:", error);
-    return null;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -53,7 +56,6 @@ export const deleteMantenimiento = async (id: number) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al eliminar mantenimiento:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -76,7 +78,6 @@ export const addMantenimientosManual = async (mantenimientos: Mantenimiento[]) =
 
     return response.json();
   } catch (error) {
-    console.error("Error al añadir mantenimientos:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -93,13 +94,12 @@ export const fetchMantenimientosByEspacios = async (ids_espacios: number[]): Pro
     });
 
     if (!response.ok) {
-      throw new Error("Error al obtener mantenimientos desde espacios");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener mantenimientos desde espacios");
     }
 
-    const data = await response.json();
-    return data.data;
+    return response.json();
   } catch (error) {
-    console.error("Error al obtener mantenimientos desde espacios:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };

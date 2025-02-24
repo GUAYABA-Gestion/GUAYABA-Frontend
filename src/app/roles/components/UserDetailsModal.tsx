@@ -1,40 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Sede } from "../../../types/api";
-import { getUserReferences } from "../../api/UserActions";
-import {
-  validateCorreo,
-  validateTelefono,
-  validateTextNotNull,
-} from "../../api/validation";
+import { updateUser, deleteUserManual, getUserReferences } from "../../api/UserActions";
+import { validateCorreo, validateTelefono, validateTextNotNull } from "../../api/validation";
 
 interface UserDetailsModalProps {
   user: User | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (updatedUser: User) => void;
   onDelete: (id_persona: number) => void;
-  editMode: boolean;
-  setEditMode: (mode: boolean) => void;
-  editedUser: User | null;
-  handleEditField: (field: keyof User, value: string) => void;
   sedes: Sede[];
   showSuccess: boolean;
 }
 
-const UserDetailsModal = ({
+const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   user,
   isOpen,
   onClose,
   onSave,
   onDelete,
-  editMode,
-  setEditMode,
-  editedUser,
-  handleEditField,
   sedes,
   showSuccess,
-}: UserDetailsModalProps) => {
+}) => {
+  const [editMode, setEditMode] = useState(false);
+  const [editedUser, setEditedUser] = useState<User | null>(user);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [references, setReferences] = useState<string[]>([]);
   const [validationErrors, setValidationErrors] = useState({
@@ -45,7 +35,15 @@ const UserDetailsModal = ({
   });
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setEditedUser(user);
+  }, [user]);
+
   if (!isOpen || !user || !editedUser) return null;
+
+  const handleEditField = (field: keyof User, value: string) => {
+    setEditedUser((prev) => (prev ? { ...prev, [field]: value } : null));
+  };
 
   const handleDeleteClick = async () => {
     try {
@@ -57,9 +55,15 @@ const UserDetailsModal = ({
     }
   };
 
-  const handleConfirmDelete = () => {
-    onDelete(user.id_persona);
-    setConfirmDelete(false);
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteUserManual(user.id_persona);
+      onDelete(user.id_persona);
+      setConfirmDelete(false);
+      onClose();
+    } catch (error: any) {
+      setError(`Error al eliminar el usuario: ${error.message}`);
+    }
   };
 
   const handleSave = async () => {
@@ -78,7 +82,8 @@ const UserDetailsModal = ({
     }
 
     try {
-      await onSave();
+      const updatedUser = await updateUser(editedUser);
+      onSave(updatedUser);
       setError(null); // Clear error if save is successful
     } catch (error: any) {
       setError(`Error al guardar los cambios: ${error.message}`);
@@ -262,10 +267,7 @@ const UserDetailsModal = ({
                     Guardar Cambios
                   </button>
                   <button
-                    onClick={() => {
-                      setEditMode(false);
-                      handleClose();
-                    }}
+                    onClick={handleClose}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
                     Cancelar

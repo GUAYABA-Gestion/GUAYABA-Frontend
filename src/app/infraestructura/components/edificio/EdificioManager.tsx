@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Edificio, Sede, Municipio, User } from "../../../../types/api";
-import { deleteEdificio } from "../../../api/EdificioActions";
 import EdificioTable from "./EdificioTable";
 import EdificioDetailsModal from "./EdificioDetailsModal";
 import AddEdificioModal from "./AddEdificioModal";
@@ -60,8 +59,7 @@ const EdificioManager: React.FC<EdificioManagerProps> = ({
     setSelectedEdificio(updatedEdificio);
   };
 
-  const handleDeleteEdificio = async (id_edificio: number) => {
-    await deleteEdificio(id_edificio);
+  const handleDeleteEdificio = (id_edificio: number) => {
     const updatedEdificios = edificios.filter((edificio) => edificio.id_edificio !== id_edificio);
     setEdificios(updatedEdificios);
     setSelectedEdificio(null);

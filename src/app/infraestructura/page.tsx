@@ -26,34 +26,46 @@ const GestionSedes: React.FC = () => {
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   const [nextFetchTime, setNextFetchTime] = useState<number>(300); // 5 minutes in seconds
   const [manualCooldown, setManualCooldown] = useState<number>(0); // Cooldown de 1 minuto para el botón manual
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
-    const sedesData = await fetchSedes();
-    sedesData.sort((a: Sede, b: Sede) => a.id_sede - b.id_sede);
-    setSedes(sedesData);
-    if (rolSimulado === "admin") {
-      setSelectedSedes(sedesData.map((sede: Sede) => sede.id_sede)); // Select all sedes by default
-    } else {
-      const userSede = sedesData.find(
-        (sede: Sede) => sede.id_sede === idSede
-      );
-      if (userSede) {
-        setSelectedSedes([userSede.id_sede]);
+    setError(null); // Reset error state before fetching data
+
+    try {
+      const sedesData = await fetchSedes();
+      sedesData.sort((a: Sede, b: Sede) => a.id_sede - b.id_sede);
+      setSedes(sedesData);
+      if (rolSimulado === "admin") {
+        setSelectedSedes(sedesData.map((sede: Sede) => sede.id_sede)); // Select all sedes by default
+      } else {
+        const userSede = sedesData.find(
+          (sede: Sede) => sede.id_sede === idSede
+        );
+        if (userSede) {
+          setSelectedSedes([userSede.id_sede]);
+        }
       }
+
+      const municipiosData = await fetchMunicipios();
+      municipiosData.sort((a: Municipio, b: Municipio) => a.nombre.localeCompare(b.nombre));
+      setMunicipios(municipiosData);
+
+      const coordinadoresData = await getAdmins();
+      coordinadoresData.sort((a: User, b: User) => a.id_persona - b.id_persona);
+      setCoordinadores(coordinadoresData);
+
+      const edificiosData = await fetchEdificios();
+      edificiosData.sort((a: Edificio, b: Edificio) => a.id_sede - b.id_sede);
+      setEdificios(edificiosData);
+
+      setLastFetchTime(new Date());
+      setNextFetchTime(300); // Reset the timer
+    } catch (error: any) {
+      setError(`❌ Error al cargar los datos: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
-    const municipiosData = await fetchMunicipios();
-    municipiosData.sort((a: Municipio, b: Municipio) => a.nombre.localeCompare(b.nombre));
-    setMunicipios(municipiosData);      
-    const coordinadoresData = await getAdmins();
-    coordinadoresData.sort((a: User, b: User) => a.id_persona - b.id_persona);
-    setCoordinadores(coordinadoresData);
-    const edificiosData = await fetchEdificios();
-    edificiosData.sort((a: Edificio, b: Edificio) => a.id_sede - b.id_sede);
-    setEdificios(edificiosData);
-    setIsLoading(false);
-    setLastFetchTime(new Date());
-    setNextFetchTime(300); // Reset the timer
   };
 
   useEffect(() => {
@@ -119,6 +131,7 @@ const GestionSedes: React.FC = () => {
             <FiRefreshCw size={20} />
           </button>
         </div>
+        {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
         <SedeManager
           sedes={sedes}
           municipios={municipios}

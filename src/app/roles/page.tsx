@@ -15,20 +15,25 @@ const AdminDashboard = () => {
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   const [nextFetchTime, setNextFetchTime] = useState<number>(300); // 5 minutes in seconds
   const [manualCooldown, setManualCooldown] = useState<number>(0); // Cooldown de 1 minuto para el botón manual
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
+    setError(null); // Reset error state before fetching data
+
     try {
       const usersData = await fetchUsers();
       usersData.sort((a: User, b: User) => a.id_persona - b.id_persona);
       setUsers(usersData);
+
       const sedesData = await fetchSedes();
       sedesData.sort((a: Sede, b: Sede) => a.id_sede - b.id_sede);
       setSedes(sedesData);
+
       setLastFetchTime(new Date());
       setNextFetchTime(300); // Reset the timer
-    } catch (error) {
-      console.error("Error al cargar los datos:", error);
+    } catch (error: any) {
+      setError(`❌ Error al cargar los datos: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -111,6 +116,7 @@ const AdminDashboard = () => {
             <FiRefreshCw size={20} />
           </button>
         </div>
+        {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
         <UserManager users={users} sedes={sedes} onUsersUpdated={setUsers} />
       </div>
       <Footer />

@@ -35,27 +35,31 @@ const GestionEspacios: React.FC = () => {
     }
 
     const fetchData = async () => {
-      if (idEdificio) {
-        const edificioData = await fetchEdificioById(idEdificio as string);
-        if (
-          edificioData &&
-          rolSimulado !== "admin" &&
-          edificioData.id_sede !== idSede
-        ) {
-          setError(
-            "No tiene permiso para acceder a este edificio. Seleccione un edificio válido desde la página de Infraestructura."
-          );
-          return;
+      try {
+        if (idEdificio) {
+          const edificioData = await fetchEdificioById(idEdificio as string);
+          if (
+            edificioData &&
+            rolSimulado !== "admin" &&
+            edificioData.id_sede !== idSede
+          ) {
+            setError(
+              "No tiene permiso para acceder a este edificio. Seleccione un edificio válido desde la página de Infraestructura."
+            );
+            return;
+          }
+          setEdificio(edificioData);
+          const espaciosData = await fetchEspaciosByEdificios([
+            parseInt(idEdificio as string),
+          ]);
+          setEspacios(espaciosData);
+          if (edificioData && edificioData.id_sede) {
+            const sedeData = await fetchSedeById(edificioData.id_sede);
+            setSede(sedeData);
+          }
         }
-        setEdificio(edificioData);
-        const espaciosData = await fetchEspaciosByEdificios([
-          parseInt(idEdificio as string),
-        ]);
-        setEspacios(espaciosData);
-        if (edificioData && edificioData.id_sede) {
-          const sedeData = await fetchSedeById(edificioData.id_sede);
-          setSede(sedeData);
-        }
+      } catch (error: any) {
+        setError(`❌ Error al cargar los datos: ${error.message}`);
       }
     };
     fetchData();

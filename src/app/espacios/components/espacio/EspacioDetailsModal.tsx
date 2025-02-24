@@ -44,22 +44,30 @@ const EspacioDetailsModal: React.FC<EspacioDetailsModalProps> = ({ espacio, isOp
         return;
       }
 
-      const updatedEspacio = await updateEspacio(editedEspacio);
-      if (updatedEspacio) {
-        onSave(updatedEspacio);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-        setEditMode(false);
+      try {
+        const updatedEspacio = await updateEspacio(editedEspacio);
+        if (updatedEspacio) {
+          onSave(updatedEspacio);
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 3000);
+          setEditMode(false);
+        }
+      } catch (error: any) {
+        setError(`Error al guardar los cambios: ${error.message}`);
       }
     }
   };
 
   const handleDelete = async () => {
     if (espacio) {
-      await deleteEspacio(espacio.id_espacio);
-      onDelete(espacio.id_espacio);
-      setConfirmDelete(false);
-      onClose();
+      try {
+        await deleteEspacio(espacio.id_espacio);
+        onDelete(espacio.id_espacio);
+        setConfirmDelete(false);
+        onClose();
+      } catch (error: any) {
+        setError(`Error al eliminar el espacio: ${error.message}`);
+      }
     }
   };
 
@@ -98,6 +106,7 @@ const EspacioDetailsModal: React.FC<EspacioDetailsModalProps> = ({ espacio, isOp
         ) : (
           <>
             <h2 className="text-xl font-bold mb-4 text-black">Detalles del Espacio</h2>
+            {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>

@@ -6,14 +6,19 @@ export const fetchEdificios = async (): Promise<Edificio[]> => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/edificios/`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener edificios");
+    }
+
     const data = await response.json();
     return data.map((edificio: any) => ({
       ...edificio,
       correo_titular: edificio.correo_titular || "",
     }));
   } catch (error) {
-    console.error("Error al obtener edificios:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -29,14 +34,14 @@ export const updateEdificio = async (edificio: Edificio) => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al actualizar el edificio");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al actualizar el edificio");
     }
 
     const data = await response.json();
     return data.edificio;
   } catch (error) {
-    console.error("Error al actualizar el edificio:", error);
-    return null;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -56,7 +61,6 @@ export const deleteEdificio = async (id: number) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al eliminar edificio:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -79,10 +83,8 @@ export const addEdificiosManual = async (edificios: Edificio[]) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al añadir edificios:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
-
 };
 
 export const fetchEdificioById = async (id: string): Promise<Edificio | null> => {
@@ -92,13 +94,13 @@ export const fetchEdificioById = async (id: string): Promise<Edificio | null> =>
     });
 
     if (!response.ok) {
-      throw new Error("Error al obtener el edificio");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener el edificio");
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error al obtener el edificio:", error);
-    return null;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };

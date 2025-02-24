@@ -6,9 +6,15 @@ export const fetchUsers = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/getAll`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener usuarios");
+    }
+
     return response.json();
   } catch (error) {
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -17,9 +23,15 @@ export const fetchSedes = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/sedes`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener sedes");
+    }
+
     return response.json();
   } catch (error) {
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -55,9 +67,15 @@ export const deleteUserManual = async (id_persona: number) => {
       },
       body: JSON.stringify({ id_persona }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al eliminar usuario");
+    }
+
     return response.json();
   } catch (error) {
-    throw error;
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -73,12 +91,13 @@ export const updateUser = async (user: User) => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al actualizar el usuario");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al actualizar el usuario");
     }
 
     return response.json(); // Devuelve el usuario actualizado
   } catch (error) {
-    throw error; // Relanza el error para manejarlo en el componente
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -109,10 +128,15 @@ export const getAdmins = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/getAdmins`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener usuarios por rol");
+    }
+
     return response.json();
   } catch (error) {
-    console.error("Error al obtener usuarios por rol:", error);
-    return [];
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };
 
@@ -123,7 +147,8 @@ export const fetchUser = async () => {
     });
 
     if (!response.ok) {
-      throw new Error("Error al obtener datos del usuario");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener datos del usuario");
     }
 
     return response.json();

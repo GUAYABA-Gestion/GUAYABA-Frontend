@@ -61,7 +61,7 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
 
   const handleSubmit = async () => {
     if (espacios.length === 0) {
-      alert("No hay espacios para añadir.");
+      setError("No hay espacios para añadir.");
       return;
     }
 
@@ -83,7 +83,7 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
     );
 
     if (hasErrors) {
-      alert("Por favor corrija los errores antes de enviar.");
+      setError("Por favor corrija los errores antes de enviar.");
       return;
     }
 
@@ -94,8 +94,8 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
       setEspacios([]);
       setValidationErrors([]);
       onClose();
-    } catch (error) {
-      setError("Error al añadir espacios. Por favor, inténtelo de nuevo.");
+    } catch (error: any) {
+      setError(`Error al añadir espacios: ${error.message}`);
     }
   };
 
@@ -247,14 +247,14 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
           </table>
         </div>
       </div>
-  
+
       <button 
         onClick={handleAddRow} 
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 text-sm"
       >
         + Añadir Fila
       </button>
-  
+
       <div className="mt-4 flex space-x-4">
         <button 
           onClick={handleSubmit} 
@@ -269,7 +269,7 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
           Cancelar
         </button>
       </div>
-  
+
       {Object.values(validationErrors).some((errors) => Object.values(errors).some((error) => error)) && (
         <div className="mt-4 text-red-500 text-sm">
           <ul className="list-disc pl-5">

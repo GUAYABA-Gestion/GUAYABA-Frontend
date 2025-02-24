@@ -4,10 +4,6 @@ import { User, Sede } from "../../../types/api";
 import UserTable from "./UserTable";
 import UserDetailsModal from "./UserDetailsModal";
 import AddUserModal from "./AddUserModal";
-import {
-  updateUser,
-  deleteUserManual,
-} from "../../api/UserActions";
 
 interface UserManagerProps {
   users: User[];
@@ -23,66 +19,42 @@ const UserManager: React.FC<UserManagerProps> = ({ users, sedes, onUsersUpdated 
     es_manual: "",
   });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [editMode, setEditMode] = useState(false);
-  const [editedUser, setEditedUser] = useState<User | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false); // Estado para el modal
-
-  const handleEditField = (field: keyof User, value: string) => {
-    editedUser && setEditedUser({ ...editedUser, [field]: value });
-  };
-
-  const handleSaveChanges = async () => {
-    if (!editedUser) return;
-
-    if (editedUser.telefono && !/^\d{10}$/.test(editedUser.telefono)) {
-      alert("El teléfono debe tener 10 dígitos");
-      return;
-    }
-
-    try {
-      const updatedUser = await updateUser(editedUser);
-
-      onUsersUpdated(
-        users.map((user) =>
-          user.id_persona === updatedUser.id_persona ? updatedUser : user
-        )
-      );
-
-      setSelectedUser(updatedUser);
-      setEditedUser(updatedUser);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-      setEditMode(false);
-    } catch (error) {
-      console.error("Update error:", error);
-    }
-  };
-
-  const handleDeleteUser = async (id_persona: number) => {
-    try {
-      await deleteUserManual(id_persona);
-      onUsersUpdated(users.filter((user) => user.id_persona !== id_persona));
-      setSelectedUser(null);
-    } catch (error) {
-      console.error("Delete error:", error);
-    }
-  };
 
   const handleUsersAdded = (newUsers: User[]) => {
-    onUsersUpdated([...users, ...newUsers]); // Agregar nuevos usuarios a la lista
+    onUsersUpdated([...users, ...newUsers]);
   };
 
-  const showSuccessMessage = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+  const handleSaveUser = (updatedUser: User) => {
+    const updatedUsers = users.map((user) =>
+      user.id_persona === updatedUser.id_persona ? updatedUser : user
+    );
+    onUsersUpdated(updatedUsers);
+    setSelectedUser(updatedUser);
+  };
+
+  const handleDeleteUser = (id_persona: number) => {
+    const updatedUsers = users.filter((user) => user.id_persona !== id_persona);
+    onUsersUpdated(updatedUsers);
+    setSelectedUser(null);
   };
 
   const handleFilterChange = (filter: string, value: string) => {
     setFilters((prev) => ({ ...prev, [filter]: value }));
     setCurrentPage(1); // Reset pagination to the first page
+  };
+
+  const handleResetFilters = () => {
+    setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
+    setCurrentPage(1); // Reset pagination to the first page
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -93,40 +65,35 @@ const UserManager: React.FC<UserManagerProps> = ({ users, sedes, onUsersUpdated 
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         filters={filters}
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
         onUserClick={(user) => {
           setSelectedUser(user);
-          setEditedUser(user);
-          setEditMode(false);
+          setIsUserModalOpen(true);
         }}
         onFilterChange={handleFilterChange}
-        resetFilters={() => {
-          setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
-          setCurrentPage(1); // Reset pagination to the first page
-        }}
+        resetFilters={handleResetFilters}
         onAddUserClick={() => setIsAddUserModalOpen(true)}
       />
 
       <UserDetailsModal
         user={selectedUser}
-        isOpen={!!selectedUser}
-        onClose={() => setSelectedUser(null)}
-        onSave={handleSaveChanges}
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        onSave={handleSaveUser}
         onDelete={handleDeleteUser}
-        editMode={editMode}
-        setEditMode={setEditMode}
-        editedUser={editedUser}
-        handleEditField={handleEditField}
         sedes={sedes}
         showSuccess={showSuccess}
       />
 
       <AddUserModal
         isOpen={isAddUserModalOpen}
-        onClose={() => setIsAddUserModalOpen(false)} // No mostrar mensaje de éxito al cancelar
+        onClose={() => setIsAddUserModalOpen(false)}
         sedes={sedes}
         onUsersAdded={handleUsersAdded}
-        showSuccessMessage={showSuccessMessage} // Pass the new prop
+        showSuccessMessage={() => {
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 3000);
+        }}
       />
     </div>
   );

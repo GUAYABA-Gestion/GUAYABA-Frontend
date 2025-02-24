@@ -19,6 +19,7 @@ const Historial: React.FC = () => {
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   const [nextFetchTime, setNextFetchTime] = useState<number>(300); // 5 minutes in seconds
   const [manualCooldown, setManualCooldown] = useState<number>(0); // Cooldown de 1 minuto para el botón manual
+  const [error, setError] = useState<string | null>(null);
 
   const fetchHistorial = async () => {
     try {
@@ -38,8 +39,8 @@ const Historial: React.FC = () => {
       setHistorial(data);
       setLastFetchTime(new Date());
       setNextFetchTime(300); // Reset the timer
-    } catch (error) {
-      console.error("Error fetching historial:", error);
+    } catch (error: any) {
+      setError(`❌ Error al cargar el historial: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -49,8 +50,8 @@ const Historial: React.FC = () => {
     try {
       const usersData = await fetchUsers();
       setUsers(usersData);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+    } catch (error: any) {
+      setError(`❌ Error al cargar los usuarios: ${error.message}`);
     }
   };
 
@@ -109,8 +110,7 @@ const Historial: React.FC = () => {
       <div className="p-4">
         <div className="flex justify-between items-center">
           <div>
-          <h1 className="text-2xl font-bold text-[#034f00]">Historial de Cambios</h1>
-
+            <h1 className="text-2xl font-bold text-[#034f00]">Historial de Cambios</h1>
             <p className="text-gray-600">
               Última actualización: {lastFetchTime ? lastFetchTime.toLocaleTimeString() : "N/A"}
             </p>
@@ -126,6 +126,7 @@ const Historial: React.FC = () => {
             <FiRefreshCw size={20} />
           </button>
         </div>
+        {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
         <AuditManager logs={logs} users={users} />
       </div>
       <Footer />

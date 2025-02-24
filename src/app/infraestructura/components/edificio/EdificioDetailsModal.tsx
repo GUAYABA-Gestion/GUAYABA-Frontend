@@ -1,48 +1,37 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Edificio, Sede, User } from "../../../../types/api";
-import { validateTextNotNull, validatePositiveNumber, validateCorreo } from "../../../api/validation";
-import { fetchUsers } from "../../../api/UserActions";
-import { deleteEdificio, updateEdificio } from "../../../api/EdificioActions";
-import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/desplegableValues";
+import { Edificio, Sede } from "../../../../types/api";
+import { updateEdificio, deleteEdificio } from "../../../api/EdificioActions";
+import { validateTextNotNull } from "../../../api/validation";
 
 interface EdificioDetailsModalProps {
+  edificio: Edificio | null;
   isOpen: boolean;
   onClose: () => void;
-  edificio: Edificio | null;
-  sedes: Sede[];
-  onSave: (edificio: Edificio) => void;
+  onSave: (updatedEdificio: Edificio) => void;
   onDelete: (id_edificio: number) => void;
+  sedes: Sede[];
 }
 
 const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
+  edificio,
   isOpen,
   onClose,
-  edificio,
-  sedes,
   onSave,
   onDelete,
+  sedes,
 }) => {
-  const [editedEdificio, setEditedEdificio] = useState<Edificio | null>(edificio);
   const [editMode, setEditMode] = useState(false);
+  const [editedEdificio, setEditedEdificio] = useState<Edificio | null>(edificio);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     setEditedEdificio(edificio);
   }, [edificio]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const usersData = await fetchUsers();
-      setUsers(usersData);
-    };
-    fetchData();
-  }, []);
-
-  const handleEditField = (field: keyof Edificio, value: any) => {
+  const handleEditField = (field: keyof Edificio, value: string | number | null) => {
     setEditedEdificio((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
@@ -50,11 +39,7 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
     if (editedEdificio) {
       const validationErrors = {
         nombre: !validateTextNotNull(editedEdificio.nombre),
-        dirección: !validateTextNotNull(editedEdificio.dirección),
-        id_sede: !editedEdificio.id_sede || editedEdificio.id_sede === 0,
-        area_terreno: !validatePositiveNumber(editedEdificio.area_terreno),
-        area_construida: !validatePositiveNumber(editedEdificio.area_construida),
-        correo_titular: editedEdificio.correo_titular ? !validateCorreo(editedEdificio.correo_titular) || !users.some(user => user.correo === editedEdificio.correo_titular) : false,
+        id_sede: !editedEdificio.id_sede,
       };
 
       if (Object.values(validationErrors).some((error) => error)) {
@@ -62,23 +47,30 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
         return;
       }
 
-      const updatedEdificio = await updateEdificio(editedEdificio);
-      if (updatedEdificio) {
-        onSave(updatedEdificio);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-        setEditMode(false);
-      } else {
-        setError("Error al actualizar el edificio.");
+      try {
+        const updatedEdificio = await updateEdificio(editedEdificio);
+        if (updatedEdificio) {
+          onSave(updatedEdificio);
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 3000);
+          setEditMode(false);
+        }
+      } catch (error: any) {
+        setError(`Error al guardar los cambios: ${error.message}`);
       }
     }
   };
 
   const handleDelete = async () => {
     if (edificio) {
-      onDelete(edificio.id_edificio);
-      setConfirmDelete(false);
-      onClose();
+      try {
+        await deleteEdificio(edificio.id_edificio);
+        onDelete(edificio.id_edificio);
+        setConfirmDelete(false);
+        onClose();
+      } catch (error: any) {
+        setError(`Error al eliminar el edificio: ${error.message}`);
+      }
     }
   };
 
@@ -89,16 +81,11 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
     onClose();
   };
 
-  const handleDeleteTitular = () => {
-    handleEditField("correo_titular", "");
-    handleEditField("id_titular", null);
-  };
-
   if (!isOpen || !editedEdificio) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
+      <div className="bg-white p-6 rounded-lg max-w-md w-full">
         {confirmDelete ? (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg">
             <p>ELIMINAR EDIFICIO</p>
@@ -122,12 +109,13 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
         ) : (
           <>
             <h2 className="text-xl font-bold mb-4 text-black">Detalles del Edificio</h2>
-            <div className="grid grid-cols-2 gap-4">
+            {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
                 <input
                   type="text"
-                  value={editedEdificio.nombre}
+                  value={editedEdificio.nombre || ""}
                   onChange={(e) => handleEditField("nombre", e.target.value)}
                   className={`mt-1 p-2 border rounded w-full text-black ${!validateTextNotNull(editedEdificio.nombre) ? "outline outline-red-500" : ""}`}
                   disabled={!editMode}
@@ -137,132 +125,22 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Dirección</label>
-                <input
-                  type="text"
-                  value={editedEdificio.dirección}
-                  onChange={(e) => handleEditField("dirección", e.target.value)}
-                  className={`mt-1 p-2 border rounded w-full text-black ${!validateTextNotNull(editedEdificio.dirección) ? "outline outline-red-500" : ""}`}
-                  disabled={!editMode}
-                />
-                {!validateTextNotNull(editedEdificio.dirección) && (
-                  <p className="text-red-500 text-sm">Dirección no puede ser vacío.</p>
-                )}
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700">Sede</label>
                 <select
-                  value={editedEdificio.id_sede}
-                  onChange={(e) => handleEditField("id_sede", Number(e.target.value))}
-                  className={`mt-1 p-2 border rounded w-full text-black ${!editedEdificio.id_sede || editedEdificio.id_sede === 0 ? "outline outline-red-500" : ""}`}
+                  value={editedEdificio.id_sede || ""}
+                  onChange={(e) => handleEditField("id_sede", parseInt(e.target.value))}
+                  className={`mt-1 p-2 border rounded w-full text-black ${!editedEdificio.id_sede ? "outline outline-red-500" : ""}`}
                   disabled={!editMode}
                 >
-                  <option value={0}>Seleccione una sede</option>
+                  <option value="">Seleccione una sede</option>
                   {sedes.map((sede) => (
                     <option key={sede.id_sede} value={sede.id_sede}>
                       {sede.nombre}
                     </option>
                   ))}
                 </select>
-                {(!editedEdificio.id_sede || editedEdificio.id_sede === 0) && (
-                  <p className="text-red-500 text-sm">Debe seleccionar una sede.</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                <select
-                  value={editedEdificio.categoría}
-                  onChange={(e) => handleEditField("categoría", e.target.value)}
-                  className="mt-1 p-2 border rounded w-full text-black"
-                  disabled={!editMode}
-                >
-                  {categoriasEdificio.map((categoria) => (
-                    <option key={categoria} value={categoria}>
-                      {categoria}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Propiedad</label>
-                <select
-                  value={editedEdificio.propiedad}
-                  onChange={(e) => handleEditField("propiedad", e.target.value)}
-                  className="mt-1 p-2 border rounded w-full text-black"
-                  disabled={!editMode}
-                >
-                  {propiedadesEdificio.map((propiedad) => (
-                    <option key={propiedad} value={propiedad}>
-                      {propiedad}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Área Terreno (m²)</label>
-                <input
-                  type="number"
-                  value={editedEdificio.area_terreno}
-                  onChange={(e) => handleEditField("area_terreno", Number(e.target.value))}
-                  className={`mt-1 p-2 border rounded w-full text-black ${!validatePositiveNumber(editedEdificio.area_terreno) ? "outline outline-red-500" : ""}`}
-                  disabled={!editMode}
-                />
-                {!validatePositiveNumber(editedEdificio.area_terreno) && (
-                  <p className="text-red-500 text-sm">Área Terreno debe ser un número positivo.</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Área Construida (m²)</label>
-                <input
-                  type="number"
-                  value={editedEdificio.area_construida}
-                  onChange={(e) => handleEditField("area_construida", Number(e.target.value))}
-                  className={`mt-1 p-2 border rounded w-full text-black ${!validatePositiveNumber(editedEdificio.area_construida) ? "outline outline-red-500" : ""}`}
-                  disabled={!editMode}
-                />
-                {!validatePositiveNumber(editedEdificio.area_construida) && (
-                  <p className="text-red-500 text-sm">Área Construida debe ser un número positivo.</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Cert. Uso Suelo</label>
-                <select
-                  value={editedEdificio.cert_uso_suelo ? "DISPONIBLE" : "NO DISPONIBLE"}
-                  onChange={(e) => handleEditField("cert_uso_suelo", e.target.value === "DISPONIBLE")}
-                  className="mt-1 p-2 border rounded w-full text-black"
-                  disabled={!editMode}
-                >
-                  {certUsoSuelo.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center">
-                <div className="flex-grow">
-                  <label className="block text-sm font-medium text-gray-700">Correo Titular</label>
-                  <select
-                    value={editedEdificio.id_titular || ""}
-                    onChange={(e) => handleEditField("id_titular", e.target.value ? Number(e.target.value) : null)}
-                    className={`mt-1 p-2 border rounded w-full text-black`}
-                    disabled={!editMode}
-                  >
-                    <option value="">Seleccione un coordinador</option>
-                    {users.map((user) => (
-                      <option key={user.id_persona} value={user.id_persona}>
-                        {user.correo}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {editedEdificio.id_titular && editMode && (
-                  <button
-                    onClick={handleDeleteTitular}
-                    className="ml-2 mt-6 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    X
-                  </button>
+                {!editedEdificio.id_sede && (
+                  <p className="text-red-500 text-sm">Sede no puede ser vacío.</p>
                 )}
               </div>
             </div>

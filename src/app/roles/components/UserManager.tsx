@@ -86,9 +86,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, sedes, onUsersUpdated 
   };
 
   return (
-    <div className="flex-grow mt-4 p-4">
-      <h1 className="text-2xl font-bold text-[#034f00]">Gestión de Roles</h1>
-
+    <div>
       <UserTable
         users={users}
         sedes={sedes}
@@ -108,7 +106,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, sedes, onUsersUpdated 
         }}
         onAddUserClick={() => setIsAddUserModalOpen(true)}
       />
-
 
       <UserDetailsModal
         user={selectedUser}

@@ -49,8 +49,12 @@ const SedeTable: React.FC<SedeTableProps> = ({
 
   const filteredSedes = sedes.filter((sede) => {
     return (
-      (filters.nombre === "" || sede.nombre.toLowerCase().includes(filters.nombre.toLowerCase())) &&
-      (filters.municipio === "" || getMunicipioNombre(sede.municipio).toLowerCase().includes(filters.municipio.toLowerCase()))
+      (filters.nombre === "" ||
+        sede.nombre.toLowerCase().includes(filters.nombre.toLowerCase())) &&
+      (filters.municipio === "" ||
+        getMunicipioNombre(sede.municipio)
+          .toLowerCase()
+          .includes(filters.municipio.toLowerCase()))
     );
   });
 
@@ -62,7 +66,10 @@ const SedeTable: React.FC<SedeTableProps> = ({
     }
   };
 
-  const displayedSedes = rolSimulado === "admin" ? filteredSedes : filteredSedes.filter((sede) => sede.id_sede === idSede);
+  const displayedSedes =
+    rolSimulado === "admin"
+      ? filteredSedes
+      : filteredSedes.filter((sede) => sede.id_sede === idSede);
 
   return (
     <div className="p-4 bg-gray-50 min-h">
@@ -82,11 +89,13 @@ const SedeTable: React.FC<SedeTableProps> = ({
             className="p-2 border rounded text-black text-sm w-full md:w-auto"
           >
             <option value="">Filtrar por municipio</option>
-            {municipios.sort((a, b) => a.id - b.id).map((municipio) => (
-              <option key={municipio.id} value={municipio.nombre}>
-                {municipio.nombre}
-              </option>
-            ))}
+            {municipios
+              .sort((a, b) => a.id - b.id)
+              .map((municipio) => (
+                <option key={municipio.id} value={municipio.nombre}>
+                  {municipio.nombre}
+                </option>
+              ))}
           </select>
           <button
             onClick={() => setFilters({ nombre: "", municipio: "" })}
@@ -110,15 +119,37 @@ const SedeTable: React.FC<SedeTableProps> = ({
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>
+              <tr className="bg-gray-200 text-black">
+                <th
+                  colSpan={
+                    3 +
+                    (rolSimulado !== "user" ? 1 : 0) +
+                    (rolSimulado === "admin" ? 1 : 0)
+                  }
+                  className="border bg-[#80BA7F] text-white px-4 py-2 text-lg font-semibold"
+                >
+                  Tabla de Sede(s)
+                </th>
+              </tr>
               <tr className="bg-[#80BA7F] text-white">
-                <th className="border border-gray-300 px-4 py-2 min-w-[120px]">Seleccionar</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Nombre</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Municipio</th>
-                {(rolSimulado !== "user") && (
-                  <th className="border border-gray-300 px-4 py-2 min-w-[250px]">Coordinador</th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[120px]">
+                  Seleccionar
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                  Nombre
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                  Municipio
+                </th>
+                {rolSimulado !== "user" && (
+                  <th className="border border-gray-300 px-4 py-2 min-w-[250px]">
+                    Coordinador
+                  </th>
                 )}
                 {rolSimulado === "admin" && (
-                  <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Acciones</th>
+                  <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                    Acciones
+                  </th>
                 )}
               </tr>
             </thead>
@@ -127,7 +158,9 @@ const SedeTable: React.FC<SedeTableProps> = ({
                 displayedSedes.map((sede, index) => (
                   <tr
                     key={sede.id_sede}
-                    className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                    }`}
                   >
                     <td className="border border-gray-300 p-2 text-center">
                       <input
@@ -143,7 +176,7 @@ const SedeTable: React.FC<SedeTableProps> = ({
                     <td className="border border-gray-300 p-2 text-black text-sm">
                       {getMunicipioNombre(sede.municipio)}
                     </td>
-                    {(rolSimulado !== "user") && (
+                    {rolSimulado !== "user" && (
                       <td className="border border-gray-300 p-2 text-black text-sm">
                         {getCoordinadorCorreo(sede.coordinador)}
                       </td>
@@ -162,8 +195,8 @@ const SedeTable: React.FC<SedeTableProps> = ({
                 ))
               ) : (
                 <tr>
-                  <td 
-                    colSpan={rolSimulado === "admin" ? 5 : 4} 
+                  <td
+                    colSpan={rolSimulado === "admin" ? 5 : 4}
                     className="border border-gray-300 p-2 text-center text-gray-600 text-sm"
                   >
                     No hay sedes para mostrar.

@@ -95,7 +95,7 @@ const EdificioTable: React.FC<EdificioTableProps> = ({
               + Añadir Edificios
             </button>
           )}
-          {(rolSimulado !== "user") && (
+          {rolSimulado !== "user" && (
             <>
               <ExcelExportButton
                 edificios={filteredEdificios}
@@ -118,6 +118,14 @@ const EdificioTable: React.FC<EdificioTableProps> = ({
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>
+              <tr className="bg-gray-200 text-black">
+                <th
+                  colSpan={4}
+                  className="border bg-[#80BA7F] text-white px-4 py-2 text-lg font-semibold"
+                >
+                  Tabla de Edificios
+                </th>
+              </tr>
               <tr className="bg-[#80BA7F] text-white">
                 <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
                   Nombre

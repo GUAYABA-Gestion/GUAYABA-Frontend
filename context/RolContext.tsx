@@ -61,8 +61,35 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const verifyJwtPeriodically = () => {
+    const interval = setInterval(async () => {
+      const jwt = Cookies.get("jwt");
+      if (!jwt) {
+        handleLogout();
+        clearInterval(interval);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
+
+        if (!response.ok) {
+          handleLogout();
+          clearInterval(interval);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        handleLogout();
+        clearInterval(interval);
+      }
+    }, 300000); // Verificar cada 5 minutos (300000 ms)
+  };
+
   useEffect(() => {
     fetchUserData();
+    verifyJwtPeriodically();
   }, []);
 
   return (

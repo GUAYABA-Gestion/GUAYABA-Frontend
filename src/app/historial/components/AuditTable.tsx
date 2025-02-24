@@ -53,27 +53,35 @@ const AuditTable: React.FC<AuditTableProps> = ({
       setValidationMessage("");
       onFilterChange("horaInicio", value);
     } else {
-      setValidationMessage(`La hora de inicio debe estar entre 0 y 23 y ser menor que la hora fin.`);
+      setValidationMessage(
+        `La hora de inicio debe estar entre 0 y 23 y ser menor que la hora fin.`
+      );
     }
   };
 
   const handleHoraFinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const horaFin = parseInt(value, 10);
-    const horaInicio = filters.horaInicio ? parseInt(filters.horaInicio, 10) : 0;
+    const horaInicio = filters.horaInicio
+      ? parseInt(filters.horaInicio, 10)
+      : 0;
 
     if (horaFin >= 0 && horaFin <= 24 && horaFin > horaInicio) {
       setValidationMessage("");
       onFilterChange("horaFin", value);
     } else {
-      setValidationMessage(`La hora fin debe estar entre 0 y 24 y ser mayor que la hora inicio.`);
+      setValidationMessage(
+        `La hora fin debe estar entre 0 y 24 y ser mayor que la hora inicio.`
+      );
     }
   };
 
   const filteredLogs = logs.filter((log) => {
     const logDate = new Date(log.fecha_hora).toISOString().split("T")[0];
     const logTime = new Date(log.fecha_hora).getHours();
-    const horaInicio = filters.horaInicio ? parseInt(filters.horaInicio, 10) : 0;
+    const horaInicio = filters.horaInicio
+      ? parseInt(filters.horaInicio, 10)
+      : 0;
     const horaFin = filters.horaFin ? parseInt(filters.horaFin, 10) : 24;
     const userEmail = getUserEmail(log.id_persona) || "";
 
@@ -81,8 +89,10 @@ const AuditTable: React.FC<AuditTableProps> = ({
       (filters.fecha === "" || logDate === filters.fecha) &&
       (filters.operacion === "" || log.operacion === filters.operacion) &&
       (filters.tabla === "" || log.tabla_afectada === filters.tabla) &&
-      (filters.horaInicio === "" || (logTime >= horaInicio && logTime < horaFin)) &&
-      (filters.correo === "" || userEmail.toLowerCase().includes(filters.correo.toLowerCase()))
+      (filters.horaInicio === "" ||
+        (logTime >= horaInicio && logTime < horaFin)) &&
+      (filters.correo === "" ||
+        userEmail.toLowerCase().includes(filters.correo.toLowerCase()))
     );
   });
 
@@ -109,7 +119,10 @@ const AuditTable: React.FC<AuditTableProps> = ({
   ];
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedLogs = filteredLogs.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedLogs = filteredLogs.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
 
   const handleJumpPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +138,11 @@ const AuditTable: React.FC<AuditTableProps> = ({
   };
 
   const handleJumpPage = () => {
-    if (typeof jumpPage === "number" && jumpPage > 0 && jumpPage <= totalPages) {
+    if (
+      typeof jumpPage === "number" &&
+      jumpPage > 0 &&
+      jumpPage <= totalPages
+    ) {
       onPageChange(jumpPage);
       setJumpPage("");
     }
@@ -134,7 +151,10 @@ const AuditTable: React.FC<AuditTableProps> = ({
   const renderPagination = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    const startPage = Math.max(
+      1,
+      currentPage - Math.floor(maxVisiblePages / 2)
+    );
     const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     if (startPage > 1) {
@@ -155,7 +175,9 @@ const AuditTable: React.FC<AuditTableProps> = ({
           key={i}
           onClick={() => onPageChange(i)}
           className={`mx-1 px-4 py-2 rounded text-sm ${
-            currentPage === i ? "bg-blue-500 text-white" : "bg-gray-200 text-black hover:bg-gray-300"
+            currentPage === i
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black hover:bg-gray-300"
           }`}
         >
           {i}
@@ -188,13 +210,14 @@ const AuditTable: React.FC<AuditTableProps> = ({
             value={filters.fecha}
             onChange={(e) => onFilterChange("fecha", e.target.value)}
             className="p-2 border rounded text-black text-sm w-full md:w-auto"
+            placeholder="Filtrar por fecha"
           />
           <select
             value={filters.operacion}
             onChange={(e) => onFilterChange("operacion", e.target.value)}
             className="p-2 border rounded text-black text-sm w-full md:w-auto"
           >
-            <option value="">Todas las operaciones</option>
+            <option value="">Filtrar por acciones</option>
             <option value="INSERT">ADICIÓN DE DATOS</option>
             <option value="UPDATE">ACTUALIZACIÓN DE DATOS</option>
             <option value="DELETE">ELIMINACIÓN DE DATOS</option>
@@ -204,36 +227,42 @@ const AuditTable: React.FC<AuditTableProps> = ({
             onChange={(e) => onFilterChange("tabla", e.target.value)}
             className="p-2 border rounded text-black text-sm w-full md:w-auto"
           >
-            <option value="">Todas las tablas</option>
+            <option value="">Filtrar por tablas</option>
             {tablas.map((tabla) => (
               <option key={tabla.value} value={tabla.value}>
                 {tabla.label}
               </option>
             ))}
           </select>
-          <input
-            type="number"
-            value={filters.horaInicio}
-            onChange={handleHoraInicioChange}
-            placeholder="Hora de Inicio"
-            className="p-2 border rounded text-black text-sm w-full md:w-auto"
-            min="0"
-            max="23"
-          />
-          <input
-            type="number"
-            value={filters.horaFin}
-            onChange={handleHoraFinChange}
-            placeholder="Hora Fin"
-            className="p-2 border rounded text-black text-sm w-full md:w-auto"
-            min={filters.horaInicio}
-            max="24"
-          />
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600">Hora de Inicio</label>
+            <input
+              type="number"
+              value={filters.horaInicio}
+              onChange={handleHoraInicioChange}
+              placeholder="Hora de Inicio"
+              className="p-2 border rounded text-black text-sm w-full md:w-auto"
+              min="0"
+              max="23"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600">Hora Fin</label>
+            <input
+              type="number"
+              value={filters.horaFin}
+              onChange={handleHoraFinChange}
+              placeholder="Hora Fin"
+              className="p-2 border rounded text-black text-sm w-full md:w-auto"
+              min={filters.horaInicio}
+              max="24"
+            />
+          </div>
           <input
             type="text"
             value={filters.correo}
             onChange={(e) => onFilterChange("correo", e.target.value)}
-            placeholder="Correo"
+            placeholder="Filtrar por correo"
             className="p-2 border rounded text-black text-sm w-full md:w-auto"
           />
           <button
@@ -253,22 +282,51 @@ const AuditTable: React.FC<AuditTableProps> = ({
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
+            <tr className="bg-gray-200 text-black">
+              <th
+                colSpan={5}
+                className="border bg-[#80BA7F] text-white px-4 py-2 text-lg font-semibold"
+              >
+                Tabla de Auditoría
+              </th>
+            </tr>
             <tr className="bg-[#80BA7F] text-white">
-              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Tabla Afectada</th>
-              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Acción</th>
-              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Realizado por</th>
-              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Fecha - Hora</th>
-              <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Detalles</th>
+              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                Tabla Afectada
+              </th>
+              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                Acción
+              </th>
+              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                Realizado por
+              </th>
+              <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                Fecha - Hora
+              </th>
+              <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                Detalles
+              </th>
             </tr>
           </thead>
           <tbody>
             {paginatedLogs.length > 0 ? (
               paginatedLogs.map((log, index) => (
-                <tr key={log.id_auditoria} className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}>
-                  <td className="border border-gray-300 p-2 text-black text-sm">{log.tabla_afectada}</td>
-                  <td className="border border-gray-300 p-2 text-black text-sm">{getOperacionCompleta(log.operacion)}</td>
-                  <td className="border border-gray-300 p-2 text-black text-sm">{getUserEmail(log.id_persona)}</td>
-                  <td className="border border-gray-300 p-2 text-black text-sm">{new Date(log.fecha_hora).toLocaleString()}</td>
+                <tr
+                  key={log.id_auditoria}
+                  className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                >
+                  <td className="border border-gray-300 p-2 text-black text-sm">
+                    {log.tabla_afectada}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-black text-sm">
+                    {getOperacionCompleta(log.operacion)}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-black text-sm">
+                    {getUserEmail(log.id_persona)}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-black text-sm">
+                    {new Date(log.fecha_hora).toLocaleString()}
+                  </td>
                   <td className="border border-gray-300 p-2 text-center">
                     <button
                       onClick={() => onDetailsClick(log)}
@@ -281,7 +339,10 @@ const AuditTable: React.FC<AuditTableProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="border border-gray-300 p-2 text-center text-gray-600 text-sm">
+                <td
+                  colSpan={5}
+                  className="border border-gray-300 p-2 text-center text-gray-600 text-sm"
+                >
                   No hay registros para mostrar.
                 </td>
               </tr>
@@ -293,12 +354,15 @@ const AuditTable: React.FC<AuditTableProps> = ({
       {/* Paginación */}
       <div className="flex justify-center mt-4">{renderPagination()}</div>
       <div className="flex items-center justify-center mt-4">
-        <span className="mr-2 text-sm text-gray-600"> {totalPages} En total </span>
+        <span className="mr-2 text-sm text-gray-600">
+          {" "}
+          {totalPages} Páginas en total{" "}
+        </span>
         <input
           type="number"
           value={jumpPage}
           onChange={handleJumpPageChange}
-          placeholder="Saltar a"
+          placeholder="Saltar a la página"
           className="p-2 border rounded text-black text-sm w-22 mr-2"
         />
         <button

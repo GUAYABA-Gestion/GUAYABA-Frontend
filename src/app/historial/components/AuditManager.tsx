@@ -48,9 +48,7 @@ const AuditManager: React.FC<AuditManagerProps> = ({ logs, users }) => {
   };
 
   return (
-    <div className="flex-grow mt-4 p-4">
-      <h1 className="text-2xl font-bold text-[#034f00]">Historial de Cambios</h1>
-
+    <div className="flex-grow">
       <AuditTable
         logs={logs}
         users={users} // Pasar los usuarios al componente AuditTable

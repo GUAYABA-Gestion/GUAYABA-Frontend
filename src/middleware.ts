@@ -14,6 +14,7 @@ export function middleware(req: NextRequest) {
     "/reportes",
     "/roles",
     "/historial",
+    "/infraestructura/informe",
   ];
 
   // Verificar si la ruta solicitada está protegida
@@ -32,5 +33,5 @@ export function middleware(req: NextRequest) {
 
 // Configuración para aplicar el middleware en las rutas protegidas
 export const config = {
-  matcher: ["/roles", "/account","/historial", "/sedes", "/infraestructura", "/espacios", "/mantenimiento", "/reportes"], // Rutas protegidas
+  matcher: ["/roles", "/account","/historial", "/sedes", "/infraestructura", "/espacios", "/mantenimiento", "/reportes", "/infraestructura/informe"], // Rutas protegidas
 };

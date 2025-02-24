@@ -6,7 +6,7 @@ import { deleteEdificio } from "../../../api/EdificioActions";
 import EdificioTable from "./EdificioTable";
 import EdificioDetailsModal from "./EdificioDetailsModal";
 import AddEdificioModal from "./AddEdificioModal";
-import InformeModal from "../informe/InformeModal";
+import InformeModal from "../../informe/InformeModal";
 import { categoriasEdificio } from "../../../api/desplegableValues";
 
 interface EdificioManagerProps {

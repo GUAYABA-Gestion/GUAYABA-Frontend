@@ -13,7 +13,6 @@ export default function Login() {
   const searchParams = useSearchParams(); // Obtener parámetros de la URL
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
 
   // Obtener el callbackUrl de los parámetros de la URL
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -43,7 +42,6 @@ export default function Login() {
 
           if (data.exists) {
             setAuthCookie(data.token);
-            await fetchUserData();
             await signOut({ redirect: false });
             router.push(callbackUrl); // Redirigir al callbackUrl después del login
           } else {
@@ -82,7 +80,7 @@ export default function Login() {
 
   if (session?.googleToken && !getAuthCookie()) {
     return (
-      <div className="min-h-screen p-4 bg-gray-50">
+      <div className="min-h-screen bg-gray-50">
         <Header />
         <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow text-center">
           <div className="animate-pulse space-y-4">
@@ -95,7 +93,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
@@ -103,7 +101,7 @@ export default function Login() {
         </h1>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
+          <div className={`mb-6 rounded-lg ${
             message.startsWith("❌") 
               ? "bg-red-100 text-red-800"
               : "bg-blue-100 text-blue-800"

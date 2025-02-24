@@ -24,8 +24,6 @@ const Historial: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState("");
 
   useEffect(() => {
-    if (!rolSimulado || rolSimulado === "none") return;
-
     const fetchHistorial = async () => {
       try {
         const response = await fetch(
@@ -66,7 +64,7 @@ const Historial: React.FC = () => {
     setFilteredLogs(filtered);
   }, [selectedDate, logs]);
 
-  if (!rolSimulado || rolSimulado === "none" || rolSimulado =="user" || rolSimulado == "maint" || rolSimulado == "coord") {
+  if (!rolSimulado || rolSimulado =="user" || rolSimulado == "maint" || rolSimulado == "coord") {
     return <p className="text-gray-500 text-center mt-4">No tienes permisos para ver el historial.</p>;
   }
 

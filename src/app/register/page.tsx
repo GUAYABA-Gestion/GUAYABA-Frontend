@@ -8,16 +8,26 @@ import { Sede } from "../../types/api";
 import { getTempMessage, removeTempMessage } from "../../../utils/cookies";
 import { useRol } from "../../../context/RolContext"; // Importar contexto de rol
 
+const roleOptions = [
+  { value: "user", label: "Usuario" },
+  { value: "admin", label: "Administrador" },
+  { value: "coord", label: "Coordinador" },
+  { value: "maint", label: "Mantenimiento" },
+];
+
 export default function Register() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [selectedSede, setSelectedSede] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("user"); // Default role is "user"
   const [agreedToPolicy, setAgreedToPolicy] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [isChecking, setIsChecking] = useState(true);
+  const [showRoleMessage, setShowRoleMessage] = useState(false); // Estado para mostrar el mensaje
+  const [roleConfirmed, setRoleConfirmed] = useState(false); // Estado para confirmar el rol
   const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
 
   useEffect(() => {
@@ -96,6 +106,17 @@ export default function Register() {
     checkUserRegistration();
   }, [session, router]);
 
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedRole(e.target.value);
+    setShowRoleMessage(true);
+    setRoleConfirmed(false); // Resetear la confirmación del rol
+  };
+
+  const handleRoleConfirmation = () => {
+    setRoleConfirmed(true);
+    setShowRoleMessage(false);
+  };
+
   const handleRegistration = async () => {
     if (!session?.googleToken) {
       setMessage("❌ Error de autenticación");
@@ -106,6 +127,7 @@ export default function Register() {
     const errors = [];
     if (!selectedSede) errors.push("selecciona una sede");
     if (!agreedToPolicy) errors.push("acepta las políticas");
+    if (!roleConfirmed) errors.push("confirma tu rol"); // Validar la confirmación del rol
 
     if (errors.length > 0) {
       setMessage(`⚠️ Por favor: ${errors.join(" y ")}`);
@@ -124,6 +146,7 @@ export default function Register() {
           body: JSON.stringify({
             googleToken: session.googleToken,
             id_sede: selectedSede,
+            rol: selectedRole, // Incluir el rol seleccionado
           }),
         }
       );
@@ -149,9 +172,14 @@ export default function Register() {
     }
   };
 
+  const handleCancel = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
+  };
+
   if (isChecking) {
     return (
-      <div className="min-h-screen p-4">
+      <div className="min-h-screen">
         <Header />
         <main className="max-w-md mx-auto mt-8 text-center">
           <div className="animate-pulse">
@@ -165,7 +193,7 @@ export default function Register() {
 
   if (!session) {
     return (
-      <div className="min-h-screen p-4 bg-gray-50">
+      <div className="min-h-screen bg-gray-50">
         <Header />
         <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Registro</h1>
@@ -187,7 +215,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
@@ -234,6 +262,42 @@ export default function Register() {
         </div>
 
         <div className="mb-6">
+          <label className="block text-gray-700 font-medium mb-2">
+            Selecciona tu rol
+          </label>
+          <select
+            value={selectedRole}
+            onChange={handleRoleChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+            disabled={isLoading}
+          >
+            {roleOptions.map((role) => (
+              <option
+                key={role.value}
+                value={role.value}
+                className="text-black"
+              >
+                {role.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {showRoleMessage && (
+          <>
+          <div className="mb-2 rounded-lg bg-yellow-100 text-yellow-800 p-4">
+            ⚠️ Recuerda que puedes probar y experimentar con las funcionalidades del rol que selecciones. Confiamos en que no vas a eliminar toda la base de datos. :)
+          </div>
+          <button
+              onClick={handleRoleConfirmation}
+              className="mt-2 mb-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Entiendo y confirmo mi rol.
+            </button>
+        </>
+        )}
+
+        <div className="mb-6">
           <label className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -255,20 +319,28 @@ export default function Register() {
           </label>
         </div>
 
-        <button
-          onClick={handleRegistration}
-          disabled={isLoading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              Registrando...
-            </div>
-          ) : (
-            "Finalizar Registro"
-          )}
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={handleRegistration}
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Registrando...
+              </div>
+            ) : (
+              "Finalizar Registro"
+            )}
+          </button>
+          <button
+            onClick={handleCancel}
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
       </main>
     </div>
   );

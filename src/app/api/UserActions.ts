@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { User } from "../../../types/api";
+import { User } from "../../types/api";
 
 export const fetchUsers = async () => {
   try {
@@ -118,5 +118,22 @@ export const getAdmins = async () => {
   } catch (error) {
     console.error("Error al obtener usuarios por rol:", error);
     return [];
+  }
+};
+
+export const fetchUser = async () => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
+      headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al obtener datos del usuario");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error al obtener datos del usuario:", error);
+    throw error; // Relanzar el error para manejarlo en el componente
   }
 };

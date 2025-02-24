@@ -6,7 +6,13 @@ import UserTable from "./components/UserTable";
 import UserDetailsModal from "./components/UserDetailsModal";
 import AddUserModal from "./components/AddUserModal";
 import { User, Sede } from "../../types/api";
-import { fetchUsers, fetchSedes, updateUser, deleteUserManual } from "../api/auth/UserActions";
+import { Header } from "../../../components";
+import {
+  fetchUsers,
+  fetchSedes,
+  updateUser,
+  deleteUserManual,
+} from "../api/UserActions";
 
 const AdminDashboard = () => {
   const { rolSimulado } = useRol();
@@ -25,19 +31,29 @@ const AdminDashboard = () => {
   const [editedUser, setEditedUser] = useState<User | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false); // Estado para el modal
+  const [isLoading, setIsLoading] = useState(true); // Estado de carga
 
   useEffect(() => {
     const fetchData = async () => {
-      const usersData = await fetchUsers();
-      const sedesData = await fetchSedes();
-      setUsers(usersData);
-      setSedes(sedesData);
+      try {
+        const usersData = await fetchUsers();
+        usersData.sort((a: User, b: User) => a.id_persona - b.id_persona);
+        setUsers(usersData);
+        const sedesData = await fetchSedes();
+        sedesData.sort((a: Sede, b: Sede) => a.id_sede - b.id_sede);
+        setSedes(sedesData);
+      } catch (error) {
+        console.error("Error al cargar los datos:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, []);
 
   useEffect(() => {
-    const handleResize = () => setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
+    const handleResize = () =>
+      setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
@@ -49,25 +65,26 @@ const AdminDashboard = () => {
 
   const handleSaveChanges = async () => {
     if (!editedUser) return;
-  
+
     if (editedUser.telefono && !/^\d{10}$/.test(editedUser.telefono)) {
       alert("El teléfono debe tener 10 dígitos");
       return;
     }
-  
+
     try {
       const updatedUser = await updateUser(editedUser);
 
-      setUsers(users.map(user => 
-        user.id_persona === updatedUser.id_persona ? updatedUser : user
-      ));
-      
+      setUsers(
+        users.map((user) =>
+          user.id_persona === updatedUser.id_persona ? updatedUser : user
+        )
+      );
+
       setSelectedUser(updatedUser);
       setEditedUser(updatedUser);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       setEditMode(false);
-  
     } catch (error) {
       console.error("Update error:", error);
     }
@@ -76,7 +93,7 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (id_persona: number) => {
     try {
       await deleteUserManual(id_persona);
-      setUsers(users.filter(user => user.id_persona !== id_persona));
+      setUsers(users.filter((user) => user.id_persona !== id_persona));
       setSelectedUser(null);
     } catch (error) {
       console.error("Delete error:", error);
@@ -93,7 +110,7 @@ const AdminDashboard = () => {
   };
 
   const handleFilterChange = (filter: string, value: string) => {
-    setFilters(prev => ({ ...prev, [filter]: value }));
+    setFilters((prev) => ({ ...prev, [filter]: value }));
     setCurrentPage(1); // Reset pagination to the first page
   };
 
@@ -174,115 +191,141 @@ const AdminDashboard = () => {
     document.body.removeChild(link);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-700">Cargando datos...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (rolSimulado !== "admin") {
     return (
-      <div className="p-4">
-        <h2 className="text-2xl font-bold text-black">Acceso Restringido</h2>
-        <p className="text-gray-600">Esta vista solo está disponible para administradores.</p>
+      <div className="bg-gray-50 min-h-screen">
+        <Header />
+        <div className="flex mt-4 items-center justify-center">
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <h2 className="text-2xl font-bold text-black">Acceso Restringido</h2>
+            <p className="text-gray-600">
+              Esta vista solo está disponible para administradores.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="p-4 bg-gray-50 min-h-screen">
-        <h1 className="text-2xl font-bold text-[#034f00]">Gestión de Roles</h1>
+      <div className="bg-gray-50 min-h-screen">
+        <Header />
+        <div className="mt-4 p-4">
+          <h1 className="text-2xl font-bold text-[#034f00]">
+            Gestión de Roles
+          </h1>
 
-        {/* Filtros */}
-        <div className="mt-4 space-y-4">
-          <div className="flex space-x-4">
-            <input
-              type="text"
-              placeholder="Filtrar por correo"
-              value={filters.correo}
-              onChange={(e) => handleFilterChange("correo", e.target.value)}
-              className="p-2 border rounded text-black"
-            />
-            <select
-              value={filters.rol}
-              onChange={(e) => handleFilterChange("rol", e.target.value)}
-              className="p-2 border rounded text-black"
-            >
-              <option value="">Todos los roles</option>
-              <option value="admin">Administrador</option>
-              <option value="coord">Coordinador</option>
-              <option value="maint">Mantenimiento</option>
-              <option value="user">Usuario</option>
-            </select>
-            <select
-              value={filters.sede}
-              onChange={(e) => handleFilterChange("sede", e.target.value)}
-              className="p-2 border rounded text-black"
-            >
-              <option value="">Todas las sedes</option>
-              {sedes.map((sede) => (
-                <option key={sede.id_sede} value={sede.id_sede}>
-                  {sede.nombre}
-                </option>
-              ))}
-            </select>
+          <div className="mt-4 space-y-4">
+            <div className="flex flex-wrap space-y-4 md:space-y-0 md:space-x-4">
+              <input
+                type="text"
+                placeholder="Filtrar por correo"
+                value={filters.correo}
+                onChange={(e) => handleFilterChange("correo", e.target.value)}
+                className="p-2 border rounded text-black min-w-[200px]"
+              />
+              <select
+                value={filters.rol}
+                onChange={(e) => handleFilterChange("rol", e.target.value)}
+                className="p-2 border rounded text-black min-w-[200px]"
+              >
+                <option value="">Todos los roles</option>
+                <option value="admin">Administrador</option>
+                <option value="coord">Coordinador</option>
+                <option value="maint">Mantenimiento</option>
+                <option value="user">Usuario</option>
+              </select>
+              <select
+                value={filters.sede}
+                onChange={(e) => handleFilterChange("sede", e.target.value)}
+                className="p-2 border rounded text-black min-w-[200px]"
+              >
+                <option value="">Todas las sedes</option>
+                {sedes.map((sede) => (
+                  <option key={sede.id_sede} value={sede.id_sede}>
+                    {sede.nombre}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={filters.es_manual}
+                onChange={(e) =>
+                  handleFilterChange("es_manual", e.target.value)
+                }
+                className="p-2 border rounded text-black min-w-[200px]"
+              >
+                <option value="">Todos</option>
+                <option value="true">Añadidos manualmente</option>
+                <option value="false">Registrados en el sistema</option>
+              </select>
+              <button
+                onClick={() => {
+                  setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
+                  setCurrentPage(1); // Reset pagination to the first page
+                }}
+                className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300 min-w-[200px]"
+              >
+                Reiniciar Filtros
+              </button>
+            </div>
+          </div>
 
-            <select
-              value={filters.es_manual}
-              onChange={(e) => handleFilterChange("es_manual", e.target.value)}
-              className="p-2 border rounded text-black"
-            >
-              <option value="">Todos</option>
-              <option value="true">Añadidos manualmente</option>
-              <option value="false">Registrados en el sistema</option>
-            </select>
+          <div className="mt-4 flex space-x-4">
             <button
-              onClick={() => {
-                setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
-                setCurrentPage(1); // Reset pagination to the first page
-              }}
-              className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300"
+              onClick={() => setIsAddUserModalOpen(true)}
+              className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300"
             >
-              Reiniciar Filtros
+              + Añadir Usuarios
+            </button>
+
+            <button
+              onClick={handleDownloadExcel}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+            >
+              Descargar tabla con filtros aplicados
             </button>
           </div>
-        </div>
-
-        <div className="mt-4 flex space-x-4">
-          <button onClick={() => setIsAddUserModalOpen(true)} className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300">
-            + Añadir Usuarios
-          </button>
-
-          <button
-            onClick={handleDownloadExcel}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
-          >
-            Descargar tabla con filtros aplicados
-          </button>
-        </div>
-
-        {/* Tabla */}
-        <div className="mt-6">
-            <UserTable
-              users={users}
-              sedes={sedes}
-              currentPage={currentPage}
-              itemsPerPage={itemsPerPage}
-              filters={filters}
-              onPageChange={setCurrentPage}
-              onUserClick={(user) => {
-                setSelectedUser(user);
-                setEditedUser(user);
-                setEditMode(false);
-              }}
-              onFilterChange={handleFilterChange}
-              resetFilters={() => {
-                setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
-                setCurrentPage(1); // Reset pagination to the first page
-              }}
-            />
-        </div>
-
-        {showSuccess && (
-          <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg">
-            ¡Usuarios añadidos correctamente!
+          {/* Tabla */}
+          <div className="mt-6 overflow-x-auto">
+            <div className="min-w-full">
+              <UserTable
+                users={users}
+                sedes={sedes}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                filters={filters}
+                onPageChange={setCurrentPage}
+                onUserClick={(user) => {
+                  setSelectedUser(user);
+                  setEditedUser(user);
+                  setEditMode(false);
+                }}
+                onFilterChange={handleFilterChange}
+                resetFilters={() => {
+                  setFilters({ sede: "", rol: "", correo: "", es_manual: "" });
+                  setCurrentPage(1); // Reset pagination to the first page
+                }}
+              />
+            </div>
           </div>
-        )}
+          {showSuccess && (
+            <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg">
+              ¡Usuarios añadidos correctamente!
+            </div>
+          )}
+        </div>
       </div>
 
       <UserDetailsModal
@@ -296,7 +339,7 @@ const AdminDashboard = () => {
         editedUser={editedUser}
         handleEditField={handleEditField}
         sedes={sedes}
-        showSuccess={showSuccess} 
+        showSuccess={showSuccess}
       />
 
       <AddUserModal

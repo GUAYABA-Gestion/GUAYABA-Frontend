@@ -1,10 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { User, Sede, Municipio } from "../../../../types/api";
-import { fetchMunicipios } from "../../../api/auth/MunicipioActions";
-import { getAdmins } from "../../../api/auth/UserActions";
-import { updateSede } from "../../../api/auth/SedeActions";
-import { validateTextNotNull } from "../../../api/auth/validation";
+import { updateSede, deleteSede } from "../../../api/SedeActions";
+import { validateTextNotNull } from "../../../api/validation";
 
 interface SedeDetailsModalProps {
   sede: Sede | null;
@@ -12,80 +10,75 @@ interface SedeDetailsModalProps {
   onClose: () => void;
   onSave: (updatedSede: Sede) => void;
   onDelete: (id_sede: number) => void;
-  editMode: boolean;
-  setEditMode: (mode: boolean) => void;
-  editedSede: Sede | null;
-  handleEditField: (field: keyof Sede, value: string | number | null) => void;
-  showSuccess: boolean;
+  municipios: Municipio[];
+  coordinadores: User[];
 }
 
-const SedeDetailsModal = ({
+const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
   sede,
   isOpen,
   onClose,
   onSave,
   onDelete,
-  editMode,
-  setEditMode,
-  editedSede,
-  handleEditField,
-  showSuccess
-}: SedeDetailsModalProps) => {
+  municipios,
+  coordinadores,
+}) => {
+  const [editMode, setEditMode] = useState(false);
+  const [editedSede, setEditedSede] = useState<Sede | null>(sede);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [municipios, setMunicipios] = useState<Municipio[]>([]);
-  const [coordinadores, setCoordinadores] = useState<User[]>([]);
-  const [validationErrors, setValidationErrors] = useState({
-    nombre: false,
-    municipio: false,
-  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      const municipiosData = await fetchMunicipios();
-      setMunicipios(municipiosData);
-      const coordinadoresData = await getAdmins();
-      setCoordinadores(coordinadoresData);
-    };
-    fetchData();
-  }, []);
+    setEditedSede(sede);
+  }, [sede]);
 
-  if (!isOpen || !sede || !editedSede) return null;
-
-  const handleDeleteClick = () => {
-    setConfirmDelete(true);
-  };
-
-  const handleConfirmDelete = () => {
-    onDelete(sede.id_sede);
-    setConfirmDelete(false);
+  const handleEditField = (field: keyof Sede, value: string | number | null) => {
+    setEditedSede((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
   const handleSave = async () => {
-    const errors = {
-      nombre: !validateTextNotNull(editedSede.nombre),
-      municipio: !editedSede.municipio,
-    };
+    if (editedSede) {
+      const validationErrors = {
+        nombre: !validateTextNotNull(editedSede.nombre),
+        municipio: !editedSede.municipio,
+      };
 
-    setValidationErrors(errors);
+      if (Object.values(validationErrors).some((error) => error)) {
+        setError("Por favor corrija los errores antes de guardar.");
+        return;
+      }
 
-    if (Object.values(errors).some((error) => error)) {
-      alert("Por favor corrija los errores antes de guardar.");
-      return;
+      const updatedSede = await updateSede(editedSede);
+      if (updatedSede) {
+        onSave(updatedSede);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+        setEditMode(false);
+      }
     }
+  };
 
-    const updatedSede = await updateSede(editedSede);
-    if (updatedSede) {
-      onSave(updatedSede);
+  const handleDelete = async () => {
+    if (sede) {
+      onDelete(sede.id_sede);
+      setConfirmDelete(false);
+      onClose();
     }
   };
 
   const handleClose = () => {
-    setValidationErrors({
-      nombre: false,
-      municipio: false,
-    });
+    setEditedSede(sede);
+    setEditMode(false);
+    setError(null);
     onClose();
   };
+
+  const handleDeleteCoordinador = () => {
+    handleEditField("coordinador", null);
+  };
+
+  if (!isOpen || !editedSede) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -93,11 +86,11 @@ const SedeDetailsModal = ({
         {confirmDelete ? (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg">
             <p>ELIMINAR SEDE</p>
-            <p className="font-bold">{sede.nombre}</p>
+            <p className="font-bold">{sede?.nombre}</p>
             <p>¿Está seguro? Esta acción no se puede deshacer.</p>
             <div className="mt-4 flex space-x-4">
               <button
-                onClick={handleConfirmDelete}
+                onClick={handleDelete}
                 className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
               >
                 Confirmar Eliminación
@@ -112,55 +105,43 @@ const SedeDetailsModal = ({
           </div>
         ) : (
           <>
-            <h2 className="text-xl font-bold mb-4 text-black">
-              Detalles de la Sede
-            </h2>
+            <h2 className="text-xl font-bold mb-4 text-black">Detalles de la Sede</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Nombre
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Nombre</label>
                 <input
                   type="text"
                   value={editedSede.nombre || ""}
                   onChange={(e) => handleEditField("nombre", e.target.value)}
-                  className={`mt-1 p-2 border rounded w-full text-black ${
-                    validationErrors.nombre ? "outline outline-red-500" : ""
-                  }`}
+                  className={`mt-1 p-2 border rounded w-full text-black ${!validateTextNotNull(editedSede.nombre) ? "outline outline-red-500" : ""}`}
                   disabled={!editMode}
                 />
-                {validationErrors.nombre && (
+                {!validateTextNotNull(editedSede.nombre) && (
                   <p className="text-red-500 text-sm">Nombre no puede ser vacío.</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Municipio
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Municipio</label>
                 <select
                   value={editedSede.municipio || ""}
                   onChange={(e) => handleEditField("municipio", parseInt(e.target.value))}
-                  className={`mt-1 p-2 border rounded w-full text-black ${
-                    validationErrors.municipio ? "outline outline-red-500" : ""
-                  }`}
+                  className={`mt-1 p-2 border rounded w-full text-black ${!editedSede.municipio ? "outline outline-red-500" : ""}`}
                   disabled={!editMode}
                 >
                   <option value="">Seleccione un municipio</option>
-                  {municipios.map((municipio: Municipio) => (
+                  {municipios.map((municipio) => (
                     <option key={municipio.id} value={municipio.id}>
                       {municipio.nombre}
                     </option>
                   ))}
                 </select>
-                {validationErrors.municipio && (
-                  <p className="text-red-500 text-sm">Debe seleccionar un municipio.</p>
+                {!editedSede.municipio && (
+                  <p className="text-red-500 text-sm">Municipio no puede ser vacío.</p>
                 )}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Coordinador
-                </label>
-                <div className="flex">
+              <div className="flex items-center">
+                <div className="flex-grow">
+                  <label className="block text-sm font-medium text-gray-700">Coordinador</label>
                   <select
                     value={editedSede.coordinador || ""}
                     onChange={(e) => handleEditField("coordinador", parseInt(e.target.value))}
@@ -168,21 +149,21 @@ const SedeDetailsModal = ({
                     disabled={!editMode}
                   >
                     <option value="">Seleccione un coordinador</option>
-                    {coordinadores.map((coordinador: User) => (
+                    {coordinadores.map((coordinador) => (
                       <option key={coordinador.id_persona} value={coordinador.id_persona}>
                         {coordinador.correo}
                       </option>
                     ))}
                   </select>
-                  {editMode && (
-                    <button
-                      onClick={() => handleEditField("coordinador", null)}
-                      className="ml-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Eliminar
-                    </button>
-                  )}
                 </div>
+                {editedSede.coordinador && editMode && (
+                  <button
+                    onClick={handleDeleteCoordinador}
+                    className="ml-2 mt-6 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    X
+                  </button>
+                )}
               </div>
             </div>
             {showSuccess && (
@@ -200,10 +181,7 @@ const SedeDetailsModal = ({
                     Guardar Cambios
                   </button>
                   <button
-                    onClick={() => {
-                      setEditMode(false);
-                      handleClose();
-                    }}
+                    onClick={handleClose}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
                     Cancelar
@@ -218,7 +196,7 @@ const SedeDetailsModal = ({
                     Editar
                   </button>
                   <button
-                    onClick={handleDeleteClick}
+                    onClick={() => setConfirmDelete(true)}
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                   >
                     Eliminar

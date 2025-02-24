@@ -10,7 +10,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
-  const { cambiarRol, fetchUserData } = useRol(); // Usar el contexto de rol
+  const { rolSimulado } = useRol(); // Usar el contexto de rol
 
   // Verificar autenticación solo en el cliente
   useEffect(() => {
@@ -24,7 +24,6 @@ const Header = () => {
 
     // Cerrar la sesión de Google con NextAuth
     await signOut({ redirect: false });
-    cambiarRol("none");
     // Redirigir al login
     router.push("/login");
   };
@@ -33,24 +32,47 @@ const Header = () => {
     setIsOpen(!isOpen);
   };
 
+  const rutasPorRol: Record<string, { path: string; label: string }[]> = {
+    admin: [
+      { path: "/roles", label: "Gestión de Roles" },
+      { path: "/historial", label: "Auditoría" },
+      { path: "/infraestructura", label: "Gestión de Infraestructura" },
+      { path: "/account", label: "Cuenta" },
+    ],
+    coord: [
+      { path: "/infraestructura", label: "Gestión de Sede" },
+      { path: "/account", label: "Cuenta" },
+    ],
+    maint: [
+      { path: "/infraestructura", label: "Información Sede" },
+      { path: "/account", label: "Cuenta" },
+    ],
+    user: [
+      { path: "/infraestructura", label: "Buscador de edificios" },
+      { path: "/account", label: "Cuenta" },
+    ],
+    none: [],
+  };
+
+  const rutas = rutasPorRol[rolSimulado] || [];
+
   return (
     <header className="bg-[#1f6032] text-white p-4 flex justify-between items-center relative">
       {/* Contenedor del logo */}
       <div className="flex justify-center items-center w-1/3">
-        <img
-          src="/images/Guayaba_LogoTexto.png"
-          alt="Guayaba Logo"
-          className="w-48 h-auto"
-        />
+        <Link href="/">
+          <img
+            src="/images/Guayaba_LogoTexto.png"
+            alt="Guayaba Logo"
+            className="w-48 h-auto cursor-pointer"
+          />
+        </Link>
       </div>
 
       {/* Navegación */}
       <nav className="flex-1 flex justify-end">
         {/* Botón hamburguesa visible solo en pantallas pequeñas */}
-        <button
-          className="block md:hidden text-white"
-          onClick={toggleMenu}
-        >
+        <button className="block md:hidden text-white" onClick={toggleMenu}>
           <svg
             className="w-6 h-6"
             fill="none"
@@ -71,46 +93,110 @@ const Header = () => {
       {/* Menú en pantallas grandes: horizontal, siempre visible */}
       <ul className="hidden md:flex md:flex-row md:space-x-6 items-center">
         {isAuthenticated ? (
-          <li>
-            <button
-              onClick={handleLogout}
-              className="hover:text-gray-300 transition-colors"
-            >
-              Logout
-            </button>
-          </li>
+          <>
+            <li className="relative group">
+              <button className="hover:text-gray-300 transition-colors flex items-center">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"
+                  ></path>
+                </svg>
+                Navegación por la aplicación
+              </button>
+              <ul className="absolute hidden group-hover:block bg-[#1f6032] text-white p-2 space-y-2">
+                {rutas.map((ruta) => (
+                  <li key={ruta.path}>
+                    <Link
+                      href={ruta.path}
+                      className="hover:text-gray-300 transition-colors flex items-center"
+                    >
+                      {ruta.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          </>
         ) : (
           <li>
-            <Link href="/login" className="hover:text-gray-300 transition-colors">
-              Login
+            <Link
+              href="/login"
+              className="hover:text-gray-300 transition-colors flex items-center"
+            >
+              <svg
+                className="w-5 h-5 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 12h14M12 5l7 7-7 7"
+                ></path>
+              </svg>
+              Iniciar Sesión
             </Link>
           </li>
         )}
+
         <li>
-          <Link href="/" className="hover:text-gray-300 transition-colors">
-            Home
+          <Link
+            href="/contact"
+            className="hover:text-gray-300 transition-colors flex items-center"
+          >
+            <svg
+              className="w-5 h-5 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18"
+              ></path>
+            </svg>
+            Contacto
           </Link>
         </li>
-        <li>
-          <Link href="/account" className="hover:text-gray-300 transition-colors">
-            Account
-          </Link>
-        </li>
-        <li>
-          <Link href="/about" className="hover:text-gray-300 transition-colors">
-            About
-          </Link>
-        </li>
-        <li>
-          <Link href="/services" className="hover:text-gray-300 transition-colors">
-            Services
-          </Link>
-        </li>
-        <li>
-          <Link href="/contact" className="hover:text-gray-300 transition-colors">
-            Contact
-          </Link>
-        </li>
+        {isAuthenticated && (
+          <li>
+            <button
+              onClick={handleLogout}
+              className="hover:text-gray-300 transition-colors flex items-center"
+            >
+              <svg
+                className="w-5 h-5 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 6h-6"
+                ></path>
+              </svg>
+              Cerrar Sesión
+            </button>
+          </li>
+        )}
       </ul>
 
       {/* Menú desplegable para pantallas pequeñas */}
@@ -121,44 +207,84 @@ const Header = () => {
       >
         <ul>
           {isAuthenticated ? (
-            <li>
-              <button
-                onClick={handleLogout}
-                className="hover:text-gray-300 transition-colors"
-              >
-                Logout
-              </button>
-            </li>
+            <>
+              {rutas.map((ruta) => (
+                <li key={ruta.path}>
+                  <Link
+                    href={ruta.path}
+                    className="hover:text-gray-300 transition-colors flex items-center"
+                  >
+                    {ruta.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="hover:text-gray-300 transition-colors flex items-center"
+                >
+                  <svg
+                    className="w-5 h-5 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 6h-6"
+                    ></path>
+                  </svg>
+                  Cerrar sesión
+                </button>
+              </li>
+            </>
           ) : (
             <li>
-              <Link href="/login" className="hover:text-gray-300 transition-colors">
-                Login
+              <Link
+                href="/login"
+                className="hover:text-gray-300 transition-colors flex items-center"
+              >
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 12h14M12 5l7 7-7 7"
+                  ></path>
+                </svg>
+                Iniciar Sesión
               </Link>
             </li>
           )}
           <li>
-            <Link href="/" className="hover:text-gray-300 transition-colors">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link href="/account" className="hover:text-gray-300 transition-colors">
-              Account
-            </Link>
-          </li>
-          <li>
-            <Link href="/about" className="hover:text-gray-300 transition-colors">
-              About
-            </Link>
-          </li>
-          <li>
-            <Link href="/services" className="hover:text-gray-300 transition-colors">
-              Services
-            </Link>
-          </li>
-          <li>
-            <Link href="/contact" className="hover:text-gray-300 transition-colors">
-              Contact
+            <Link
+              href="/contact"
+              className="hover:text-gray-300 transition-colors flex items-center"
+            >
+              <svg
+                className="w-5 h-5 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18"
+                ></path>
+              </svg>
+              Contacto
             </Link>
           </li>
         </ul>

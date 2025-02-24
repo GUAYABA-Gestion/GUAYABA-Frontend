@@ -1,12 +1,12 @@
 import Cookies from "js-cookie";
-import { Sede } from "../../../types/api";
+import { Sede } from "../../types/api";
 
 export const fetchSedes = async () => {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/sedes`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
-    const data = response.json();  
+    const data = await response.json();  
     return data;
   } catch (error) {
     console.error("Error al obtener sedes:", error);
@@ -14,15 +14,16 @@ export const fetchSedes = async () => {
   }
 };
 
-export const fetchSedeById = async (id: number) => {
+export const fetchSedeById = async (id: number): Promise<Sede> => {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/sedes/${id}`, {
       headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
     });
-    return response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error("Error al obtener sede:", error);
-    return null;
+    return null!;
   }
 };
 

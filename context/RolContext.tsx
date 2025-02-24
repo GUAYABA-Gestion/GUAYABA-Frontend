@@ -6,17 +6,22 @@ import { useRouter } from "next/navigation"; // Si usas App Router
 
 const RolContext = createContext<{
   rolSimulado: string | "none";
+  idSede: number | null;
   cambiarRol: (nuevoRol: string | "none") => void;
+  cambiarSede: (nuevoIdSede: number | null) => void;
   fetchUserData: () => Promise<void>;
 } | null>(null);
 
 export const RolProvider = ({ children }: { children: ReactNode }) => {
   const [rolSimulado, setRolSimulado] = useState<string | "none">("none");
+  const [idSede, setIdSede] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter(); // Si usas App Router
 
   const handleLogout = () => {
     Cookies.remove("jwt");
     setRolSimulado("none");
+    setIdSede(null);
     // Redirección con Next.js (App Router)
     router.push("/login");
     // O con window.location si no usas App Router
@@ -27,6 +32,8 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
     const jwt = Cookies.get("jwt");
     if (!jwt) {
       setRolSimulado("none");
+      setIdSede(null);
+      setIsLoading(false);
       return;
     }
 
@@ -42,7 +49,9 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
 
       const data = await response.json();
       setRolSimulado(data.rol);
-      
+      setIdSede(data.id_sede);
+      setIsLoading(false);
+
     } catch (error) {
       console.error("Error:", error);
       handleLogout();
@@ -54,8 +63,8 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <RolContext.Provider value={{ rolSimulado, cambiarRol: setRolSimulado, fetchUserData }}>
-      {children}
+    <RolContext.Provider value={{ rolSimulado /*: 'coord' */, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData }}>
+      {!isLoading && children}
     </RolContext.Provider>
   );
 };

@@ -1,16 +1,15 @@
 "use client";
 import { useState } from "react";
 import { Sede, Municipio, User } from "../../../../types/api";
-import { validateTextNotNull } from "../../../api/auth/validation";
-import { addSedesManual } from "../../../api/auth/SedeActions";
+import { validateTextNotNull } from "../../../api/validation";
+import { addSedesManual } from "../../../api/SedeActions";
 
 interface AddSedeModalProps {
   isOpen: boolean;
   onClose: () => void;
   municipios: Municipio[];
   coordinadores: User[];
-  onSedeAdded: (newSedes: Sede[]) => void;
-  showSuccessMessage: () => void;
+  onSedesAdded: (newSedes: Sede[]) => void;
 }
 
 const AddSedeModal: React.FC<AddSedeModalProps> = ({
@@ -18,8 +17,7 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
   onClose,
   municipios,
   coordinadores,
-  onSedeAdded,
-  showSuccessMessage,
+  onSedesAdded,
 }) => {
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [validationErrors, setValidationErrors] = useState<
@@ -59,15 +57,6 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
 
     setValidationErrors(errors);
 
-    const errorMessages = errors.map((error, index) => {
-      const messages = [];
-      if (error.nombre) messages.push(`Fila ${index + 1}: Nombre no puede ser vacío.`);
-      if (error.municipio) messages.push(`Fila ${index + 1}: Debe seleccionar un municipio.`);
-      return messages;
-    }).flat();
-
-    setErrorMessages(errorMessages);
-
     if (errors.some((error) => error.nombre || error.municipio)) {
       alert("Por favor corrija los errores antes de enviar.");
       return;
@@ -75,8 +64,7 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
 
     try {
       const response = await addSedesManual(sedes);
-      onSedeAdded(response.sedes);
-      showSuccessMessage();
+      onSedesAdded(response.sedes);
       setSedes([]);
       setValidationErrors([]);
       setErrorMessages([]);
@@ -175,10 +163,10 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
         </div>
 
         {Object.values(validationErrors).some((errors) => Object.values(errors).some((error) => error)) && (
-          <div className="mt-4 text-red-500">
-            <ul>
-              {Object.values(validationErrors).some((errors) => errors.nombre) && <li>Nombre: No puede ser vacío</li>}
-              {Object.values(validationErrors).some((errors) => errors.municipio) && <li>Municipio: Debe seleccionar un municipio</li>}
+          <div className="mt-4 text-red-500 text-sm">
+            <ul className="list-disc pl-5">
+              {Object.values(validationErrors).some((errors) => errors.nombre) && <li>Nombre: Campo obligatorio</li>}
+              {Object.values(validationErrors).some((errors) => errors.municipio) && <li>Municipio: Seleccione un municipio válido</li>}
             </ul>
           </div>
         )}

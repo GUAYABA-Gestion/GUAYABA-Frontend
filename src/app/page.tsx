@@ -1,7 +1,7 @@
 "use client";
 import { Header } from "../../components";
 import { Footer } from "../../components";
-import {FuncionalidadesCarousel} from "../../components";
+import { FuncionalidadesCarousel } from "../../components";
 
 export default function Home() {
   return (
@@ -10,32 +10,30 @@ export default function Home() {
       <Header />
 
       {/* Contenedor principal */}
-      <div className="flex flex-col md:flex-row bg-gray-50 overflow-hidden items-center md:items-start">
-        {/* Sección izquierda: Texto */}
-        <div className="flex-1 p-6 text-center md:text-left">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Bienvenido a Guayaba
-          </h2>
-          <p className="mt-4 text-gray-600">
-            Centralizamos la información clave de la estructura educativa de tu
-            universidad, facilitando la gestión y toma de decisiones respecto a
-            los distintos espacios que la componen, para que los puedas
-            disfrutar al máximo. Creemos en la innovación y la fiabilidad.
-          </p>
-          {/* Botones */}
-          <div className="mt-6 flex justify-center space-x-4">
-          <form method="get" action="/wompi">
-            <button
-            className="bg-[#80BA7F] text-white px-6 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300">
-              Pagar Licencia
-            </button>
-            </form>
-            <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg shadow-md hover:bg-gray-300 transition duration-300">
-              Contáctanos
-            </button>
+      <div className="flex flex-col md:flex-row bg-gray-50 overflow-hidden items-center justify-center w-full">{/* Sección izquierda: Texto */}
+        <div className="flex-1 p-6 text-center md:text-left flex items-center justify-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Bienvenido a Guayaba
+            </h2>
+            <p className="mt-4 text-gray-600">
+              Centralizamos la información clave de la estructura educativa de
+              tu universidad, facilitando la gestión y toma de decisiones
+              respecto a los distintos espacios que la componen, para que los
+              puedas disfrutar al máximo. Creemos en la innovación y la
+              fiabilidad.
+            </p>
+            {/* Botones */}
+            <div className="mt-6 flex justify-center space-x-4">
+              <button className="bg-[#80BA7F] text-white px-6 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300">
+                Pagar Licencia
+              </button>
+              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg shadow-md hover:bg-gray-300 transition duration-300">
+                Contáctanos
+              </button>
+            </div>
           </div>
         </div>
-
         {/* Sección derecha: Imagen */}
         <div className="flex-1 p-6">
           <img
@@ -141,59 +139,99 @@ export default function Home() {
         </div>
       </div>
 
-
       {/* Sección: Nuestro Equipo */}
       <div className="bg-[#F9FAFB] py-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h3 className="text-2xl font-bold text-[#034f00] mb-8">Equipo GUAYABA</h3>
+          <h3 className="text-2xl font-bold text-[#034f00] mb-8">
+            Equipo GUAYABA
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-
-          {/* Miembro 1 */}
+            {/* Miembro 1 */}
             <div className="flex-grow flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg">
-              <img src="/images/tibusanti.jpg" alt="Miembro 1" className="w-32 h-32 rounded-full object-cover mb-4"/>
-              <h4 className="text-lg font-semibold text-gray-800">Santiago Reyes Ochoa</h4>
+              <img
+                src="/images/tibusanti.jpg"
+                alt="Miembro 1"
+                className="w-32 h-32 rounded-full object-cover mb-4"
+              />
+              <h4 className="text-lg font-semibold text-gray-800">
+                Santiago Reyes Ochoa
+              </h4>
               <p className="text-sm text-gray-600">Frontend + Backend</p>
-                <div className="mt-2 flex space-x-2">
-                  <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
-                  <a href="#" className="text-blue-500 hover:underline">GitHub</a>
-                </div>
-            </div>
-
-          {/* Miembro 2 */}
-            <div className="flex-grow flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg">
-              <img src="/images/sant.jpg" alt="Miembro 2" className="w-32 h-32 rounded-full object-cover mb-4"/>
-              <h4 className="text-lg font-semibold text-gray-800">Santiago Ballen Leguizamo</h4>
-              <p className="text-sm text-gray-600">Backend</p>
-                <div className="mt-2 flex space-x-2">
-                  <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
-                  <a href="#" className="text-blue-500 hover:underline">GitHub</a>
-                </div>
-            </div>
-
-          {/* Miembro 3 */}
-            <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
-              <img src="/images/miguel.jpg" alt="Miembro 3" className="w-32 h-32 rounded-full object-cover mb-4"/>
-              <h4 className="text-lg font-semibold text-gray-800">Miguel Angel Suarez Cortes</h4>
-              <p className="text-sm text-gray-600">Backend</p>
               <div className="mt-2 flex space-x-2">
-                <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
-                <a href="#" className="text-blue-500 hover:underline">GitHub</a>
+                <a href="#" className="text-blue-500 hover:underline">
+                  LinkedIn
+                </a>
+                <a href="#" className="text-blue-500 hover:underline">
+                  GitHub
+                </a>
               </div>
             </div>
 
-          {/* Miembro 4 */}
-            <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
-              <img src="/images/dan3.jpg" alt="Miembro 4" className="w-32 h-32 rounded-full object-cover mb-4"/>
-              <h4 className="text-lg font-semibold text-gray-800">Daniel Esteban Tobar Lozano</h4>
-              <p className="text-sm text-gray-600">Frontend</p>
-                <div className="mt-2 flex space-x-2">
-                  <a href="#" className="text-blue-500 hover:underline">LinkedIn</a>
-                  <a href="#" className="text-blue-500 hover:underline">GitHub</a>
-                </div>
+            {/* Miembro 2 */}
+            <div className="flex-grow flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg">
+              <img
+                src="/images/sant.jpg"
+                alt="Miembro 2"
+                className="w-32 h-32 rounded-full object-cover mb-4"
+              />
+              <h4 className="text-lg font-semibold text-gray-800">
+                Santiago Ballen Leguizamo
+              </h4>
+              <p className="text-sm text-gray-600">Backend</p>
+              <div className="mt-2 flex space-x-2">
+                <a href="#" className="text-blue-500 hover:underline">
+                  LinkedIn
+                </a>
+                <a href="#" className="text-blue-500 hover:underline">
+                  GitHub
+                </a>
+              </div>
             </div>
+
+            {/* Miembro 3 */}
+            <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+              <img
+                src="/images/miguel.jpg"
+                alt="Miembro 3"
+                className="w-32 h-32 rounded-full object-cover mb-4"
+              />
+              <h4 className="text-lg font-semibold text-gray-800">
+                Miguel Angel Suarez Cortes
+              </h4>
+              <p className="text-sm text-gray-600">Backend</p>
+              <div className="mt-2 flex space-x-2">
+                <a href="#" className="text-blue-500 hover:underline">
+                  LinkedIn
+                </a>
+                <a href="#" className="text-blue-500 hover:underline">
+                  GitHub
+                </a>
+              </div>
+            </div>
+
+            {/* Miembro 4 */}
+            <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+              <img
+                src="/images/dan3.jpg"
+                alt="Miembro 4"
+                className="w-32 h-32 rounded-full object-cover mb-4"
+              />
+              <h4 className="text-lg font-semibold text-gray-800">
+                Daniel Esteban Tobar Lozano
+              </h4>
+              <p className="text-sm text-gray-600">Frontend</p>
+              <div className="mt-2 flex space-x-2">
+                <a href="#" className="text-blue-500 hover:underline">
+                  LinkedIn
+                </a>
+                <a href="#" className="text-blue-500 hover:underline">
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
       {/* Footer */}
       <Footer />

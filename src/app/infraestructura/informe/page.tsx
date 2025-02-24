@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Sede, Espacio, Edificio } from "../../../types/api";
 import { fetchEventosByEspacios } from "../../api/EventoActions";
 import { fetchEspaciosByEdificios } from "../../api/EspacioActions";
 import { Footer, Header } from "../../../../components";
+import { Chart } from "chart.js";
+import { fetchSedes } from "@/app/api/SedeActions";
+
 
 
 interface EdificioUsage {
@@ -12,17 +14,45 @@ interface EdificioUsage {
   usage: number;
 }
 
+interface SedeInformation {
+  nombre: string;
+  edificioInformation: EdificioUsage[];
+}
+
 
 const InformePage: React.FC = () => {
-  const [edificioUsage, setEdificioUsage] = useState<EdificioUsage[]>([]);
+  const [edificiosUsage, setEdificioUsage] = useState<EdificioUsage[]>([]);
+  const [sedeInformation, setSedeInformation] = useState<SedeInformation[]>([]);
   const informeData = JSON.parse(localStorage.getItem("informeData") || "{}");
   const { selectedSedes, filteredEdificios, rolSimulado } = informeData;
 
-  useEffect(() => {
+  
+
+  useEffect( () => {
+    const fetchData = async () => {
+      const sedesMap = new Map<number, SedeInformation>();
+      const sedesData = await fetchSedes();
+      calculateUsePercentage(filteredEdificios);
+      filteredEdificios.forEach((edificio: Edificio) => {
+        const sedeId = edificio.id_sede;
+        const sedeNombre = sedesData.map((sede: Sede) => sede.id_sede === edificio.id_sede);
+        const edificioInfo = edificiosUsage.find((usage) => usage.nombre === edificio.nombre);
+
+        if (!sedesMap.has(sedeId)) {
+          sedesMap.set(sedeId, {nombre: sedeNombre, edificioInformation: []});
+        }
+        if (edificioInfo) {
+          sedesMap.get(sedeId)?.edificioInformation.push()
+        }
+      });
+        
+      };
+    
     // Verificar si los datos necesarios están presentes
     if (!selectedSedes || !filteredEdificios || !rolSimulado) {
       window.location.href = "/infraestructura"; // Redirigir si no hay datos
     } else {
+      fetchData();
       calculateUsePercentage(filteredEdificios);
     }
 
@@ -48,7 +78,7 @@ const InformePage: React.FC = () => {
 
     const usageData: EdificioUsage[] = [];
 
-    filteredEdificios.forEach((edificio) => {
+    filteredEdificios.forEach((edificio: Edificio) => {
       const espaciosEdificio = espaciosEdificios.filter(
         (espacio) => espacio.id_edificio === edificio.id_edificio
       );
@@ -66,35 +96,23 @@ const InformePage: React.FC = () => {
   };
 
   const generatePDF = async () => {
-    // Lógica para generar el PDF
-    // (igual que en el código anterior)
+    window.print();
   };
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />
       <h1 className="text-2xl font-bold mb-4">Informe de Uso de Edificios</h1>
-      <div id="contenedorchart">
-        {edificioUsage.map((edificio) => (
-          <div key={edificio.nombre} className="mb-4">
-            <span className="mr-4">{edificio.nombre}</span>
-            <div
-              style={{
-                width: `${edificio.usage}%`,
-                height: "20px",
-                backgroundColor: "rgba(11, 241, 88, 0.8)",
-                borderRadius: "4px",
-              }}
-            ></div>
-          </div>
-        ))}
-      </div>
       <button
         onClick={generatePDF}
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
         Descargar Informe en PDF
       </button>
+      <div id="contenedorchart">
+        
+      </div>
+      <Footer />
     </div>
   );
 };

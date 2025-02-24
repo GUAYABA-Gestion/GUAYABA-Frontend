@@ -3,9 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Sede, Espacio, Edificio } from "../../../types/api";
 import { fetchEventosByEspacios } from "../../api/EventoActions";
 import { fetchEspaciosByEdificios } from "../../api/EspacioActions";
-import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useRouter } from "next/navigation";
+
 
 interface DetailsModalProps {
   isOpen: boolean;

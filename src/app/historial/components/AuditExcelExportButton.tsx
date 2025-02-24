@@ -70,7 +70,7 @@ const AuditExcelExportButton: React.FC<AuditExcelExportButtonProps> = ({ logs, f
   return (
     <button
       onClick={handleDownloadExcel}
-      className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+      className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 text-sm w-full md:w-auto"
     >
       Descargar tabla con filtros aplicados
     </button>

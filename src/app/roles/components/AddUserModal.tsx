@@ -134,13 +134,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           })),
         ]);
       },
-      error: (err) => console.error("Error al leer CSV:", err.message),
+      error: (err) => setError(`Error al leer CSV: ${err.message}`),
     });
   };
 
   const handleSubmit = async () => {
     if (users.length === 0) {
-      alert("No hay usuarios para añadir.");
+      setError("No hay usuarios para añadir.");
       return;
     }
 
@@ -158,7 +158,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     );
 
     if (hasErrors) {
-      alert("Por favor corrija los errores antes de enviar.");
+      setError("Por favor corrija los errores antes de enviar.");
       return;
     }
 
@@ -170,8 +170,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       setValidationErrors([]);
       onClose();
     } catch (error: any) {
-      console.error("Error al añadir usuarios:", error);
-      setError(error.message);
+      setError(`Error al añadir usuarios: ${error.message}`);
     }
   };
 

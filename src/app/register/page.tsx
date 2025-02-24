@@ -184,7 +184,7 @@ export default function Register() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
-        <main className="flex-grow flex items-center justify-center">
+        <main className="flex-grow flex p-6 items-center justify-center">
           <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow text-center">
             <div className="animate-pulse space-y-4">
               <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto" />
@@ -201,7 +201,7 @@ export default function Register() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
-        <main className="flex-grow flex items-center justify-center">
+        <main className="flex-grow flex p-6 items-center justify-center">
           <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow text-center">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">Registro</h1>
             <p className="mb-6 text-gray-600">
@@ -226,7 +226,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow flex items-center justify-center">
+      <main className="flex-grow flex p-6 items-center justify-center">
         <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
             Completa tu registro

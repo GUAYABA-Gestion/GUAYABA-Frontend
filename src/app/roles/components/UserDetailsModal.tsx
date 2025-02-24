@@ -43,6 +43,7 @@ const UserDetailsModal = ({
     telefono: false,
     id_sede: false,
   });
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen || !user || !editedUser) return null;
 
@@ -52,7 +53,7 @@ const UserDetailsModal = ({
       setReferences(data.references);
       setConfirmDelete(true);
     } catch (error) {
-      console.error("Error al obtener referencias del usuario:", error);
+      setError("Error al obtener referencias del usuario.");
     }
   };
 
@@ -72,11 +73,16 @@ const UserDetailsModal = ({
     setValidationErrors(errors);
 
     if (Object.values(errors).some((error) => error)) {
-      alert("Por favor corrija los errores antes de guardar.");
+      setError("Por favor corrija los errores antes de guardar.");
       return;
     }
 
-    await onSave();
+    try {
+      await onSave();
+      setError(null); // Clear error if save is successful
+    } catch (error: any) {
+      setError(`Error al guardar los cambios: ${error.message}`);
+    }
   };
 
   const handleClose = () => {
@@ -86,6 +92,7 @@ const UserDetailsModal = ({
       telefono: false,
       id_sede: false,
     });
+    setError(null);
     onClose();
   };
 
@@ -136,6 +143,7 @@ const UserDetailsModal = ({
                 editables.
               </p>
             )}
+            {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">

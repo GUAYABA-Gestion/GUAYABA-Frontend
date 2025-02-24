@@ -8,7 +8,6 @@ export const fetchUsers = async () => {
     });
     return response.json();
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
     return [];
   }
 };
@@ -20,7 +19,6 @@ export const fetchSedes = async () => {
     });
     return response.json();
   } catch (error) {
-    console.error("Error al obtener sedes:", error);
     return [];
   }
 };
@@ -43,7 +41,6 @@ export const addUsersManual = async (users: any[]) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al añadir usuarios front:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -60,7 +57,7 @@ export const deleteUserManual = async (id_persona: number) => {
     });
     return response.json();
   } catch (error) {
-    console.error("Error al eliminar usuario:", error);
+    throw error;
   }
 };
 
@@ -81,7 +78,6 @@ export const updateUser = async (user: User) => {
 
     return response.json(); // Devuelve el usuario actualizado
   } catch (error) {
-    console.error("Error al actualizar el usuario:", error);
     throw error; // Relanza el error para manejarlo en el componente
   }
 };
@@ -104,7 +100,6 @@ export const getUserReferences = async (id_persona: number) => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al obtener referencias del usuario:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
@@ -133,7 +128,6 @@ export const fetchUser = async () => {
 
     return response.json();
   } catch (error) {
-    console.error("Error al obtener datos del usuario:", error);
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };

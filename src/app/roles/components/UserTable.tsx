@@ -128,8 +128,19 @@ const UserTable = ({
 
       {/* Tabla */}
       <div className="mt-6 overflow-x-auto">
+      <p className="text-gray-600 mb-4">
+          Las filas en la tabla que tienen un borde rojo a la izquierda indican que son personas que fueron añadidas manualmente.
+        </p>
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
+          <tr className="bg-gray-200 text-black">
+              <th
+                colSpan={4}
+                className="border bg-[#80BA7F] text-white px-4 py-2 text-lg font-semibold"
+              >
+                Tabla de Personas
+              </th>
+            </tr>
             <tr className="bg-[#80BA7F] text-white">
               <th className="border border-gray-300 px-4 py-2 min-w-[250px]">Correo</th>
               <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Rol</th>

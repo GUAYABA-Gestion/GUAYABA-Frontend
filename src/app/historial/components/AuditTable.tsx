@@ -204,7 +204,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
     <div className="p-4 bg-gray-50">
       {/* Filtros y botones */}
       <div className="mt-2 space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-end gap-2">
           <input
             type="date"
             value={filters.fecha}

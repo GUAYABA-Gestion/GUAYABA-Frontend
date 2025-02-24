@@ -52,12 +52,12 @@ export default function FuncionalidadesCarousel() {
           <SwiperSlide>
             <div
               className="w-full h-[400px] md:h-[450px] bg-cover bg-center"
-              style={{ backgroundImage: "url('/images/usuarios.png')" }}
+              style={{ backgroundImage: "url('/images/auditoria.png')" }}
             >
               <div className="w-full h-full flex items-center justify-center bg-opacity-80 bg-[#E8F4E8]">
                 <div className="text-center max-w-xl text-gray-800">
-                  <h4 className="text-2xl font-bold mb-2">Reservas Inteligentes</h4>
-                  <p>Facilita la reserva de espacios con un sistema ágil e intuitivo.</p>
+                  <h4 className="text-2xl font-bold mb-2">Tabla de Auditoría</h4>
+                  <p>Realiza un seguimiento extenso y completo del sistema al revisar en tiempo real todo cambio hecho por cualquier usuario con permisos.</p>
                 </div>
               </div>
             </div>

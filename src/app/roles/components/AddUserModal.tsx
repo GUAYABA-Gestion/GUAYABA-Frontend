@@ -103,6 +103,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const validExtensions = [".csv"];
+    const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+    const validMimeTypes = ["text/csv", "application/vnd.ms-excel"];
+
+    if (!validExtensions.includes(fileExtension) || !validMimeTypes.includes(file.type)) {
+      alert("Por favor, sube un archivo válido (.csv)");
+      event.target.value = ""; // Reinicia el input
+      return;
+    }
+
     setSelectedFile(file);
 
     Papa.parse(file, {

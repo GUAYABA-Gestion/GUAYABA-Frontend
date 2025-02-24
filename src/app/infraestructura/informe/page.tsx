@@ -9,6 +9,7 @@ import { fetchSedes } from "@/app/api/SedeActions";
 
 Chart.register(...registerables);
 
+
 interface EdificioUsage {
   nombre: string;
   usage: number;
@@ -39,7 +40,6 @@ const InformePage: React.FC = () => {
         const sedeId = edificio.id_sede;
         const sedeNombre = sedesData.find((sede: Sede) => sede.id_sede === sedeId)?.nombre || "Desconocido";
         const edificioInfo = usageData.find((usage) => usage.nombre === edificio.nombre);
-
         if (!sedesMap.has(sedeId)) {
           sedesMap.set(sedeId, { nombre: sedeNombre, edificioInformation: [] });
         }
@@ -129,7 +129,7 @@ const InformePage: React.FC = () => {
                 labels: sede.edificioInformation.map((edificio) => edificio.nombre),
                 datasets: [{
                   label: 'Porcentaje de Uso',
-                  data: sede.edificioInformation.map((edificio) => edificio.usage),
+                  data: sede.edificioInformation.map((edificio) => edificio.usage as number),
                   backgroundColor: 'rgba(75, 192, 192, 0.2)',
                   borderColor: 'rgba(75, 192, 192, 1)',
                   borderWidth: 1
@@ -143,7 +143,20 @@ const InformePage: React.FC = () => {
                     beginAtZero: true,
                     max: 100
                   }
+                },
+                animation: {
+                  onComplete: function({chart}) {
+                    this.config.data.datasets.forEach(function(dataset, i) {
+                      const meta = chart.getDatasetMeta(i);
+                      meta.data.forEach(function(bar, index) {
+                        const data = dataset.data[index] as number;
+                        const value = (data.toFixed(2)).toString();
+                        ctx.fillText(value!, bar.x, bar.y - 5);
+                      });
+                    });
+                  }
                 }
+
               }
             });
           }
@@ -176,8 +189,8 @@ const InformePage: React.FC = () => {
       <div id="contenedorchart">
         {sedeInformation.map((sede, index) => (
           <div key={index} className="mb-8">
-            <h2 className="text-2x1 font-bold mb-4 mx-auto text-center">{sede.nombre}</h2>
-            <div className="w-1/2 mx-auto">
+            <h2 className="text-2x1 font-bold mb-4 mx-auto text-center  text-gray-700">{sede.nombre}</h2>
+            <div className="w-1/2 mx-auto border-4 border-solid rounded-md">
               <canvas id={`chart-${index}`} width="400" height="200"></canvas>
             </div>
           </div>

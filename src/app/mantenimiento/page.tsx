@@ -157,7 +157,9 @@ const GestionMantenimiento: React.FC = () => {
                           ? "bg-yellow-200"
                           : mantenimiento.estado === "En Progreso"
                           ? "bg-blue-200"
-                          : "bg-green-200"
+                          : mantenimiento.estado
+                          ? "bg-green-200"
+                          : "Desconocido"
                       }`}
                     >
                       {mantenimiento.estado}

@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSX } from "react";
 import { getAuthCookie, removeAuthCookie } from "../utils/cookies";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react"; // Importar signOut de NextAuth
 import { useRol } from "../context/RolContext"; // Importar contexto de rol
+import { FiMenu, FiLogOut, FiLogIn, FiMail, FiUser, FiGrid, FiSettings, FiArchive, FiHome } from "react-icons/fi"; // Importar iconos de react-icons
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,24 +33,24 @@ const Header = () => {
     setIsOpen(!isOpen);
   };
 
-  const rutasPorRol: Record<string, { path: string; label: string }[]> = {
+  const rutasPorRol: Record<string, { path: string; label: string; icon: JSX.Element }[]> = {
     admin: [
-      { path: "/roles", label: "Gestión de Roles" },
-      { path: "/historial", label: "Auditoría" },
-      { path: "/infraestructura", label: "Gestión de Infraestructura" },
-      { path: "/account", label: "Cuenta" },
+      { path: "/roles", label: "Gestión de Roles", icon: <FiSettings className="w-5 h-5 mr-1" /> },
+      { path: "/historial", label: "Auditoría", icon: <FiArchive className="w-5 h-5 mr-1" /> },
+      { path: "/infraestructura", label: "Gestión de Infraestructura", icon: <FiHome className="w-5 h-5 mr-1" /> },
+      { path: "/account", label: "Cuenta", icon: <FiUser className="w-5 h-5 mr-1" /> },
     ],
     coord: [
-      { path: "/infraestructura", label: "Gestión de Sede" },
-      { path: "/account", label: "Cuenta" },
+      { path: "/infraestructura", label: "Gestión de Sede", icon: <FiHome className="w-5 h-5 mr-1" /> },
+      { path: "/account", label: "Cuenta", icon: <FiUser className="w-5 h-5 mr-1" /> },
     ],
     maint: [
-      { path: "/infraestructura", label: "Información Sede" },
-      { path: "/account", label: "Cuenta" },
+      { path: "/infraestructura", label: "Información Sede", icon: <FiHome className="w-5 h-5 mr-1" /> },
+      { path: "/account", label: "Cuenta", icon: <FiUser className="w-5 h-5 mr-1" /> },
     ],
     user: [
-      { path: "/infraestructura", label: "Buscador de edificios" },
-      { path: "/account", label: "Cuenta" },
+      { path: "/infraestructura", label: "Buscador de edificios", icon: <FiHome className="w-5 h-5 mr-1" /> },
+      { path: "/account", label: "Cuenta", icon: <FiUser className="w-5 h-5 mr-1" /> },
     ],
     none: [],
   };
@@ -73,20 +74,7 @@ const Header = () => {
       <nav className="flex-1 flex justify-end">
         {/* Botón hamburguesa visible solo en pantallas pequeñas */}
         <button className="block md:hidden text-white" onClick={toggleMenu}>
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            ></path>
-          </svg>
+          <FiMenu className="w-6 h-6" />
         </button>
       </nav>
 
@@ -96,20 +84,7 @@ const Header = () => {
           <>
             <li className="relative group">
               <button className="hover:text-gray-300 transition-colors flex items-center">
-                <svg
-                  className="w-5 h-5 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"
-                  ></path>
-                </svg>
+                <FiGrid className="w-5 h-5 mr-1" />
                 Navegación por la aplicación
               </button>
               <ul className="absolute hidden group-hover:block bg-[#1f6032] text-white p-2 space-y-2">
@@ -119,6 +94,7 @@ const Header = () => {
                       href={ruta.path}
                       className="hover:text-gray-300 transition-colors flex items-center"
                     >
+                      {ruta.icon}
                       {ruta.label}
                     </Link>
                   </li>
@@ -132,20 +108,7 @@ const Header = () => {
               href="/login"
               className="hover:text-gray-300 transition-colors flex items-center"
             >
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 12h14M12 5l7 7-7 7"
-                ></path>
-              </svg>
+              <FiLogIn className="w-5 h-5 mr-1" />
               Iniciar Sesión
             </Link>
           </li>
@@ -156,20 +119,7 @@ const Header = () => {
             href="/contact"
             className="hover:text-gray-300 transition-colors flex items-center"
           >
-            <svg
-              className="w-5 h-5 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18"
-              ></path>
-            </svg>
+            <FiMail className="w-5 h-5 mr-1" />
             Contacto
           </Link>
         </li>
@@ -179,20 +129,7 @@ const Header = () => {
               onClick={handleLogout}
               className="hover:text-gray-300 transition-colors flex items-center"
             >
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 6h-6"
-                ></path>
-              </svg>
+              <FiLogOut className="w-5 h-5 mr-1" />
               Cerrar Sesión
             </button>
           </li>
@@ -214,6 +151,7 @@ const Header = () => {
                     href={ruta.path}
                     className="hover:text-gray-300 transition-colors flex items-center"
                   >
+                    {ruta.icon}
                     {ruta.label}
                   </Link>
                 </li>
@@ -223,20 +161,7 @@ const Header = () => {
                   onClick={handleLogout}
                   className="hover:text-gray-300 transition-colors flex items-center"
                 >
-                  <svg
-                    className="w-5 h-5 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 6h-6"
-                    ></path>
-                  </svg>
+                  <FiLogOut className="w-5 h-5 mr-1" />
                   Cerrar sesión
                 </button>
               </li>
@@ -247,20 +172,7 @@ const Header = () => {
                 href="/login"
                 className="hover:text-gray-300 transition-colors flex items-center"
               >
-                <svg
-                  className="w-5 h-5 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 12h14M12 5l7 7-7 7"
-                  ></path>
-                </svg>
+                <FiLogIn className="w-5 h-5 mr-1" />
                 Iniciar Sesión
               </Link>
             </li>
@@ -270,20 +182,7 @@ const Header = () => {
               href="/contact"
               className="hover:text-gray-300 transition-colors flex items-center"
             >
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18"
-                ></path>
-              </svg>
+              <FiMail className="w-5 h-5 mr-1" />
               Contacto
             </Link>
           </li>

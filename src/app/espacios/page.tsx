@@ -12,6 +12,7 @@ import EspacioManager from "./components/espacio/EspacioManager";
 import { Footer, Header } from "../../../components";
 import { useRol } from "../../../context/RolContext";
 import Link from "next/link";
+import MantenimientoManager from "./components/mant/MantenimientoManager";
 
 const GestionEspacios: React.FC = () => {
   const { data: session } = useSession();
@@ -19,7 +20,7 @@ const GestionEspacios: React.FC = () => {
   const searchParams = useSearchParams();
   const idEdificio = searchParams.get("idEdificio");
   const { rolSimulado, idSede } = useRol();
-  const [mantenimientos, setMantenimientos] = useState<User[]>([]);
+  const [mantenedores, setMantenedores] = useState<User[]>([]);
   const [edificio, setEdificio] = useState<Edificio | null>(null);
   const [sede, setSede] = useState<Sede | null>(null);
   const [espacios, setEspacios] = useState<Espacio[]>([]);
@@ -57,9 +58,9 @@ const GestionEspacios: React.FC = () => {
           const sedeData = await fetchSedeById(edificioData.id_sede);
           setSede(sedeData);
         }
-        const mantenimientoData = await getMaints();
-              mantenimientoData.sort((a: User, b: User) => a.id_persona - b.id_persona);
-              setMantenimientos(mantenimientoData);
+        const mantenedoresData = await getMaints();
+              mantenedoresData.sort((a: User, b: User) => a.id_persona - b.id_persona);
+              setMantenedores(mantenedoresData);
       }
     };
     fetchData();
@@ -200,7 +201,6 @@ const GestionEspacios: React.FC = () => {
               onEspaciosUpdated={setEspacios}
               idEdificio={parseInt(idEdificio as string)}
               rol={rolSimulado}
-              mantenimiento={mantenimientos}
               onEspacioSelect={setSelectedEspacio} // Pasar la función para manejar el espacio seleccionado
             />
           )}
@@ -208,7 +208,12 @@ const GestionEspacios: React.FC = () => {
             <div>{/* Aquí irán los componentes de eventos */}</div>
           )}
           {selectedTab === "mantenimiento" && (
-            <div>{/* Aquí irán los componentes de mantenimiento */}</div>
+            <MantenimientoManager
+              mantenimientos={mantenimientos}
+              mantenedores={mantenedores}
+              idEspacio={selectedEspacio.id_espacio}
+              rol={rolSimulado}
+            />
           )}
         </div>
       </div>

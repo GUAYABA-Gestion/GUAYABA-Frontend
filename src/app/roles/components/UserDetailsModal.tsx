@@ -65,7 +65,7 @@ const UserDetailsModal = ({
     const errors = {
       nombre: !validateTextNotNull(editedUser.nombre),
       correo: !validateCorreo(editedUser.correo),
-      telefono: !validateTelefono(editedUser.telefono),
+      telefono: editedUser.telefono ? !validateTelefono(editedUser.telefono) : false,
       id_sede: !editedUser.id_sede,
     };
 

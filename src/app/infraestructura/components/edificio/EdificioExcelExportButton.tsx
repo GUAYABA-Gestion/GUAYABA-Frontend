@@ -64,11 +64,11 @@ const ExcelExportButton: React.FC<ExcelExportButtonProps> = ({ edificios, sedes,
   };
 
   return (
-    <button
+<button
       onClick={handleDownloadEdificios}
-      className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition duration-300 text-sm w-full md:w-auto"
+      className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 text-sm w-full md:w-auto"
     >
-      Descargar Excel
+      Descargar tabla con filtros aplicados
     </button>
   );
 };

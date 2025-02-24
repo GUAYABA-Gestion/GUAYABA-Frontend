@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation"; // Si usas App Router
+import { useRouter, usePathname, useSearchParams } from "next/navigation"; // Si usas App Router
 
 const RolContext = createContext<{
   rolSimulado: string | "none";
@@ -17,15 +17,18 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
   const [idSede, setIdSede] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter(); // Si usas App Router
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const handleLogout = () => {
     Cookies.remove("jwt");
     setRolSimulado("none");
     setIdSede(null);
     // Redirección con Next.js (App Router)
-    router.push("/login");
+    const callbackUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     // O con window.location si no usas App Router
-    // window.location.href = "/login";
+    // window.location.href = `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
   };
 
   const fetchUserData = async () => {
@@ -63,7 +66,7 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <RolContext.Provider value={{ rolSimulado /*: 'coord' */, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData }}>
+    <RolContext.Provider value={{ rolSimulado, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData }}>
       {!isLoading && children}
     </RolContext.Provider>
   );

@@ -8,7 +8,7 @@ import { fetchEdificioById } from "../api/EdificioActions";
 import { fetchEspaciosByEdificios } from "../api/EspacioActions";
 import { fetchSedeById } from "../api/SedeActions";
 import EspacioManager from "./components/espacio/EspacioManager";
-import { Header } from "../../../components";
+import { Footer, Header } from "../../../components";
 import { useRol } from "../../../context/RolContext";
 import Link from "next/link";
 
@@ -79,6 +79,7 @@ const GestionEspacios: React.FC = () => {
             </Link>
           </div>
         </main>
+        <Footer />
       </div>
     );
   }
@@ -206,6 +207,7 @@ const GestionEspacios: React.FC = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

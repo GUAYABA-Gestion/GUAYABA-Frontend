@@ -1,3 +1,5 @@
+import { DateTime } from "next-auth/providers/kakao";
+
 export interface User {
   id_persona: number;
   correo: string;
@@ -91,4 +93,14 @@ export interface Evento {
   fecha_fin: string;
   tipo: string;
   estado: string;
+}
+
+export interface Log {
+  id_auditoria: number;
+  tabla_afectada: string;
+  operacion: "INSERT" | "UPDATE" | "DELETE";
+  fecha_hora: string;
+  datos_anteriores: JSON;
+  datos_nuevos: JSON;
+  id_persona: number;
 }

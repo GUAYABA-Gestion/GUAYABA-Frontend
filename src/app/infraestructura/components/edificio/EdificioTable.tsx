@@ -1,6 +1,6 @@
 "use client";
 import { Edificio, Sede } from "../../../../types/api";
-import ExcelExportButton from "./ExcelExportButton";
+import ExcelExportButton from "./EdificioExcelExportButton";
 
 interface EdificioTableProps {
   edificios: Edificio[];

@@ -4,7 +4,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Header } from "../../../components";
+import { Footer, Header } from "../../../components";
 import { User, Sede } from "../../types/api";
 import Cookies from "js-cookie";
 
@@ -135,14 +135,15 @@ export default function Account() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-green-500 mx-auto mb-4"></div>
           <p className="text-gray-700">Cargando datos...</p>
         </div>
+
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow">
+      <main className="flex-grow max-w-3xl mx-auto mt-8 p-6 bg-white rounded-lg shadow mb-8 min-w-[48rem]">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Mi Cuenta</h1>
 
         {message && (
@@ -247,11 +248,12 @@ export default function Account() {
         </div>
 
         {editMode && (
-          <div className="mb-6 rounded-lg bg-yellow-100 text-yellow-800">
+          <div className=" rounded-lg bg-yellow-100 text-yellow-800">
             ⚠️ Recuerda que puedes probar y experimentar con las funcionalidades del rol que selecciones. Confiamos en que no vas a eliminar toda la base de datos. :) 
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

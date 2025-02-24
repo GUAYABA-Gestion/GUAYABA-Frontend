@@ -123,11 +123,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           es_manual: true,
         }));
 
-        if (parsedUsers.some((user) => !/^\d{10}$/.test(user.telefono))) {
-          alert("Uno o más usuarios tienen teléfonos inválidos.");
-          return;
-        }
-
         setUsers([...users, ...parsedUsers]);
         setValidationErrors([
           ...validationErrors,
@@ -152,7 +147,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     const newValidationErrors = users.map((user) => ({
       nombre: !validateTextNotNull(user.nombre),
       correo: !validateCorreo(user.correo),
-      telefono: !validateTelefono(user.telefono),
+      telefono: user.telefono ? !validateTelefono(user.telefono) : false,
       id_sede: !user.id_sede || user.id_sede === 0,
     }));
 

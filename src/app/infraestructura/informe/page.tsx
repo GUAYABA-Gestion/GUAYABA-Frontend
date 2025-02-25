@@ -36,6 +36,8 @@ const InformePage: React.FC = () => {
       setIsLoading(true);
       const sedesData = await fetchSedes();
       const sedesMap = new Map<number, SedeInformation>();
+      console.log(filteredEdificios);
+      
 
       // Calcular el porcentaje de uso de los edificios
       const usageData = await calculateUsePercentage(filteredEdificios);

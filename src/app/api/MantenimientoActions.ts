@@ -100,7 +100,7 @@ export const fetchMantenimientosByEspacios = async (ids_espacios: number[]): Pro
     }
 
     const data = await response.json();
-    return data.data;
+    return data;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }

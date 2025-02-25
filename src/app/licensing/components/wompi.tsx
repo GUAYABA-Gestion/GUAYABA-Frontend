@@ -69,7 +69,7 @@ const Wompi: React.FC<WompiProps> = ({
       serviceReference +
       serviceAmount +
       currency +
-      process.env.NEXT_PUBLIC_WOMPI_INTEGRITY;
+      process.env.WOMPI_INTEGRITY;
     computedSignatureIntegrity = createHash("sha256")
       .update(computedSignature, "utf8")
       .digest("hex")

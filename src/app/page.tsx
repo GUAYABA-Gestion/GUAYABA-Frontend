@@ -150,12 +150,8 @@ export default function Home() {
               <h4 className="text-lg font-semibold text-gray-800">
                 Santiago Reyes Ochoa
               </h4>
-              <p className="text-sm text-gray-600">Frontend + Backend</p>
               <div className="mt-2 flex space-x-2">
-                <a href="#" className="text-blue-500 hover:underline">
-                  LinkedIn
-                </a>
-                <a href="#" className="text-blue-500 hover:underline">
+                <a href="https://github.com/Sreyeso" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>
@@ -171,12 +167,8 @@ export default function Home() {
               <h4 className="text-lg font-semibold text-gray-800">
                 Santiago Ballen Leguizamo
               </h4>
-              <p className="text-sm text-gray-600">Backend</p>
               <div className="mt-2 flex space-x-2">
-                <a href="#" className="text-blue-500 hover:underline">
-                  LinkedIn
-                </a>
-                <a href="#" className="text-blue-500 hover:underline">
+                <a href="https://github.com/SantBl18" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>
@@ -192,12 +184,8 @@ export default function Home() {
               <h4 className="text-lg font-semibold text-gray-800">
                 Miguel Angel Suarez Cortes
               </h4>
-              <p className="text-sm text-gray-600">Backend</p>
               <div className="mt-2 flex space-x-2">
-                <a href="#" className="text-blue-500 hover:underline">
-                  LinkedIn
-                </a>
-                <a href="#" className="text-blue-500 hover:underline">
+                <a href="https://github.com/miasuarezco" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>
@@ -213,12 +201,8 @@ export default function Home() {
               <h4 className="text-lg font-semibold text-gray-800">
                 Daniel Esteban Tobar Lozano
               </h4>
-              <p className="text-sm text-gray-600">Frontend</p>
               <div className="mt-2 flex space-x-2">
-                <a href="#" className="text-blue-500 hover:underline">
-                  LinkedIn
-                </a>
-                <a href="#" className="text-blue-500 hover:underline">
+                <a href="https://github.com/dtobarl" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>

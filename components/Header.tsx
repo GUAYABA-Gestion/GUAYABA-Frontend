@@ -5,7 +5,7 @@ import { getAuthCookie, removeAuthCookie } from "../utils/cookies";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react"; // Importar signOut de NextAuth
 import { useRol } from "../context/RolContext"; // Importar contexto de rol
-import { FiMenu, FiLogOut, FiLogIn, FiMail, FiUser, FiGrid, FiSettings, FiArchive, FiHome } from "react-icons/fi"; // Importar iconos de react-icons
+import { FiMenu, FiLogOut, FiLogIn, FiMail, FiUser, FiGrid, FiSettings, FiArchive, FiHome, FiDollarSign } from "react-icons/fi"; // Importar iconos de react-icons
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -101,6 +101,15 @@ const Header = () => {
                 ))}
               </ul>
             </li>
+            <li>
+              <Link
+                href="/licensing"
+                className="hover:text-gray-300 transition-colors flex items-center"
+              >
+                <FiDollarSign className="w-5 h-5 mr-1" />
+                Consulta nuestros planes
+              </Link>
+            </li>
           </>
         ) : (
           <li>
@@ -156,6 +165,15 @@ const Header = () => {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/licensing"
+                  className="hover:text-gray-300 transition-colors flex items-center"
+                >
+                  <FiDollarSign className="w-5 h-5 mr-1" />
+                  Consulta nuestros planes
+                </Link>
+              </li>
               <li>
                 <button
                   onClick={handleLogout}

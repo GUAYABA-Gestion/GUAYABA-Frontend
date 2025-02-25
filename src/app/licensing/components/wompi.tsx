@@ -32,15 +32,15 @@ const Wompi: React.FC<WompiProps> = ({
     [key: string]: { amountInCents: number; reference: string };
   } = {
     "60 horas de servicio por 1 mes": {
-      amountInCents: 1000000,
+      amountInCents: 200000000,
       reference: "REF_60H"
     },
     "Subscripcion a la plataforma": {
-      amountInCents: 2000000,
+      amountInCents: 500000000,
       reference: "REF_SUBS"
     },
     "Licenciamiento de la plataforma": {
-      amountInCents: 3000000,
+      amountInCents: 2000000000,
       reference: "REF_LICENSE"
     }
   };

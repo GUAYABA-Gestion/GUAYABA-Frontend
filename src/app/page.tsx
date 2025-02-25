@@ -29,10 +29,6 @@ export default function Home() {
               <a href="/licensing" className="bg-[#80BA7F] text-white px-6 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300">
                 Consulta Nuestros Planes
               </a>
-
-              <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg shadow-md hover:bg-gray-300 transition duration-300">
-                Contáctanos
-              </button>
             </div>
           </div>
         </div>

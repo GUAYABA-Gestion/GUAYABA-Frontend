@@ -64,8 +64,9 @@ export interface Mantenimiento {
   necesidad: string;
   prioridad: string;
   detalle: string;
-  fecha_ini: string;
-  fecha_fin: string;
+  fecha_asignacion: string;
+  plazo_ideal: number;
+  terminado: boolean;
   observación: string;
 }
 

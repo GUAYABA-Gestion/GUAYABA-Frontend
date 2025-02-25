@@ -41,7 +41,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 
   if (!isOpen || !user || !editedUser) return null;
 
-  const handleEditField = (field: keyof User, value: string) => {
+  const handleEditField = (field: keyof User, value: string | number | null) => {
     setEditedUser((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
@@ -85,6 +85,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
       const updatedUser = await updateUser(editedUser);
       onSave(updatedUser);
       setError(null); // Clear error if save is successful
+      setEditMode(false);
     } catch (error: any) {
       setError(`Error al guardar los cambios: ${error.message}`);
     }
@@ -223,7 +224,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                 </label>
                 <select
                   value={editedUser.id_sede || ""}
-                  onChange={(e) => handleEditField("id_sede", e.target.value)}
+                  onChange={(e) => handleEditField("id_sede", e.target.value ? Number(e.target.value) : null)}
                   className={`mt-1 p-2 border rounded w-full text-black ${
                     validationErrors.id_sede ? "outline outline-red-500" : ""
                   }`}

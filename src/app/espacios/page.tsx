@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Edificio, Espacio, Sede } from "../../types/api";
+import { Edificio, Espacio, Sede, User } from "../../types/api";
 import { fetchEdificioById } from "../api/EdificioActions";
 import { fetchEspaciosByEdificios } from "../api/EspacioActions";
 import { fetchSedeById } from "../api/SedeActions";
+import { getAdmins } from "../api/UserActions";
 import EspacioManager from "./components/espacio/EspacioManager";
+import MantenimientoManager from "./components/mantenimiento/MantenimientoManager";
 import { Footer, Header } from "../../../components";
 import { useRol } from "../../../context/RolContext";
 import Link from "next/link";
@@ -30,6 +32,7 @@ const GestionEspacios: React.FC = () => {
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   const [nextFetchTime, setNextFetchTime] = useState<number>(300); // 5 minutes in seconds
   const [manualCooldown, setManualCooldown] = useState<number>(0); // Cooldown de 1 minuto para el botón manual
+  const [coordinadores, setCoordinadores] = useState<User[]>([]);
 
   const fetchData = async () => {
     const isValid = await verifyJwt();
@@ -57,6 +60,8 @@ const GestionEspacios: React.FC = () => {
           const sedeData = await fetchSedeById(edificioData.id_sede);
           setSede(sedeData);
         }
+        const coordinadoresData = await getAdmins();
+        setCoordinadores(coordinadoresData);
         setLastFetchTime(new Date());
         setNextFetchTime(300); // Reset the timer
       }
@@ -66,7 +71,7 @@ const GestionEspacios: React.FC = () => {
       setIsLoading(false);
     }
   };
-
+  
   useEffect(() => {
     if (!idEdificio) {
       setError(
@@ -74,6 +79,7 @@ const GestionEspacios: React.FC = () => {
       );
       return;
     }
+
     fetchData();
 
     const interval = setInterval(() => {
@@ -96,6 +102,10 @@ const GestionEspacios: React.FC = () => {
       fetchData();
       setManualCooldown(60); // Cooldown de 1 minuto
     }
+  };
+
+  const handleEspacioSelect = (espacio: Espacio | null) => {
+    setSelectedEspacio(espacio);
   };
 
   if (error) {
@@ -132,6 +142,11 @@ const GestionEspacios: React.FC = () => {
     );
   }
 
+  const correos = coordinadores.reduce((acc, coord) => {
+    acc[coord.id_persona] = coord.correo;
+    return acc;
+  }, {} as { [key: number]: string });
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />
@@ -142,20 +157,16 @@ const GestionEspacios: React.FC = () => {
               Gestión de Espacios
             </h1>
             <p className="text-gray-600">
-              Última actualización:{" "}
-              {lastFetchTime ? lastFetchTime.toLocaleTimeString() : "N/A"}
+              Última actualización: {lastFetchTime ? lastFetchTime.toLocaleTimeString() : "N/A"}
             </p>
             <p className="text-gray-600">
-              Próxima actualización en: {Math.floor(nextFetchTime / 60)}:
-              {(nextFetchTime % 60).toString().padStart(2, "0")}
+              Próxima actualización en: {Math.floor(nextFetchTime / 60)}:{(nextFetchTime % 60).toString().padStart(2, '0')}
             </p>
           </div>
           <button
             onClick={handleManualFetch}
             disabled={manualCooldown > 0}
-            className={`bg-blue-500 text-white p-2 rounded-full shadow-md hover:bg-blue-600 transition duration-300 ${
-              manualCooldown > 0 ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`bg-blue-500 text-white p-2 rounded-full shadow-md hover:bg-blue-600 transition duration-300 ${manualCooldown > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <FiRefreshCw size={20} />
           </button>
@@ -259,21 +270,23 @@ const GestionEspacios: React.FC = () => {
             </tbody>
           </table>
         </div>
-        <div className="mt-4">
+        <div className="">
           {selectedTab === "espacios" && (
             <EspacioManager
               espacios={espacios}
               onEspaciosUpdated={setEspacios}
               idEdificio={parseInt(idEdificio as string)}
               rol={rolSimulado}
-              onEspacioSelect={setSelectedEspacio} // Pasar la función para manejar el espacio seleccionado
+              onEspacioSelect={handleEspacioSelect}
             />
           )}
           {selectedTab === "eventos" && (
             <div>{/* Aquí irán los componentes de eventos */}</div>
           )}
-          {selectedTab === "mantenimiento" && (
-            <div>{/* Aquí irán los componentes de mantenimiento */}</div>
+          {selectedTab === "mantenimiento" && selectedEspacio && (
+            <MantenimientoManager
+              espacio={selectedEspacio}
+            />
           )}
         </div>
       </div>

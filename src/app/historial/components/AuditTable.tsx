@@ -36,12 +36,12 @@ const AuditTable: React.FC<AuditTableProps> = ({
   const [jumpPage, setJumpPage] = useState<number | string>("");
   const [validationMessage, setValidationMessage] = useState<string>("");
 
-  const getUserEmail = (id_persona: number) => {
+  const getUserInfo = (id_persona: number) => {
     if (id_persona === -1) {
       return "AÑADIDO AUTOMÁTICAMENTE";
     }
     const user = users.find((user) => user.id_persona === id_persona);
-    return user ? user.correo : "";
+    return user ? `${user.nombre} (${user.correo})` : "";
   };
 
   const handleHoraInicioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +83,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
       ? parseInt(filters.horaInicio, 10)
       : 0;
     const horaFin = filters.horaFin ? parseInt(filters.horaFin, 10) : 24;
-    const userEmail = getUserEmail(log.id_persona) || "";
+    const userInfo = getUserInfo(log.id_persona) || "";
 
     return (
       (filters.fecha === "" || logDate === filters.fecha) &&
@@ -92,7 +92,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
       (filters.horaInicio === "" ||
         (logTime >= horaInicio && logTime < horaFin)) &&
       (filters.correo === "" ||
-        userEmail.toLowerCase().includes(filters.correo.toLowerCase()))
+        userInfo.toLowerCase().includes(filters.correo.toLowerCase()))
     );
   });
 
@@ -262,7 +262,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
             type="text"
             value={filters.correo}
             onChange={(e) => onFilterChange("correo", e.target.value)}
-            placeholder="Filtrar por correo"
+            placeholder="Filtrar por responsable"
             className="p-2 border rounded text-black text-sm w-full md:w-auto"
           />
           <button
@@ -322,7 +322,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
                     {getOperacionCompleta(log.operacion)}
                   </td>
                   <td className="border border-gray-300 p-2 text-black text-sm">
-                    {getUserEmail(log.id_persona)}
+                    {getUserInfo(log.id_persona)}
                   </td>
                   <td className="border border-gray-300 p-2 text-black text-sm">
                     {new Date(log.fecha_hora).toLocaleString()}

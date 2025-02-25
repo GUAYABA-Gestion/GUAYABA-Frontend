@@ -73,7 +73,7 @@ const UserTable = ({
         <div className="flex flex-wrap items-center gap-2">
           <input
             type="text"
-            placeholder="Filtrar por correo"
+            placeholder="Filtrar por persona"
             value={filters.correo}
             onChange={(e) => onFilterChange("correo", e.target.value)}
             className="p-2 border rounded text-black text-sm w-full md:w-auto"
@@ -142,7 +142,7 @@ const UserTable = ({
               </th>
             </tr>
             <tr className="bg-[#80BA7F] text-white">
-              <th className="border border-gray-300 px-4 py-2 min-w-[250px]">Correo</th>
+              <th className="border border-gray-300 px-4 py-2 min-w-[250px]">Persona</th>
               <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Rol</th>
               <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Sede</th>
               <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Acciones</th>
@@ -158,7 +158,7 @@ const UserTable = ({
                   }`}
                 >
                   <td className="border border-gray-300 p-2 text-black text-sm">
-                    {user.correo}
+                    {user.nombre} ({user.correo})
                   </td>
                   <td className="border border-gray-300 p-2 text-black text-sm">
                     {getRolCompleto(user.rol)}

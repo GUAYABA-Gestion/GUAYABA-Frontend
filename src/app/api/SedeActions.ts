@@ -50,8 +50,8 @@ export const updateSede = async (sede: Sede) => {
       const errorData = await response.json();
       throw new Error(errorData.error || "Error al actualizar la sede");
     }
-
-    return response.json();
+    const data = await response.json();
+    return data.sede;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }

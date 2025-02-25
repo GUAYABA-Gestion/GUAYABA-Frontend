@@ -121,21 +121,21 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
                 <input
                   type="text"
-                  value={editedSede.nombre || ""}
+                  value={editedSede?.nombre || ""}
                   onChange={(e) => handleEditField("nombre", e.target.value)}
-                  className={`mt-1 p-2 border rounded w-full text-black ${!validateTextNotNull(editedSede.nombre) ? "outline outline-red-500" : ""}`}
+                  className={`mt-1 p-2 border rounded w-full text-black ${!validateTextNotNull(editedSede?.nombre || "") ? "outline outline-red-500" : ""}`}
                   disabled={!editMode}
                 />
-                {!validateTextNotNull(editedSede.nombre) && (
+                {!validateTextNotNull(editedSede?.nombre || "") && (
                   <p className="text-red-500 text-sm">Nombre no puede ser vacío.</p>
                 )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Municipio</label>
                 <select
-                  value={editedSede.municipio || ""}
+                  value={editedSede?.municipio || ""}
                   onChange={(e) => handleEditField("municipio", parseInt(e.target.value))}
-                  className={`mt-1 p-2 border rounded w-full text-black ${!editedSede.municipio ? "outline outline-red-500" : ""}`}
+                  className={`mt-1 p-2 border rounded w-full text-black ${!editedSede?.municipio ? "outline outline-red-500" : ""}`}
                   disabled={!editMode}
                 >
                   <option value="">Seleccione un municipio</option>
@@ -145,7 +145,7 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
                     </option>
                   ))}
                 </select>
-                {!editedSede.municipio && (
+                {!editedSede?.municipio && (
                   <p className="text-red-500 text-sm">Municipio no puede ser vacío.</p>
                 )}
               </div>
@@ -153,20 +153,20 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
                 <div className="flex-grow">
                   <label className="block text-sm font-medium text-gray-700">Coordinador</label>
                   <select
-                    value={editedSede.coordinador || ""}
-                    onChange={(e) => handleEditField("coordinador", parseInt(e.target.value))}
+                    value={editedSede?.coordinador || ""}
+                    onChange={(e) => handleEditField("coordinador", e.target.value ? Number(e.target.value) : null)}
                     className="mt-1 p-2 border rounded w-full text-black"
                     disabled={!editMode}
                   >
                     <option value="">Seleccione un coordinador</option>
                     {coordinadores.map((coordinador) => (
                       <option key={coordinador.id_persona} value={coordinador.id_persona}>
-                        {coordinador.correo}
+                        {coordinador.nombre} ({coordinador.correo})
                       </option>
                     ))}
                   </select>
                 </div>
-                {editedSede.coordinador && editMode && (
+                {editedSede?.coordinador && editMode && (
                   <button
                     onClick={handleDeleteCoordinador}
                     className="ml-2 mt-6 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"

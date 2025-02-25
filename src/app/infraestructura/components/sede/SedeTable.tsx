@@ -42,9 +42,9 @@ const SedeTable: React.FC<SedeTableProps> = ({
     return municipio ? municipio.nombre : "Sin municipio";
   };
 
-  const getCoordinadorCorreo = (id: number | null | undefined) => {
+  const getCoordinadorInfo = (id: number | null | undefined) => {
     const coordinador = coordinadores.find((c) => c.id_persona === id);
-    return coordinador ? coordinador.correo : "Sin coordinador";
+    return coordinador ? `${coordinador.nombre} (${coordinador.correo})` : "Sin coordinador";
   };
 
   const filteredSedes = sedes.filter((sede) => {
@@ -178,7 +178,7 @@ const SedeTable: React.FC<SedeTableProps> = ({
                     </td>
                     {rolSimulado !== "user" && (
                       <td className="border border-gray-300 p-2 text-black text-sm">
-                        {getCoordinadorCorreo(sede.coordinador)}
+                        {getCoordinadorInfo(sede.coordinador)}
                       </td>
                     )}
                     {rolSimulado === "admin" && (

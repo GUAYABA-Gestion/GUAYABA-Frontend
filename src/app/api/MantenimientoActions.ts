@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Mantenimiento } from "../../types/api";
+import { Mantenimiento, User } from "../../types/api";
 
 export const fetchMantenimientos = async (): Promise<Mantenimiento[]> => {
   try {
@@ -34,7 +34,8 @@ export const updateMantenimiento = async (mantenimiento: Mantenimiento) => {
       throw new Error(errorData.error || "Error al actualizar el mantenimiento");
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.mantenimiento;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }
@@ -98,7 +99,8 @@ export const fetchMantenimientosByEspacios = async (ids_espacios: number[]): Pro
       throw new Error(errorData.error || "Error al obtener mantenimientos desde espacios");
     }
 
-    return response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }

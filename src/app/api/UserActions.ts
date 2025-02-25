@@ -156,3 +156,20 @@ export const fetchUser = async () => {
     throw error; // Relanzar el error para manejarlo en el componente
   }
 };
+
+export const fetchMaints = async (): Promise<User[]> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/getMaints`, {
+      headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al obtener personal de mantenimiento");
+    }
+
+    return response.json();
+  } catch (error) {
+    throw error; // Relanzar el error para manejarlo en el componente
+  }
+};

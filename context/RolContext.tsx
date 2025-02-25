@@ -57,7 +57,7 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
 
     } catch (error) {
-      console.error("Error:", error);
+
       handleLogout();
     }
   };
@@ -81,7 +81,6 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
 
       return true;
     } catch (error) {
-      console.error("Error:", error);
       handleLogout();
       return false;
     }

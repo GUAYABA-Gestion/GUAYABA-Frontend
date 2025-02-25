@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { Sede, Espacio, Edificio } from "../../../types/api";
 import { fetchEventosByEspacios } from "../../api/EventoActions";
 import { fetchEspaciosByEdificios } from "../../api/EspacioActions";
+import { fetchSedes } from "../../api/SedeActions";
 import { Footer, Header } from "../../../../components";
 import { Chart, registerables } from "chart.js";
-import { fetchSedes } from "@/app/api/SedeActions";
+import { fetchMantenimientosByEspacios } from "../../api/MantenimientoActions";
 
 Chart.register(...registerables);
 
@@ -13,6 +14,10 @@ Chart.register(...registerables);
 interface EdificioUsage {
   nombre: string;
   usage: number;
+  mantenimientoPendiente: number;
+  mantenimientoEnProgreso: number;
+  mantenimientoCompleto: number;
+  mantenimientoInactivo: number;
 }
 
 interface SedeInformation {
@@ -79,12 +84,14 @@ const InformePage: React.FC = () => {
       edificios.map((edificio: Edificio) => edificio.id_edificio)
     );
 
-    console.log(espaciosEdificios);
     // Obtener los eventos de todos los espacios
     const eventosEdificios = await fetchEventosByEspacios(
       espaciosEdificios.map((espacio: Espacio) => espacio.id_espacio)
     );
-    console.log(eventosEdificios);
+
+    const mantenimientoEspacios = await fetchMantenimientosByEspacios(
+      espaciosEdificios.map((espacio: Espacio) => espacio.id_espacio)
+    );
 
     const usageData: EdificioUsage[] = [];
 
@@ -92,14 +99,36 @@ const InformePage: React.FC = () => {
       const espaciosEdificio = espaciosEdificios.filter(
         (espacio) => espacio.id_edificio === edificio.id_edificio
       );
+      
+      const mantenimientoEdificio = mantenimientoEspacios.filter(
+        (mantenimiento) => mantenimiento.id_espacio === edificio.id_edificio
+      );
+
       const eventosEdificio = eventosEdificios.filter((evento) =>
         espaciosEdificio.some((espacio) => espacio.id_espacio === evento.id_espacio)
       );
-      let useTime = eventosEdificio.reduce((total, evento) => {
+      const useTime = eventosEdificio.reduce((total, evento) => {
           return total + calculateEventDuration(evento.hora_inicio, evento.hora_fin);
       }, 0);
-      let usePercentage = (useTime / 24) * 100;
-      usageData.push({ nombre: edificio.nombre, usage: usePercentage });
+      const usePercentage = (useTime / 36) * 100;
+
+      const mantenimientoPendiente = mantenimientoEdificio.reduce((total, mantenimiento) => {
+        return mantenimiento.estado === "Pendiente" ? total + 1 : total;
+      }, 0);
+      const mantenimientoEnProgreso = mantenimientoEdificio.reduce((total, mantenimiento) => {
+        return mantenimiento.estado === "En Progreso" ? total + 1 : total;
+      }, 0);
+      const mantenimientoCompleto = mantenimientoEdificio.reduce((total, mantenimiento) => {
+        return mantenimiento.estado === "Completo" ? total + 1 : total;
+      }, 0);
+      const mantenimientoInactivo = mantenimientoEdificio.reduce((total, mantenimiento) => {
+        return mantenimiento.estado === "Inactivo" ? total + 1 : total;
+      }, 0);
+      
+      usageData.push({
+        nombre: edificio.nombre, usage: usePercentage, mantenimientoPendiente: mantenimientoPendiente,
+        mantenimientoEnProgreso: mantenimientoEnProgreso, mantenimientoCompleto: mantenimientoCompleto,
+        mantenimientoInactivo: mantenimientoInactivo });
     });
 
     return usageData;
@@ -128,7 +157,7 @@ const InformePage: React.FC = () => {
               data: {
                 labels: sede.edificioInformation.map((edificio) => edificio.nombre),
                 datasets: [{
-                  label: 'Porcentaje de Uso',
+                  label: 'Porcentaje de Uso (%)',
                   data: sede.edificioInformation.map((edificio) => edificio.usage as number),
                   backgroundColor: 'rgba(75, 192, 192, 0.2)',
                   borderColor: 'rgba(75, 192, 192, 1)',
@@ -141,17 +170,24 @@ const InformePage: React.FC = () => {
                 scales: {
                   y: {
                     beginAtZero: true,
-                    max: 100
+                    max: 100,
+                    ticks: {
+                      
+                    }
                   }
                 },
                 animation: {
                   onComplete: function({chart}) {
                     this.config.data.datasets.forEach(function(dataset, i) {
                       const meta = chart.getDatasetMeta(i);
+                      ctx.textAlign = 'center';
                       meta.data.forEach(function(bar, index) {
                         const data = dataset.data[index] as number;
+                        console.log(data);
+                        const scaleMax = chart.scales.y.max;
+                        const ypos = data / scaleMax >= 0.93 ? bar.y + 20 : bar.y - 5
                         const value = (data.toFixed(2)).toString();
-                        ctx.fillText(value!, bar.x, bar.y - 5);
+                        ctx.fillText(value, bar.x, ypos);
                       });
                     });
                   }
@@ -175,23 +211,56 @@ const InformePage: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />
-      <h1 className="text-2xl text-gray-800 font-bold mb-4">Informe de Uso de Edificios</h1>
-      <button
-        onClick={generatePDF}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        Descargar Informe en PDF
-      </button>
+      <div className="flex flex-wrap justify-between mt-2 mb-2 space-y-2">
+        <h1 className="text-2xl text-gray-800 font-bold mb-4">Informe de Uso de Edificios</h1>
+        <button
+          onClick={generatePDF}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Descargar Informe en PDF
+        </button>
+      </div>
+      
       <div id="contenedorchart">
         {sedeInformation.map((sede, index) => (
           <div key={index} className="mb-8">
-            <h2 className="text-2x1 font-bold mb-4 mx-auto text-center  text-gray-700">{sede.nombre}</h2>
+            <h2 className="text-2x1 font-bold mb-4 mx-auto text-center text-gray-700">{sede.nombre}</h2>
             <div className="w-1/2 mx-auto border-4 border-solid rounded-md">
-              <canvas id={`chart-${index}`} width="400" height="200"></canvas>
+              <canvas id={`chart-${index}`} width="600" height="300"></canvas>
+            </div>
+
+            {/* Tabla de mantenimientos */}
+            <div className="mt-4 mx-48">
+              <h3 className="text-lg font-bold mb-4 text-gray-800">Mantenimientos por Edificio</h3>
+              <table className="min-w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-[#80BA7F] text-white">
+                    <th className="border border-gray-300 px-4 py-2 min-w-[120px]">Edificio</th>
+                    <th className="border border-gray-300 px-4 py-2 min-w-[120px]">Mantenimiento Pendiente</th>
+                    <th className="border border-gray-300 px-4 py-2 min-w-[120px]">Mantenimiento En Progreso</th>
+                    <th className="border border-gray-300 px-4 py-2 min-w-[120px]">Mantenimiento Completado</th>
+                    <th className="border border-gray-300 px-4 py-2 min-w-[120px]">Inactivo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sede.edificioInformation.map((edificio, index) => (
+                    <tr
+                     key={edificio.nombre}
+                     className={`${
+                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                    }`}>
+                      <td className="border border-gray-300 p-2 text-black text-sm">{edificio.nombre}</td>
+                      <td className="border border-gray-300 p-2 text-black text-sm">{edificio.mantenimientoPendiente}</td>
+                      <td className="border border-gray-300 p-2 text-black text-sm">{edificio.mantenimientoEnProgreso}</td>
+                      <td className="border border-gray-300 p-2 text-black text-sm">{edificio.mantenimientoCompleto}</td>
+                      <td className="border border-gray-300 p-2 text-black text-sm">{edificio.mantenimientoInactivo}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         ))}

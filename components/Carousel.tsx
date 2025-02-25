@@ -37,12 +37,12 @@ export default function FuncionalidadesCarousel() {
           <SwiperSlide>
             <div
               className="w-full h-[400px] md:h-[450px] bg-cover bg-center"
-              style={{ backgroundImage: "url('/images/usuarios.png')" }}
+              style={{ backgroundImage: "url('/images/infraestructura.png')" }}
             >
               <div className="w-full h-full flex items-center justify-center bg-opacity-80 bg-[#E8F4E8]">
                 <div className="text-center max-w-xl text-gray-800">
-                  <h4 className="text-2xl font-bold mb-2">Reportes en Tiempo Real</h4>
-                  <p>Obtén informes detallados sobre el uso de la infraestructura universitaria.</p>
+                  <h4 className="text-2xl font-bold mb-2">Gestión de Infraestructura</h4>
+                  <p>Añade, elimina y modifica detalles de las distintas sedes, los distintos edificios asignados a cada una, y los eventos y mantenimientos relacionados con cada espacio.</p>
                 </div>
               </div>
             </div>
@@ -58,6 +58,20 @@ export default function FuncionalidadesCarousel() {
                 <div className="text-center max-w-xl text-gray-800">
                   <h4 className="text-2xl font-bold mb-2">Tabla de Auditoría</h4>
                   <p>Realiza un seguimiento extenso y completo del sistema al revisar en tiempo real todo cambio hecho por cualquier usuario con permisos.</p>
+                </div>
+              </div>
+            </div>
+          </SwiperSlide>
+          {/* Slide 4 */}
+          <SwiperSlide>
+            <div
+              className="w-full h-[400px] md:h-[450px] bg-cover bg-center"
+              style={{ backgroundImage: "url('/images/informes.png')" }}
+            >
+              <div className="w-full h-full flex items-center justify-center bg-opacity-50 bg-[#E8F4E8]">
+                <div className="text-center max-w-xl text-gray-800">
+                  <h4 className="text-2xl font-bold mb-2">Generación de Informes</h4>
+                  <p>De acuerdo a los datos de tu institución en la plataforma, revisa métricas sobre el ocupamiento y los matenimientos de edificios que selecciones.</p>
                 </div>
               </div>
             </div>

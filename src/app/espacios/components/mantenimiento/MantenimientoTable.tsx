@@ -9,6 +9,7 @@ interface MantenimientoTableProps {
   maints: User[]; // Arreglo de usuarios de mantenimiento
   onMantenimientoClick: (mantenimiento: Mantenimiento) => void;
   onAddMantenimientoClick: () => void; // Nueva prop para manejar el clic en "Añadir Mantenimiento"
+  rol: string;
 }
 
 const MantenimientoTable: React.FC<MantenimientoTableProps> = ({
@@ -16,6 +17,7 @@ const MantenimientoTable: React.FC<MantenimientoTableProps> = ({
   maints,
   onMantenimientoClick,
   onAddMantenimientoClick, // Recibir la prop
+  rol,
 }) => {
   const [filters, setFilters] = useState({
     estado: "",
@@ -87,12 +89,14 @@ const MantenimientoTable: React.FC<MantenimientoTableProps> = ({
           >
             Reiniciar Filtros
           </button>
-          <button
-            onClick={onAddMantenimientoClick} // Usar la función para abrir el modal
-            className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300 text-sm w-full md:w-auto"
-          >
-            + Añadir Mantenimiento
-          </button>
+          {(rol === "admin" || rol === "coord") && (
+            <button
+              onClick={onAddMantenimientoClick} // Usar la función para abrir el modal
+              className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-pink-600 transition duration-300 text-sm w-full md:w-auto"
+            >
+              + Añadir Mantenimiento
+            </button>
+          )}
         </div>
       </div>
 
@@ -107,7 +111,9 @@ const MantenimientoTable: React.FC<MantenimientoTableProps> = ({
                 <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Tipo</th>
                 <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Prioridad</th>
                 <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Detalle</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Acciones</th>
+                {(rol === "admin" || rol === "coord") && (
+                  <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Acciones</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -132,14 +138,16 @@ const MantenimientoTable: React.FC<MantenimientoTableProps> = ({
                     <td className="border border-gray-300 p-2 text-black text-sm">
                       {mantenimiento.detalle}
                     </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      <button
-                        onClick={() => onMantenimientoClick(mantenimiento)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                      >
-                        Ver Detalles
-                      </button>
-                    </td>
+                    {(rol === "admin" || rol === "coord") && (
+                      <td className="border border-gray-300 p-2 text-center">
+                        <button
+                          onClick={() => onMantenimientoClick(mantenimiento)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                        >
+                          Ver Detalles
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (

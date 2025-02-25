@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchMantenimientosByEspacios} from "../../../api/MantenimientoActions";
-import {fetchMaints}    from "../../../api/UserActions";
+import { fetchMantenimientosByEspacios } from "../../../api/MantenimientoActions";
+import { fetchMaints } from "../../../api/UserActions";
 import MantenimientoTable from "./MantenimientoTable";
 import { Mantenimiento, Espacio, User } from "../../../../types/api";
 import MantenimientoDetailsModal from "./MantenimientoDetailsModal";
@@ -10,15 +10,22 @@ import AddMantenimientoModal from "./AddMantenimientoModal";
 
 interface MantenimientoManagerProps {
   espacio: Espacio;
+  rol: string;
 }
 
-const MantenimientoManager: React.FC<MantenimientoManagerProps> = ({ espacio }) => {
+const MantenimientoManager: React.FC<MantenimientoManagerProps> = ({
+  espacio,
+  rol,
+}) => {
   const [mantenimientos, setMantenimientos] = useState<Mantenimiento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMantenimiento, setSelectedMantenimiento] = useState<Mantenimiento | null>(null);
-  const [isMantenimientoModalOpen, setIsMantenimientoModalOpen] = useState(false);
-  const [isAddMantenimientoModalOpen, setIsAddMantenimientoModalOpen] = useState(false);
+  const [selectedMantenimiento, setSelectedMantenimiento] =
+    useState<Mantenimiento | null>(null);
+  const [isMantenimientoModalOpen, setIsMantenimientoModalOpen] =
+    useState(false);
+  const [isAddMantenimientoModalOpen, setIsAddMantenimientoModalOpen] =
+    useState(false);
   const [maints, setMaints] = useState<User[]>([]);
 
   useEffect(() => {
@@ -51,14 +58,18 @@ const MantenimientoManager: React.FC<MantenimientoManagerProps> = ({ espacio }) 
 
   const handleSaveMantenimiento = (updatedMantenimiento: Mantenimiento) => {
     const updatedMantenimientos = mantenimientos.map((mantenimiento) =>
-      mantenimiento.id_mantenimiento === updatedMantenimiento.id_mantenimiento ? updatedMantenimiento : mantenimiento
+      mantenimiento.id_mantenimiento === updatedMantenimiento.id_mantenimiento
+        ? updatedMantenimiento
+        : mantenimiento
     );
     setMantenimientos(updatedMantenimientos);
     setSelectedMantenimiento(updatedMantenimiento);
   };
 
   const handleDeleteMantenimiento = (id_mantenimiento: number) => {
-    const updatedMantenimientos = mantenimientos.filter((mantenimiento) => mantenimiento.id_mantenimiento !== id_mantenimiento);
+    const updatedMantenimientos = mantenimientos.filter(
+      (mantenimiento) => mantenimiento.id_mantenimiento !== id_mantenimiento
+    );
     setMantenimientos(updatedMantenimientos);
     setSelectedMantenimiento(null);
   };
@@ -95,6 +106,7 @@ const MantenimientoManager: React.FC<MantenimientoManagerProps> = ({ espacio }) 
         maints={maints}
         onMantenimientoClick={handleMantenimientoClick}
         onAddMantenimientoClick={handleAddMantenimientoClick}
+        rol={rol}
       />
       <MantenimientoDetailsModal
         mantenimiento={selectedMantenimiento}

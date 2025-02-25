@@ -286,6 +286,7 @@ const GestionEspacios: React.FC = () => {
           {selectedTab === "mantenimiento" && selectedEspacio && (
             <MantenimientoManager
               espacio={selectedEspacio}
+              rol={rolSimulado}
             />
           )}
         </div>

@@ -57,7 +57,7 @@ export interface RegisterResponse {
 export interface Mantenimiento {
   id_mantenimiento: number;
   id_espacio: number;
-  id_encargado: number;
+  id_encargado: number | null;
   tipo_contrato: string;
   tipo: string;
   estado: string;

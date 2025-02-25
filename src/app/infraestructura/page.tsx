@@ -6,7 +6,7 @@ import { Sede, Municipio, User, Edificio } from "../../types/api";
 import { useRol } from "../../../context/RolContext";
 import { fetchSedes } from "../api/SedeActions";
 import { fetchMunicipios } from "../api/MunicipioActions";
-import { getAdmins } from "../api/UserActions";
+import { fetchUsers } from "../api/UserActions";
 import { fetchEdificios } from "../api/EdificioActions";
 import { Header } from "../../../components";
 import SedeManager from "./components/sede/SedeManager";
@@ -54,7 +54,7 @@ const GestionSedes: React.FC = () => {
       municipiosData.sort((a: Municipio, b: Municipio) => a.nombre.localeCompare(b.nombre));
       setMunicipios(municipiosData);
 
-      const coordinadoresData = await getAdmins();
+      const coordinadoresData = await fetchUsers();
       coordinadoresData.sort((a: User, b: User) => a.id_persona - b.id_persona);
       setCoordinadores(coordinadoresData);
 

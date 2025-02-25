@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Footer, Header } from "../../../components";
 import { User, Sede } from "../../types/api";
 import Cookies from "js-cookie";
-import { fetchUser, fetchSedes } from "../api/UserActions"; // Importar las acciones
+import { fetchUser, fetchSedes, deleteUser } from "../api/UserActions"; // Importar las acciones
 
 const roleOptions = [
   { value: "admin", label: "Administrador" },
@@ -26,6 +26,7 @@ export default function Account() {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [selectedSede, setSelectedSede] = useState<string>("");
   const [editMode, setEditMode] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 
   useAuth();
 
@@ -40,7 +41,9 @@ export default function Account() {
           fetchSedeData();
         }
       } catch (error: any) {
-        setMessage(`❌ Error al cargar los datos del usuario: ${error.message}`);
+        setMessage(
+          `❌ Error al cargar los datos del usuario: ${error.message}`
+        );
       } finally {
         setIsLoading(false);
       }
@@ -51,7 +54,9 @@ export default function Account() {
         const data = await fetchSedes();
         setSedeData(data);
       } catch (error: any) {
-        setMessage(`❌ Error al cargar los datos de las sedes: ${error.message}`);
+        setMessage(
+          `❌ Error al cargar los datos de las sedes: ${error.message}`
+        );
       }
     };
 
@@ -94,6 +99,21 @@ export default function Account() {
       }, 1500);
     } catch (error: any) {
       setMessage(`❌ No se pudo actualizar los datos: ${error.message}`);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!userData) return;
+
+    try {
+      await deleteUser();
+      setConfirmDelete(false);
+      setMessage("✅ Cuenta eliminada correctamente.");
+      setTimeout(() => {
+        signOut();
+      }, 1500);
+    } catch (error: any) {
+      setMessage(`❌ No se pudo eliminar la cuenta: ${error.message}`);
     }
   };
 
@@ -204,6 +224,13 @@ export default function Account() {
               >
                 Cancelar
               </button>
+              {/* Botón de Eliminar Cuenta solo visible en modo edición */}
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mx-2"
+              >
+                Eliminar Cuenta
+              </button>
             </>
           ) : (
             <button
@@ -216,8 +243,39 @@ export default function Account() {
         </div>
 
         {editMode && (
-          <div className=" rounded-lg bg-yellow-100 text-yellow-800">
-            ⚠️ Recuerda que puedes probar y experimentar con las funcionalidades del rol que selecciones. Confiamos en que no vas a eliminar toda la base de datos. :) 
+          <div className="rounded-lg bg-yellow-100 text-yellow-800 p-4 mt-4">
+            ⚠️ Recuerda que puedes probar y experimentar con las funcionalidades
+            del rol que selecciones. Confiamos en que no vas a eliminar toda la
+            base de datos. :)
+          </div>
+        )}
+
+        {confirmDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-bold mb-4 text-black">
+                Confirmar Eliminación
+              </h2>
+              <p className="text-black">
+                ¿Está seguro de que desea eliminar su cuenta? Esta acción no se
+                puede deshacer.
+              </p>
+
+              <div className="mt-4 flex space-x-4">
+                <button
+                  onClick={handleDeleteAccount}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Confirmar
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>

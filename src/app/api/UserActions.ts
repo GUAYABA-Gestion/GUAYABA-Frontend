@@ -79,6 +79,27 @@ export const deleteUserManual = async (id_persona: number) => {
   }
 };
 
+export const deleteUser = async () => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("jwt")}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al eliminar usuario");
+    }
+
+    return response.json();
+  } catch (error) {
+    throw error; // Relanzar el error para manejarlo en el componente
+  }
+};
+
 export const updateUser = async (user: User) => {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/update`, {

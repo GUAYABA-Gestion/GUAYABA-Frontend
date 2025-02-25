@@ -45,22 +45,27 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({
       header: true,
       skipEmptyLines: true,
       complete: (result) => {
-        const parsedEdificios: Edificio[] = result.data.map((row: any) => ({
-          id_edificio: 0,
-          nombre: row.nombre || "",
-          dirección: row.dirección || "",
-          id_sede: rolSimulado === "coord" ? idSede ?? 0 : Number(row.id_sede) || 0, // Asignar idSede fijo si el rol es coordinador
-          categoría: row.categoría || "",
-          propiedad: row.propiedad || "",
-          area_terreno: Number(row.area_terreno) || 0,
-          area_construida: Number(row.area_construida) || 0,
-          cert_uso_suelo: row.cert_uso_suelo === "DISPONIBLE",
-          id_titular: 0,
-          correo_titular: row.correo_titular || "",
-          nombre_sede: "",
-          nombre_titular: ""
-        }));
-
+        const parsedEdificios: Edificio[] = result.data.map((row: any) => {
+          const correoTitular = row.correo_titular || "";
+          const titular = coordinadores.find(coordinador => coordinador.correo === correoTitular);
+      
+          return {
+            id_edificio: 0,
+            nombre: row.nombre || "",
+            dirección: row.dirección || "",
+            id_sede: rolSimulado === "coord" ? idSede ?? 0 : Number(row.id_sede) || 0,
+            categoría: row.categoría || "",
+            propiedad: row.propiedad || "",
+            area_terreno: Number(row.area_terreno) || 0,
+            area_construida: Number(row.area_construida) || 0,
+            cert_uso_suelo: row.cert_uso_suelo === "DISPONIBLE",
+            id_titular: titular ? titular.id_persona : null,  // Asignar el id_titular si el correo existe
+            correo_titular: correoTitular,
+            nombre_sede: "",
+            nombre_titular: ""
+          };
+        });
+      
         onEdificiosParsed(parsedEdificios);
       },
       error: (err) => console.error("Error al leer CSV:", err.message),

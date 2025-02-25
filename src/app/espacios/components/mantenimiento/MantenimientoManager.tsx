@@ -109,6 +109,7 @@ const MantenimientoManager: React.FC<MantenimientoManagerProps> = ({ espacio }) 
         onClose={() => setIsAddMantenimientoModalOpen(false)}
         onMantenimientosAdded={handleAddMantenimiento}
         idEspacio={espacio.id_espacio}
+        maints={maints}
       />
     </div>
   );

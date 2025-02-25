@@ -2,8 +2,16 @@
 import { useState } from "react";
 import { addEdificiosManual } from "../../../api/EdificioActions";
 import { Edificio, Sede, User } from "../../../../types/api";
-import { validateTextNotNull, validatePositiveNumber, validateCorreo } from "../../../api/validation";
-import { categoriasEdificio, propiedadesEdificio, certUsoSuelo } from "../../../api/desplegableValues";
+import {
+  validateTextNotNull,
+  validatePositiveNumber,
+  validateCorreo,
+} from "../../../api/validation";
+import {
+  categoriasEdificio,
+  propiedadesEdificio,
+  certUsoSuelo,
+} from "../../../api/desplegableValues";
 
 interface AddEdificioManualProps {
   onClose: () => void;
@@ -28,27 +36,44 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<
-    Array<{ nombre: boolean; dirección: boolean; id_sede: boolean; categoría: boolean; propiedad: boolean; area_terreno: boolean; area_construida: boolean; correo_titular: boolean }>
+    Array<{
+      nombre: boolean;
+      dirección: boolean;
+      id_sede: boolean;
+      categoría: boolean;
+      propiedad: boolean;
+      area_terreno: boolean;
+      area_construida: boolean;
+      correo_titular: boolean;
+    }>
   >([]);
 
-  const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const updatedEdificios = [...edificios];
     const { name, value } = e.target;
 
     if (name === "cert_uso_suelo") {
-      updatedEdificios[index] = { ...updatedEdificios[index], [name]: value === "DISPONIBLE" };
+      updatedEdificios[index] = {
+        ...updatedEdificios[index],
+        [name]: value === "DISPONIBLE",
+      };
     } else {
       updatedEdificios[index] = { ...updatedEdificios[index], [name]: value };
     }
 
     if (name === "id_sede") {
-      const selectedSede = sedes.find(sede => sede.id_sede === Number(value));
+      const selectedSede = sedes.find((sede) => sede.id_sede === Number(value));
       updatedEdificios[index].id_sede = selectedSede?.id_sede || 0;
     }
 
     if (name === "correo_titular") {
-      const selectedUser = coordinadores.find(user => user.correo === value);
-      updatedEdificios[index].id_titular = selectedUser?.id_persona || null;
+      const selectedUser = coordinadores.find((user) => user.correo === value);
+      updatedEdificios[index].id_titular = selectedUser
+        ? selectedUser.id_persona
+        : null;
     }
 
     setEdificios(updatedEdificios);
@@ -56,27 +81,42 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
     const updatedErrors = [...validationErrors];
     updatedErrors[index] = {
       ...updatedErrors[index],
-      [name]: false
+      [name]: false,
     };
     setValidationErrors(updatedErrors);
   };
 
   const handleAddRow = () => {
-    setEdificios([...edificios, { 
-      id_edificio: 0,
-      nombre: "",
-      dirección: "",
-      id_sede: idSede ?? 0, // Asignar idSede por defecto
-      categoría: "",
-      propiedad: "",
-      area_terreno: 0,
-      area_construida: 0,
-      cert_uso_suelo: false,
-      id_titular: null,
-      correo_titular: "",
-      nombre_sede: ""
-    }]);
-    setValidationErrors([...validationErrors, { nombre: false, dirección: false, id_sede: false, categoría: false, propiedad: false, area_terreno: false, area_construida: false, correo_titular: false }]);
+    setEdificios([
+      ...edificios,
+      {
+        id_edificio: 0,
+        nombre: "",
+        dirección: "",
+        id_sede: idSede ?? 0, // Asignar idSede por defecto
+        categoría: "",
+        propiedad: "",
+        area_terreno: 0,
+        area_construida: 0,
+        cert_uso_suelo: false,
+        id_titular: null,
+        correo_titular: "",
+        nombre_sede: "",
+      },
+    ]);
+    setValidationErrors([
+      ...validationErrors,
+      {
+        nombre: false,
+        dirección: false,
+        id_sede: false,
+        categoría: false,
+        propiedad: false,
+        area_terreno: false,
+        area_construida: false,
+        correo_titular: false,
+      },
+    ]);
   };
 
   const handleRemoveRow = (index: number) => {
@@ -93,7 +133,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
       return;
     }
 
-    const newValidationErrors = edificios.map(edificio => ({
+    const newValidationErrors = edificios.map((edificio) => ({
       nombre: !validateTextNotNull(edificio.nombre),
       dirección: !validateTextNotNull(edificio.dirección),
       id_sede: rolSimulado === "coord" && edificio.id_sede !== idSede, // Validar que el id_sede sea el correcto solo si el rol es coordinador
@@ -101,13 +141,24 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
       propiedad: edificio.propiedad === "",
       area_terreno: !validatePositiveNumber(edificio.area_terreno),
       area_construida: !validatePositiveNumber(edificio.area_construida),
-      correo_titular: edificio.correo_titular ? !validateCorreo(edificio.correo_titular) || !coordinadores.some(user => user.correo === edificio.correo_titular) : false,
+      correo_titular: edificio.correo_titular
+        ? !validateCorreo(edificio.correo_titular) ||
+          !coordinadores.some((user) => user.correo === edificio.correo_titular)
+        : false,
     }));
 
     setValidationErrors(newValidationErrors);
 
-    const hasErrors = newValidationErrors.some(error => 
-      error.nombre || error.dirección || error.id_sede || error.categoría || error.propiedad || error.area_terreno || error.area_construida || error.correo_titular
+    const hasErrors = newValidationErrors.some(
+      (error) =>
+        error.nombre ||
+        error.dirección ||
+        error.id_sede ||
+        error.categoría ||
+        error.propiedad ||
+        error.area_terreno ||
+        error.area_construida ||
+        error.correo_titular
     );
 
     if (hasErrors) {
@@ -141,22 +192,48 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-[#80BA7F] text-white">
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">Nombre</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">Dirección</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">Sede</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">Categoría</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">Propiedad</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[140px]">Área Terreno</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[160px]">Área Construida</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">Cert. Uso Suelo</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[220px]">Correo Titular</th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[120px]">Acciones</th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
+                  Nombre
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
+                  Dirección
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                  Sede
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
+                  Categoría
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
+                  Propiedad
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[140px]">
+                  Área Terreno
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[160px]">
+                  Área Construida
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
+                  Cert. Uso Suelo
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[220px]">
+                  Correo Titular
+                </th>
+                <th className="border border-gray-300 px-4 py-2 min-w-[120px]">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
               {edificios.map((edificio, index) => (
                 <tr key={index}>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.nombre ? "outline outline-red-500" : ""}`}>
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.nombre
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
                     <input
                       type="text"
                       name="nombre"
@@ -166,7 +243,13 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.dirección ? "outline outline-red-500" : ""}`}>
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.dirección
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
                     <input
                       type="text"
                       name="dirección"
@@ -176,7 +259,13 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.id_sede ? "outline outline-red-500" : ""}`}>
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.id_sede
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
                     <select
                       name="id_sede"
                       value={edificio.id_sede}
@@ -185,7 +274,12 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       disabled={rolSimulado === "coord"}
                     >
                       {rolSimulado === "coord" ? (
-                        <option value={idSede ?? 0}>{sedes.find(sede => sede.id_sede === idSede)?.nombre}</option>
+                        <option value={idSede ?? 0}>
+                          {
+                            sedes.find((sede) => sede.id_sede === idSede)
+                              ?.nombre
+                          }
+                        </option>
                       ) : (
                         <>
                           <option value="">Seleccione una sede</option>
@@ -198,7 +292,13 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       )}
                     </select>
                   </td>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.categoría ? "outline outline-red-500" : ""}`}>
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.categoría
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
                     <select
                       name="categoría"
                       value={edificio.categoría}
@@ -213,7 +313,13 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       ))}
                     </select>
                   </td>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.propiedad ? "outline outline-red-500" : ""}`}>
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.propiedad
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
                     <select
                       name="propiedad"
                       value={edificio.propiedad}
@@ -228,7 +334,13 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       ))}
                     </select>
                   </td>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.area_terreno ? "outline outline-red-500" : ""}`}>
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.area_terreno
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
                     <input
                       type="number"
                       name="area_terreno"
@@ -238,7 +350,13 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.area_construida ? "outline outline-red-500" : ""}`}>
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.area_construida
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
                     <input
                       type="number"
                       name="area_construida"
@@ -251,7 +369,9 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                   <td className="border border-gray-300 p-1">
                     <select
                       name="cert_uso_suelo"
-                      value={edificio.cert_uso_suelo ? "DISPONIBLE" : "NO DISPONIBLE"}
+                      value={
+                        edificio.cert_uso_suelo ? "DISPONIBLE" : "NO DISPONIBLE"
+                      }
                       onChange={(e) => handleInputChange(index, e)}
                       className="w-full px-2 py-1 text-sm text-black"
                     >
@@ -262,23 +382,26 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                       ))}
                     </select>
                   </td>
-                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.correo_titular ? "outline outline-red-500" : ""}`}>
-                    <input
-                      type="email"
-                      list="correos-titulares"
+                  <td
+                    className={`border border-gray-300 p-1 ${
+                      validationErrors[index]?.correo_titular
+                        ? "outline outline-red-500"
+                        : ""
+                    }`}
+                  >
+                    <select
                       name="correo_titular"
                       value={edificio.correo_titular || ""}
                       onChange={(e) => handleInputChange(index, e)}
-                      placeholder="Correo Titular"
                       className="w-full px-2 py-1 text-sm text-black"
-                    />
-                    <datalist id="correos-titulares">
+                    >
+                      <option value="">Seleccione un titular</option>
                       {coordinadores.map((user) => (
                         <option key={user.id_persona} value={user.correo}>
                           {user.correo}
                         </option>
                       ))}
-                    </datalist>
+                    </select>
                   </td>
                   <td className="border border-gray-300 p-1">
                     <button
@@ -294,40 +417,58 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
           </table>
         </div>
       </div>
-  
-      <button 
-        onClick={handleAddRow} 
+
+      <button
+        onClick={handleAddRow}
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 text-sm"
       >
         + Añadir Fila
       </button>
-  
+
       <div className="mt-4 flex space-x-4">
-        <button 
-          onClick={handleSubmit} 
+        <button
+          onClick={handleSubmit}
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm"
         >
           Guardar Edificios
         </button>
-        <button 
-          onClick={handleClose} 
+        <button
+          onClick={handleClose}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm"
         >
           Cancelar
         </button>
       </div>
-  
-      {Object.values(validationErrors).some((errors) => Object.values(errors).some((error) => error)) && (
+
+      {Object.values(validationErrors).some((errors) =>
+        Object.values(errors).some((error) => error)
+      ) && (
         <div className="mt-4 text-red-500 text-sm">
           <ul className="list-disc pl-5">
-            {Object.values(validationErrors).some((errors) => errors.nombre) && <li>Nombre: Campo obligatorio</li>}
-            {Object.values(validationErrors).some((errors) => errors.dirección) && <li>Dirección: Campo obligatorio</li>}
-            {Object.values(validationErrors).some((errors) => errors.id_sede) && <li>Sede: Seleccione una sede válida</li>}
-            {Object.values(validationErrors).some((errors) => errors.categoría) && <li>Categoría: Seleccione una categoría válida</li>}
-            {Object.values(validationErrors).some((errors) => errors.propiedad) && <li>Propiedad: Seleccione una propiedad válida</li>}
-            {Object.values(validationErrors).some((errors) => errors.area_terreno) && <li>Área Terreno: Debe ser un número positivo</li>}
-            {Object.values(validationErrors).some((errors) => errors.area_construida) && <li>Área Construida: Debe ser un número positivo</li>}
-            {Object.values(validationErrors).some((errors) => errors.correo_titular) && <li>Correo Titular: Debe ser un correo válido y existente</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.nombre
+            ) && <li>Nombre: Campo obligatorio</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.dirección
+            ) && <li>Dirección: Campo obligatorio</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.id_sede
+            ) && <li>Sede: Seleccione una sede válida</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.categoría
+            ) && <li>Categoría: Seleccione una categoría válida</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.propiedad
+            ) && <li>Propiedad: Seleccione una propiedad válida</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.area_terreno
+            ) && <li>Área Terreno: Debe ser un número positivo</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.area_construida
+            ) && <li>Área Construida: Debe ser un número positivo</li>}
+            {Object.values(validationErrors).some(
+              (errors) => errors.correo_titular
+            ) && <li>Correo Titular: Debe ser un correo válido y existente</li>}
           </ul>
         </div>
       )}

@@ -35,7 +35,7 @@ const MantenimientoTable: React.FC<MantenimientoTableProps> = ({
     );
   });
 
-  const getCorreoById = (id: number) => {
+  const getCorreoById = (id: number | null) => {
     const maint = maints.find((m) => m.id_persona === id);
     return maint ? maint.correo : "Desconocido";
   };

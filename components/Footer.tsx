@@ -14,11 +14,6 @@ const Footer = () => {
           <h3 className="text-lg font-bold mb-4">Información Legal</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <a href="#" className="hover:underline">
-                Términos y Condiciones
-              </a>
-            </li>
-            <li>
               <a href="/privacy" className="hover:underline">
                 Política de Privacidad
               </a>

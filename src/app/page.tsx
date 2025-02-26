@@ -147,7 +147,7 @@ export default function Home() {
                 Santiago Reyes Ochoa
               </h4>
               <div className="mt-2 flex space-x-2">
-                <a href="https://github.com/Sreyeso" className="text-blue-500 hover:underline">
+                <a href="https://github.com/Sreyeso" target="_blank" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>
@@ -164,7 +164,7 @@ export default function Home() {
                 Santiago Ballen Leguizamo
               </h4>
               <div className="mt-2 flex space-x-2">
-                <a href="https://github.com/SantBl18" className="text-blue-500 hover:underline">
+                <a href="https://github.com/SantBl18" target="_blank" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>
@@ -181,7 +181,7 @@ export default function Home() {
                 Miguel Angel Suarez Cortes
               </h4>
               <div className="mt-2 flex space-x-2">
-                <a href="https://github.com/miasuarezco" className="text-blue-500 hover:underline">
+                <a href="https://github.com/miasuarezco" target="_blank" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>
@@ -198,7 +198,7 @@ export default function Home() {
                 Daniel Esteban Tobar Lozano
               </h4>
               <div className="mt-2 flex space-x-2">
-                <a href="https://github.com/dtobarl" className="text-blue-500 hover:underline">
+                <a href="https://github.com/dtobarl" target="_blank" className="text-blue-500 hover:underline">
                   GitHub
                 </a>
               </div>

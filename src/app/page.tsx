@@ -59,9 +59,9 @@ export default function Home() {
                 Nuestra Misión
               </h3>
               <p className="text-lg text-gray-700">
-              Con Guayaba, diseñamos, desarrollamos y mejoramos constantemente una plataforma que centraliza la información clave de la infraestructura educativa, 
-              facilitando su seguimiento y gestión. Nos enfocamos en consolidar datos, generar informes útiles y promover herramientas confiables que respalden la toma de decisiones estratégicas, 
-              con el compromiso de abordar estos retos del sector educativo de forma efectiva y sostenible.
+              Con Guayaba mejoramos, diseñamos y desarrollamos constantemente una plataforma que centraliza información clave de infraestructura educativa, 
+              facilitando su seguimiento y gestión. Brindamos herramientas confiables que respaldan la toma de decisiones estratégicas;
+              como la generación de informes y la planificación de horarios, para que las instituciones educativas puedan optimizar el uso de sus espacios y recursos.
               </p>
             </div>
           </div>
@@ -74,9 +74,8 @@ export default function Home() {
               </h3>
               <p className="text-lg text-gray-700">
               Para 2027, Guayaba busca ser una opción confiable y accesible en Colombia para la gestión integral de infraestructura educativa, 
-              destacándose por su rigor en procesos como la consolidación de información clave, seguimiento del uso de espacios y planificación horaria. 
-              Buscamos superar las limitaciones actuales del sector mediante una solución innovadora que respalden la toma de decisiones, favoreciendo la eficiencia 
-              y sostenibilidad en la gestión educativa.
+              destacándose su seguridad y funcionalidades innovadoras, ayudando al sector educativo a mejorar la toma de decisiones administrativas, 
+              favoreciendo la eficiencia y sostenibilidad en la gestión educativa realizada.
               </p>
             </div>
             <img
@@ -100,8 +99,8 @@ export default function Home() {
                 Innovación
               </h4>
               <p className="text-gray-600">
-                Desarrollamos una solución tecnológica avanzada que aborda las
-                necesidades actuales del sector educativo, facilitando la
+                Desarrollamos una solución tecnológica avanzada que aborda
+                necesidades actuales del sector educativo: la
                 modernización y sostenibilidad en la gestión de infraestructura.
               </p>
             </div>

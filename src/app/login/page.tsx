@@ -18,13 +18,23 @@ export default function Login() {
 
   // Obtener el callbackUrl de los parámetros de la URL
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const error = searchParams.get("error");
 
   useEffect(() => {
+    if (error === "AccessDenied") {
+      setMessage("❌ Dominio no permitido.");
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 5000); // Limpiar el mensaje después de 5 segundos
+
+      return () => clearTimeout(timer); // Limpiar el timeout si el componente se desmonta
+    }
+
     const jwt = getAuthCookie();
 
     // Si ya hay un JWT válido, redirigir al callbackUrl o al home
     if (jwt) {
-      signOut({redirect: false});
+      signOut({ redirect: false });
       router.push(callbackUrl);
       return;
     }
@@ -34,11 +44,14 @@ export default function Login() {
       const checkUser = async () => {
         setIsLoading(true);
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/check-user`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ googleToken: session.googleToken }),
-          });
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/check-user`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ googleToken: session.googleToken }),
+            }
+          );
 
           const data = await response.json();
 
@@ -48,13 +61,15 @@ export default function Login() {
             await signOut({ redirect: false });
             router.push(callbackUrl); // Redirigir al callbackUrl después del login
           } else {
-            setTempMessage("No tienes una cuenta registrada. Por favor, completa tu registro.");
+            setTempMessage(
+              "No tienes una cuenta registrada. Por favor, completa tu registro."
+            );
             await signOut({ redirect: false });
-            router.push('/register');
+            router.push("/register");
           }
         } catch (error) {
-          console.error('Error al verificar usuario:', error);
-          setMessage('❌ Error al verificar tu cuenta. Intenta de nuevo.');
+          console.error("Error al verificar usuario:", error);
+          setMessage("❌ Error al verificar tu cuenta. Intenta de nuevo.");
         } finally {
           setIsLoading(false);
         }
@@ -62,14 +77,14 @@ export default function Login() {
 
       checkUser();
     }
-  }, [session, router, callbackUrl, fetchUserData]); // Agregar fetchUserData como dependencia
+  }, [session, router, callbackUrl, fetchUserData, error]); // Agregar fetchUserData como dependencia
 
   const handleSignIn = async () => {
     setIsLoading(true);
-    const res = await signIn('google', { redirect: false });
+    const res = await signIn("google", { redirect: false });
     if (res?.error) {
       console.error(res.error);
-      setMessage('❌ Error al iniciar sesión. Intenta de nuevo.');
+      setMessage("❌ Error al iniciar sesión. Intenta de nuevo.");
     }
     setIsLoading(false);
   };
@@ -78,15 +93,15 @@ export default function Login() {
     removeAuthCookie();
     setTempMessage("Por favor, regístrate para continuar.");
     await signOut({ redirect: false });
-    router.push('/register');
+    router.push("/register");
   };
 
   if (session?.googleToken && !getAuthCookie()) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
-        <main className="flex-grow flex items-center justify-center min-w-[48rem]">
-          <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow text-center">
+        <main className="flex-grow flex items-center justify-center p-4">
+          <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow text-center">
             <div className="animate-pulse space-y-4">
               <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto" />
               <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto" />
@@ -101,27 +116,23 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow flex items-center justify-center min-w-[48rem]">
-
+      <main className="flex-grow flex items-center justify-center p-4">
         <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
             Inicio de sesión
           </h1>
 
-          {message && (
-            <div className={`mb-6 rounded-lg ${
-              message.startsWith("❌") 
-                ? "bg-red-100 text-red-800"
-                : "bg-blue-100 text-blue-800"
-            }`}>
-              {message}
-            </div>
-          )}
+          <div className="mb-6 text-center text-gray-600">
+            <p>
+              Esta aplicación está restringida a los dominios{" "}
+              <strong>@unal.edu.co</strong> y <strong>@sanmartin.edu.co</strong>.
+            </p>
+          </div>
 
           <button
             onClick={handleSignIn}
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 p-4 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
@@ -130,13 +141,28 @@ export default function Login() {
               </div>
             ) : (
               <>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/>
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z" />
                 </svg>
                 Continuar con Google
               </>
             )}
           </button>
+          {message && (
+            <div
+              className={`mb-4 rounded-lg ${
+                message.startsWith("❌")
+                  ? "bg-red-100 text-red-800"
+                  : "bg-blue-100 text-blue-800"
+              } text-center`}
+            >
+              {message}
+            </div>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-gray-600 mb-2">¿No tienes una cuenta?</p>
@@ -146,6 +172,15 @@ export default function Login() {
             >
               ¡Regístrate aquí!
             </button>
+          </div>
+
+          <div className="mt-6 text-center text-gray-600">
+            <p>
+              ¿Te gustaría implementar Guayaba en tu institución?{" "}
+              <a href="/contact" className="text-blue-600 hover:underline">
+                Contáctanos
+              </a>
+            </p>
           </div>
         </div>
       </main>

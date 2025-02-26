@@ -1,6 +1,6 @@
 // src/app/api/auth/authOptions.ts
 
-import { AuthOptions } from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 // Definir las opciones de NextAuth
@@ -13,6 +13,15 @@ export const authOptions: AuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
+    async signIn({ user, account }) {
+      const allowedDomains = ["unal.edu.co", "sanmartin.edu.co"];
+      const emailDomain = user.email?.split("@")[1];
+      if (emailDomain && allowedDomains.includes(emailDomain)) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     async jwt({ token, account }) {
       if (account?.id_token) {
         token.googleToken = account.id_token; // Guardar token de Google
@@ -24,5 +33,9 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
-
+  pages: {
+    error: "/login", // Redirigir a una página personalizada en caso de error
+  },
 };
+
+export default NextAuth(authOptions);

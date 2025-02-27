@@ -1,26 +1,9 @@
 import Cookies from "js-cookie";
 import { Evento } from "../../types/api";
 
-export const fetchEventos = async (): Promise<Evento[]> => {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos/`, {
-      headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Error al obtener eventos");
-    }
-
-    return response.json();
-  } catch (error) {
-    throw error; // Relanzar el error para manejarlo en el componente
-  }
-};
-
 export const updateEvento = async (evento: Evento) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos/update-evento`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos/update/${evento.id_evento}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +82,7 @@ export const fetchEventosByEspacios = async (ids_espacios: number[]): Promise<Ev
     }
     
     const data = await response.json();
-    return data.data;
+    return data;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }

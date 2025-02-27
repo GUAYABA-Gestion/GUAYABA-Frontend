@@ -1,12 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Sede, Espacio, Edificio } from "../../../types/api";
-import { fetchEventosByEspacios } from "../../api/EventoActions";
+
 import { fetchEspaciosByEdificios } from "../../api/EspacioActions";
+
+import { fetchEventosByEspacios } from "../../api/EventoActions";
+import { fetchMantenimientosByEspacios } from "../../api/MantenimientoActions";
 import { fetchSedes } from "../../api/SedeActions";
 import { Footer, Header } from "../../../../components";
 import { Chart, registerables } from "chart.js";
-import { fetchMantenimientosByEspacios } from "../../api/MantenimientoActions";
+
 
 Chart.register(...registerables);
 

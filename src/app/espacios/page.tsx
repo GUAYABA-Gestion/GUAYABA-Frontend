@@ -10,6 +10,7 @@ import { fetchSedeById } from "../api/SedeActions";
 import { getAdmins } from "../api/UserActions";
 import EspacioManager from "./components/espacio/EspacioManager";
 import MantenimientoManager from "./components/mantenimiento/MantenimientoManager";
+import EventoManager from "./components/evento/EventoManager";
 import { Footer, Header } from "../../../components";
 import { useRol } from "../../../context/RolContext";
 import Link from "next/link";
@@ -280,8 +281,11 @@ const GestionEspacios: React.FC = () => {
               onEspacioSelect={handleEspacioSelect}
             />
           )}
-          {selectedTab === "eventos" && (
-            <div>{/* Aquí irán los componentes de eventos */}</div>
+          {selectedTab === "eventos" && selectedEspacio &&(
+              <EventoManager
+                espacio={selectedEspacio}
+                rol={rolSimulado}
+              />
           )}
           {selectedTab === "mantenimiento" && selectedEspacio && (
             <MantenimientoManager

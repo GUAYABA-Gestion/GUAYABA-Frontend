@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { Sede, Municipio, User, Edificio } from "../../types/api";
 import { useRol } from "../../../context/RolContext";
 import { fetchSedes } from "../api/SedeActions";
-import { fetchMunicipios } from "../api/MunicipioActions";
+import { fetchMunicipios } from "../api/UtilsActions";
 import { fetchUsers } from "../api/UserActions";
 import { fetchEdificios } from "../api/EdificioActions";
 import { Header } from "../../../components";

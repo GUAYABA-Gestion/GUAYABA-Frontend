@@ -9,10 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
     "chart.js": "^4.4.8",
     "crypto-js": "^4.2.0",
     "cryptojs": "^2.5.3",
     "exceljs": "^4.4.0",
+    "fullcalendar": "^6.1.15",
     "html2canvas": "^1.4.1",
     "install": "^0.13.0",
     "js-cookie": "^3.0.5",

@@ -75,7 +75,7 @@ export default function Home() {
               <p className="text-lg text-gray-700">
               Para 2027, Guayaba busca ser una opción confiable y accesible en Colombia para la gestión integral de infraestructura educativa, 
               destacándose su seguridad y funcionalidades innovadoras, ayudando al sector educativo a mejorar la toma de decisiones administrativas, 
-              favoreciendo la eficiencia y sostenibilidad en la gestión educativa realizada.
+              favoreciendo la eficiencia y sostenibilidad en la gestión realizada.
               </p>
             </div>
             <img

@@ -17,12 +17,18 @@ export function middleware(req: NextRequest) {
     "/infraestructura/informe",
   ];
 
+  // No redirigir si la ruta es /login o /register
+  if (req.nextUrl.pathname.startsWith("/login") || req.nextUrl.pathname.startsWith("/register")) {
+    return NextResponse.next();
+  }
+
   // Verificar si la ruta solicitada está protegida
   const isProtectedRoute = protectedRoutes.some(route => req.nextUrl.pathname.startsWith(route));
 
   if (isProtectedRoute && !token) {
     // Redirige al login con callbackUrl para retornar después de iniciar sesión
     const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("redirect", "middleware"); // Guarda la ruta original con parámetros
     loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search); // Guarda la ruta original con parámetros
     return NextResponse.redirect(loginUrl);
   }

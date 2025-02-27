@@ -1,15 +1,14 @@
 "use client";
 import { useState } from "react";
-import { Log, User } from "../../../types/api";
+import { Log } from "../../../types/api";
 import AuditTable from "./AuditTable";
 import AuditDetailsModal from "./AuditDetailsModal";
 
 interface AuditManagerProps {
   logs: Log[];
-  users: User[]; // Nueva propiedad para los usuarios
 }
 
-const AuditManager: React.FC<AuditManagerProps> = ({ logs, users }) => {
+const AuditManager: React.FC<AuditManagerProps> = ({ logs }) => {
   const [filters, setFilters] = useState({
     fecha: "",
     operacion: "",
@@ -51,7 +50,6 @@ const AuditManager: React.FC<AuditManagerProps> = ({ logs, users }) => {
     <div className="flex-grow">
       <AuditTable
         logs={logs}
-        users={users} // Pasar los usuarios al componente AuditTable
         filters={filters}
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}

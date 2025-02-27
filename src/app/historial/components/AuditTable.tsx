@@ -1,18 +1,22 @@
 "use client";
 import React, { useState } from "react";
-import { Log, User } from "../../../types/api";
+import { Log } from "../../../types/api";
 import AuditExcelExportButton from "./AuditExcelExportButton";
+import moment from 'moment-timezone';
+
+const adjustDateTime = (dateTime: string) => {
+  return moment(dateTime).tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
+};
 
 interface AuditTableProps {
   logs: Log[];
-  users: User[];
   filters: {
     fecha: string;
     operacion: string;
     tabla: string;
     horaInicio: string;
     horaFin: string;
-    correo: string; // Nuevo filtro para correo
+    correo: string;
   };
   currentPage: number;
   itemsPerPage: number;
@@ -24,7 +28,6 @@ interface AuditTableProps {
 
 const AuditTable: React.FC<AuditTableProps> = ({
   logs,
-  users,
   filters,
   currentPage,
   itemsPerPage,
@@ -35,14 +38,6 @@ const AuditTable: React.FC<AuditTableProps> = ({
 }) => {
   const [jumpPage, setJumpPage] = useState<number | string>("");
   const [validationMessage, setValidationMessage] = useState<string>("");
-
-  const getUserInfo = (id_persona: number) => {
-    if (id_persona === -1) {
-      return "AÑADIDO AUTOMÁTICAMENTE";
-    }
-    const user = users.find((user) => user.id_persona === id_persona);
-    return user ? `${user.nombre} (${user.correo})` : "";
-  };
 
   const handleHoraInicioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -83,7 +78,6 @@ const AuditTable: React.FC<AuditTableProps> = ({
       ? parseInt(filters.horaInicio, 10)
       : 0;
     const horaFin = filters.horaFin ? parseInt(filters.horaFin, 10) : 24;
-    const userInfo = getUserInfo(log.id_persona) || "";
 
     return (
       (filters.fecha === "" || logDate === filters.fecha) &&
@@ -92,7 +86,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
       (filters.horaInicio === "" ||
         (logTime >= horaInicio && logTime < horaFin)) &&
       (filters.correo === "" ||
-        userInfo.toLowerCase().includes(filters.correo.toLowerCase()))
+        log.correo.toLowerCase().includes(filters.correo.toLowerCase()))
     );
   });
 
@@ -204,79 +198,79 @@ const AuditTable: React.FC<AuditTableProps> = ({
     <div className="p-4 bg-gray-50">
       {/* Filtros y botones */}
       <div className="mt-2 space-y-2">
-  <div className="flex flex-wrap items-end gap-2">
-    <input
-      type="date"
-      value={filters.fecha}
-      onChange={(e) => onFilterChange("fecha", e.target.value)}
-      className="p-2 border rounded text-black text-sm w-full md:w-auto"
-      placeholder="Filtrar por fecha"
-    />
-    <select
-      value={filters.operacion}
-      onChange={(e) => onFilterChange("operacion", e.target.value)}
-      className="p-2 border rounded text-black text-sm w-full md:w-auto"
-    >
-      <option value="">Filtrar por acciones</option>
-      <option value="INSERT">ADICIÓN DE DATOS</option>
-      <option value="UPDATE">ACTUALIZACIÓN DE DATOS</option>
-      <option value="DELETE">ELIMINACIÓN DE DATOS</option>
-    </select>
-    <select
-      value={filters.tabla}
-      onChange={(e) => onFilterChange("tabla", e.target.value)}
-      className="p-2 border rounded text-black text-sm w-full md:w-auto"
-    >
-      <option value="">Filtrar por tablas</option>
-      {tablas.map((tabla) => (
-        <option key={tabla.value} value={tabla.value}>
-          {tabla.label}
-        </option>
-      ))}
-    </select>
-    <div className="flex flex-col">
-      <label className="text-sm text-gray-600">Hora de Inicio</label>
-      <input
-        type="number"
-        value={filters.horaInicio}
-        onChange={handleHoraInicioChange}
-        placeholder="Hora de Inicio"
-        className="p-2 border rounded text-black text-sm w-full md:w-auto"
-        min="0"
-        max="23"
-      />
-    </div>
-    <div className="flex flex-col">
-      <label className="text-sm text-gray-600">Hora Fin</label>
-      <input
-        type="number"
-        value={filters.horaFin}
-        onChange={handleHoraFinChange}
-        placeholder="Hora Fin"
-        className="p-2 border rounded text-black text-sm w-full md:w-auto"
-        min={filters.horaInicio}
-        max="24"
-      />
-    </div>
-    <input
-      type="text"
-      value={filters.correo}
-      onChange={(e) => onFilterChange("correo", e.target.value)}
-      placeholder="Filtrar por responsable"
-      className="p-2 border rounded text-black text-sm w-full md:w-auto"
-    />
-    <button
-      onClick={resetFilters}
-      className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300 text-sm w-full md:w-auto"
-    >
-      Reiniciar Filtros
-    </button>
-    <AuditExcelExportButton logs={logs} filters={filters} />
-  </div>
-  {validationMessage && (
-    <div className="text-red-500 text-sm mt-2">{validationMessage}</div>
-  )}
-</div>
+        <div className="flex flex-wrap items-end gap-2">
+          <input
+            type="date"
+            value={filters.fecha}
+            onChange={(e) => onFilterChange("fecha", e.target.value)}
+            className="p-2 border rounded text-black text-sm w-full md:w-auto"
+            placeholder="Filtrar por fecha"
+          />
+          <select
+            value={filters.operacion}
+            onChange={(e) => onFilterChange("operacion", e.target.value)}
+            className="p-2 border rounded text-black text-sm w-full md:w-auto"
+          >
+            <option value="">Filtrar por acciones</option>
+            <option value="INSERT">ADICIÓN DE DATOS</option>
+            <option value="UPDATE">ACTUALIZACIÓN DE DATOS</option>
+            <option value="DELETE">ELIMINACIÓN DE DATOS</option>
+          </select>
+          <select
+            value={filters.tabla}
+            onChange={(e) => onFilterChange("tabla", e.target.value)}
+            className="p-2 border rounded text-black text-sm w-full md:w-auto"
+          >
+            <option value="">Filtrar por tablas</option>
+            {tablas.map((tabla) => (
+              <option key={tabla.value} value={tabla.value}>
+                {tabla.label}
+              </option>
+            ))}
+          </select>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600">Hora de Inicio</label>
+            <input
+              type="number"
+              value={filters.horaInicio}
+              onChange={handleHoraInicioChange}
+              placeholder="Hora de Inicio"
+              className="p-2 border rounded text-black text-sm w-full md:w-auto"
+              min="0"
+              max="23"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600">Hora Fin</label>
+            <input
+              type="number"
+              value={filters.horaFin}
+              onChange={handleHoraFinChange}
+              placeholder="Hora Fin"
+              className="p-2 border rounded text-black text-sm w-full md:w-auto"
+              min={filters.horaInicio}
+              max="24"
+            />
+          </div>
+          <input
+            type="text"
+            value={filters.correo}
+            onChange={(e) => onFilterChange("correo", e.target.value)}
+            placeholder="Filtrar por responsable"
+            className="p-2 border rounded text-black text-sm w-full md:w-auto"
+          />
+          <button
+            onClick={resetFilters}
+            className="bg-[#80BA7F] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#51835f] transition duration-300 text-sm w-full md:w-auto"
+          >
+            Reiniciar Filtros
+          </button>
+          <AuditExcelExportButton logs={logs} filters={filters} />
+        </div>
+        {validationMessage && (
+          <div className="text-red-500 text-sm mt-2">{validationMessage}</div>
+        )}
+      </div>
 
       {/* Tabla */}
       <div className="mt-6 overflow-x-auto">
@@ -322,10 +316,10 @@ const AuditTable: React.FC<AuditTableProps> = ({
                     {getOperacionCompleta(log.operacion)}
                   </td>
                   <td className="border border-gray-300 p-2 text-black text-sm">
-                    {getUserInfo(log.id_persona)}
+                    {log.correo}
                   </td>
                   <td className="border border-gray-300 p-2 text-black text-sm">
-                    {new Date(log.fecha_hora).toLocaleString()}
+                    {adjustDateTime(log.fecha_hora)}
                   </td>
                   <td className="border border-gray-300 p-2 text-center">
                     <button

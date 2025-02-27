@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import Cookies from "js-cookie";
 import { useRouter, usePathname, useSearchParams } from "next/navigation"; // Si usas App Router
 
@@ -22,14 +28,19 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
   const searchParams = useSearchParams();
 
   const handleLogout = () => {
-    Cookies.remove("jwt");
-    setRolSimulado("none");
-    setIdSede(null);
-    // Redirección con Next.js (App Router)
-    const callbackUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-    router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
-    // O con window.location si no usas App Router
-    // window.location.href = `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+    const jwt = Cookies.get("jwt");
+    if (jwt) {
+      Cookies.remove("jwt");
+      setRolSimulado("none");
+      setIdSede(null);
+      // Redirección con Next.js (App Router)
+      const callbackUrl = `${pathname}${
+        searchParams.toString() ? `?${searchParams.toString()}` : ""
+      }`;
+      router.push(`/login?redirect=RolContext&callbackUrl=${encodeURIComponent(callbackUrl)}`);
+      // O con window.location si no usas App Router
+      // window.location.href = `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+    }
   };
 
   const fetchUserData = async () => {
@@ -42,9 +53,12 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`,
+        {
+          headers: { Authorization: `Bearer ${jwt}` },
+        }
+      );
 
       if (!response.ok) {
         handleLogout();
@@ -55,9 +69,7 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
       setRolSimulado(data.rol);
       setIdSede(data.id_sede);
       setIsLoading(false);
-
     } catch (error) {
-
       handleLogout();
     }
   };
@@ -70,9 +82,12 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`,
+        {
+          headers: { Authorization: `Bearer ${jwt}` },
+        }
+      );
 
       if (!response.ok) {
         handleLogout();
@@ -96,12 +111,27 @@ export const RolProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // No verificar JWT si estamos en la página de login o registro
+    if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
+      setIsLoading(false);
+      return;
+    }
+
     fetchUserData();
     verifyJwtPeriodically();
-  }, []);
+  }, [pathname]);
 
   return (
-    <RolContext.Provider value={{ rolSimulado, idSede, cambiarRol: setRolSimulado, cambiarSede: setIdSede, fetchUserData, verifyJwt }}>
+    <RolContext.Provider
+      value={{
+        rolSimulado,
+        idSede,
+        cambiarRol: setRolSimulado,
+        cambiarSede: setIdSede,
+        fetchUserData,
+        verifyJwt,
+      }}
+    >
       {!isLoading && children}
     </RolContext.Provider>
   );

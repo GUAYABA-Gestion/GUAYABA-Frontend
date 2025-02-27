@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -27,8 +26,6 @@ export default function Account() {
   const [selectedSede, setSelectedSede] = useState<string>("");
   const [editMode, setEditMode] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
-
-  useAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -60,12 +57,8 @@ export default function Account() {
       }
     };
 
-    if (session?.googleToken || Cookies.get("jwt")) {
-      fetchUserData();
-    } else {
-      router.push("/login");
-    }
-  }, [session, router]);
+    fetchUserData();
+  }, [session]);
 
   const handleSaveChanges = async () => {
     if (!userData) return;
@@ -110,7 +103,9 @@ export default function Account() {
       setConfirmDelete(false);
       setMessage("✅ Cuenta eliminada correctamente.");
       setTimeout(() => {
-        signOut();
+        Cookies.remove("jwt");
+        signOut({ redirect: false });
+        router.push("/");
       }, 1500);
     } catch (error: any) {
       setMessage(`❌ No se pudo eliminar la cuenta: ${error.message}`);

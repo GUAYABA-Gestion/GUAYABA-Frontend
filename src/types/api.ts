@@ -106,5 +106,5 @@ export interface Log {
   fecha_hora: string;
   datos_anteriores: JSON;
   datos_nuevos: JSON;
-  id_persona: number;
+  correo: string;
 }

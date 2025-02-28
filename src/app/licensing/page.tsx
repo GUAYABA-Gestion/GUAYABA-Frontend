@@ -6,10 +6,10 @@ import { Header, Footer } from '../../../components';
 export default function WompiPage() {
   console.log(process.env.NEXT_PUBLIC_WOMPI_PUBKEY)
   return (
-<div className="min-h-screen flex flex-col"> {/* Contenedor principal */}
+<div className="bg-gray-50 min-h-screen flex flex-col"> {/* Contenedor principal */}
   <Header />
   
-  <div className="bg-[#E8F4E8] py-16"> {/* Fondo verde claro */}
+  <div className="flex-grow flex justify-center items-center py-16"> {/* Fondo verde claro */}
     <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 p-6 bg-white shadow-md rounded"> 
       
       {/* Sección de Servicios */}

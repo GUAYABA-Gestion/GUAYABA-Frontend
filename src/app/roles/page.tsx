@@ -104,7 +104,7 @@ const AdminDashboard = () => {
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
       <Header />
-      <div className="p-4">
+      <div className="flex-grow mt-4 p-4">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-2xl font-bold text-[#034f00]">Gestión de Roles</h1>

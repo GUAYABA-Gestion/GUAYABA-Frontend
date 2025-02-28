@@ -8,7 +8,7 @@ import { fetchSedes } from "../api/SedeActions";
 import { fetchMunicipios } from "../api/UtilsActions";
 import { fetchUsers } from "../api/UserActions";
 import { fetchEdificios } from "../api/EdificioActions";
-import { Header } from "../../../components";
+import { Footer, Header } from "../../../components";
 import SedeManager from "./components/sede/SedeManager";
 import EdificioManager from "./components/edificio/EdificioManager";
 import { FiRefreshCw } from "react-icons/fi"; // Importar el icono de refrescar
@@ -108,9 +108,9 @@ const GestionSedes: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen flex flex-col">
       <Header />
-      <div className="mt-4 p-4">
+      <div className="flex-grow mt-4 p-4">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-[#034f00]">
@@ -129,7 +129,9 @@ const GestionSedes: React.FC = () => {
           <button
             onClick={handleManualFetch}
             disabled={manualCooldown > 0}
-            className={`bg-blue-500 text-white p-2 rounded-full shadow-md hover:bg-blue-600 transition duration-300 ${manualCooldown > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`bg-blue-500 text-white p-2 rounded-full shadow-md hover:bg-blue-600 transition duration-300 ${
+              manualCooldown > 0 ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             <FiRefreshCw size={20} />
           </button>
@@ -143,7 +145,7 @@ const GestionSedes: React.FC = () => {
           setSelectedSedes={setSelectedSedes}
           rolSimulado={rolSimulado}
           idSede={idSede}
-          setSedes={setSedes} // Pasamos setSedes al SedeManager
+          setSedes={setSedes}
         />
         <EdificioManager
           edificios={edificios}
@@ -154,11 +156,13 @@ const GestionSedes: React.FC = () => {
           setSelectedSedes={setSelectedSedes}
           rolSimulado={rolSimulado}
           idSede={idSede}
-          setEdificios={setEdificios} // Pasamos setEdificios al EdificioManager
+          setEdificios={setEdificios}
         />
       </div>
+      <Footer />
     </div>
   );
+  
 };
 
 export default GestionSedes;

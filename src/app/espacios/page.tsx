@@ -149,9 +149,9 @@ const GestionEspacios: React.FC = () => {
   }, {} as { [key: number]: string });
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen flex flex-col">
       <Header />
-      <div className="mt-4 p-4">
+      <div className="flex-grow mt-4 p-4">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-[#034f00]">

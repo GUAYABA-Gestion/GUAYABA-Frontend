@@ -124,155 +124,157 @@ export default function Account() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="bg-gray-50 min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow max-w-3xl mx-auto mt-8 p-6 bg-white rounded-lg shadow mb-8 min-w-[48rem]">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Mi Cuenta</h1>
+      <main className="flex-grow flex items-center justify-center p-4">
+        <div className="w-full max-w-3xl bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Mi Cuenta</h1>
 
-        {message && (
-          <div
-            className={`mb-6 p-4 rounded-lg ${
-              message.startsWith("❌")
-                ? "bg-red-100 text-red-800"
-                : "bg-blue-100 text-blue-800"
-            }`}
-          >
-            {message}
-          </div>
-        )}
+          {message && (
+            <div
+              className={`mb-6 p-4 rounded-lg ${
+                message.startsWith("❌")
+                  ? "bg-red-100 text-red-800"
+                  : "bg-blue-100 text-blue-800"
+              }`}
+            >
+              {message}
+            </div>
+          )}
 
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Información Personal
-            </h2>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500">Nombre</p>
-                <p className="font-medium text-gray-800">
-                  {userData?.nombre || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Correo</p>
-                <p className="font-medium text-gray-800">
-                  {userData?.correo || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Rol Simulado</p>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  disabled={!editMode}
-                >
-                  {roleOptions.map((role) => (
-                    <option
-                      key={role.value}
-                      value={role.value}
-                      className="text-black"
-                    >
-                      {role.label}
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                Información Personal
+              </h2>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-500">Nombre</p>
+                  <p className="font-medium text-gray-800">
+                    {userData?.nombre || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Correo</p>
+                  <p className="font-medium text-gray-800">
+                    {userData?.correo || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Rol Simulado</p>
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    disabled={!editMode}
+                  >
+                    {roleOptions.map((role) => (
+                      <option
+                        key={role.value}
+                        value={role.value}
+                        className="text-black"
+                      >
+                        {role.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Sede Simulada</p>
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={selectedSede}
+                    onChange={(e) => setSelectedSede(e.target.value)}
+                    disabled={!editMode}
+                  >
+                    <option value="" disabled className="text-black">
+                      Seleccione una sede
                     </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Sede Simulada</p>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={selectedSede}
-                  onChange={(e) => setSelectedSede(e.target.value)}
-                  disabled={!editMode}
-                >
-                  <option value="" disabled className="text-black">
-                    Seleccione una sede
-                  </option>
-                  {sedeData.map((sede) => (
-                    <option
-                      key={sede.id_sede}
-                      value={sede.id_sede}
-                      className="text-black"
-                    >
-                      {sede.nombre}
-                    </option>
-                  ))}
-                </select>
+                    {sedeData.map((sede) => (
+                      <option
+                        key={sede.id_sede}
+                        value={sede.id_sede}
+                        className="text-black"
+                      >
+                        {sede.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="p-4 flex justify-center">
-          {editMode ? (
-            <>
-              <button
-                onClick={handleSaveChanges}
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mx-2"
-              >
-                Guardar Cambios
-              </button>
-              <button
-                onClick={() => setEditMode(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mx-2"
-              >
-                Cancelar
-              </button>
-              {/* Botón de Eliminar Cuenta solo visible en modo edición */}
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mx-2"
-              >
-                Eliminar Cuenta
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setEditMode(true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Editar
-            </button>
-          )}
-        </div>
-
-        {editMode && (
-          <div className="rounded-lg bg-yellow-100 text-yellow-800 p-4 mt-4">
-            ⚠️ Recuerda que puedes probar y experimentar con las funcionalidades
-            del rol que selecciones. Confiamos en que no vas a eliminar toda la
-            base de datos. :)
-          </div>
-        )}
-
-        {confirmDelete && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold mb-4 text-black">
-                Confirmar Eliminación
-              </h2>
-              <p className="text-black">
-                ¿Está seguro de que desea eliminar su cuenta? Esta acción no se
-                puede deshacer.
-              </p>
-
-              <div className="mt-4 flex space-x-4">
+          <div className="p-4 flex justify-center">
+            {editMode ? (
+              <>
                 <button
-                  onClick={handleDeleteAccount}
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                  onClick={handleSaveChanges}
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mx-2"
                 >
-                  Confirmar
+                  Guardar Cambios
                 </button>
                 <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                  onClick={() => setEditMode(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mx-2"
                 >
                   Cancelar
                 </button>
+                {/* Botón de Eliminar Cuenta solo visible en modo edición */}
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mx-2"
+                >
+                  Eliminar Cuenta
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setEditMode(true)}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Editar
+              </button>
+            )}
+          </div>
+
+          {editMode && (
+            <div className="rounded-lg bg-yellow-100 text-yellow-800 p-4">
+              ⚠️ Recuerda que puedes probar y experimentar con las funcionalidades
+              del rol que selecciones. Confiamos en que no vas a eliminar toda la
+              base de datos. :)
+            </div>
+          )}
+
+          {confirmDelete && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h2 className="text-xl font-bold mb-4 text-black">
+                  Confirmar Eliminación
+                </h2>
+                <p className="text-black">
+                  ¿Está seguro de que desea eliminar su cuenta? Esta acción no se
+                  puede deshacer.
+                </p>
+
+                <div className="mt-4 flex space-x-4">
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                  >
+                    Confirmar
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
       <Footer />
     </div>

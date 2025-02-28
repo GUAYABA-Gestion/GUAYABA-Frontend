@@ -111,9 +111,9 @@ const Historial: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="bg-gray-50 min-h-screen flex flex-col">
       <Header />
-      <div className="p-4">
+      <div className="flex-grow mt-4 p-4">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-[#034f00]">Historial de Cambios</h1>
@@ -133,7 +133,7 @@ const Historial: React.FC = () => {
           </button>
         </div>
         {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
-        <AuditManager logs={logs} users={users} />
+        <AuditManager logs={logs}/>
       </div>
       <Footer />
     </div>

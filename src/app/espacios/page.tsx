@@ -252,19 +252,21 @@ const GestionEspacios: React.FC = () => {
                     >
                       Eventos
                     </button>
-                    <button
-                      onClick={() => setSelectedTab("mantenimiento")}
-                      className={`px-4 py-2 rounded-lg ${
-                        selectedTab === "mantenimiento"
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-200 text-black"
-                      } ${
-                        !selectedEspacio ? "cursor-not-allowed opacity-50" : ""
-                      }`}
-                      disabled={!selectedEspacio}
-                    >
-                      Mantenimiento
-                    </button>
+                    {(rolSimulado !== "user") && (
+                      <button
+                        onClick={() => setSelectedTab("mantenimiento")}
+                        className={`px-4 py-2 rounded-lg ${
+                          selectedTab === "mantenimiento"
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-black"
+                        } ${
+                          !selectedEspacio ? "cursor-not-allowed opacity-50" : ""
+                        }`}
+                        disabled={!selectedEspacio}
+                      >
+                        Mantenimiento
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

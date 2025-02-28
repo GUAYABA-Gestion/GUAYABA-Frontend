@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sede, Municipio, User } from "../../../../types/api";
 import { validateTextNotNull } from "../../../api/validation";
 import { addSedesManual } from "../../../api/SedeActions";
@@ -19,11 +19,35 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
   coordinadores,
   onSedesAdded,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  
   const [sedes, setSedes] = useState<Sede[]>([]);
   const [validationErrors, setValidationErrors] = useState<
     Array<{ nombre: boolean; municipio: boolean }>
   >([]);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -83,7 +107,7 @@ const AddSedeModal: React.FC<AddSedeModalProps> = ({
 
   return (
     <div className={`fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 ${isOpen ? "visible" : "invisible"}`}>
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full max-h-screen overflow-y-auto">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full max-h-screen overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-black">Añadir Sedes</h2>
 
         {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}

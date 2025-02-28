@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useEffect, useRef } from "react";
 import { Log } from "../../../types/api";
 
 interface AuditDetailsModalProps {
@@ -9,6 +10,30 @@ interface AuditDetailsModalProps {
 }
 
 const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({ log, isOpen, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   const getDifferences = (oldData: any, newData: any) => {
@@ -35,7 +60,7 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({ log, isOpen, onCl
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg max-w-2xl w-full">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg max-w-2xl w-full">
         <h2 className="text-xl font-bold mb-4 text-black">Detalles del Cambio</h2>
         <div className="overflow-y-auto max-h-[60vh]">
           <table className="min-w-full border-collapse border border-gray-300">

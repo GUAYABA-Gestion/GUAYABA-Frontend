@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect} from "react";
 import AddMantenimientoManual from "./AddMantenimientoManual";
 import AddMantenimientoCSV from "./AddMantenimientoCSV";
 import { Mantenimiento, User } from "../../../../types/api";
@@ -19,8 +19,33 @@ const AddMantenimientoModal: React.FC<AddMantenimientoModalProps> = ({
   maints,
   idEspacio,
 }) => {
+
+  const modalRef = useRef<HTMLDivElement>(null);
+
   const [mantenimientos, setMantenimientos] = useState<Mantenimiento[]>([]);
   const [showCsvInfo, setShowCsvInfo] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   const handleMantenimientosParsed = (parsedMantenimientos: Mantenimiento[]) => {
     setMantenimientos([...mantenimientos, ...parsedMantenimientos]);
@@ -46,7 +71,7 @@ const AddMantenimientoModal: React.FC<AddMantenimientoModalProps> = ({
         isOpen ? "visible" : "invisible"
       }`}
     >
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-[95vw] max-h-[90vh] overflow-y-auto">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-[95vw] max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-black">Añadir Mantenimientos</h2>
 
         <AddMantenimientoManual

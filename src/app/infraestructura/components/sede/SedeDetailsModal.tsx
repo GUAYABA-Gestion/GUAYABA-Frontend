@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Sede, Municipio } from "../../../../types/api";
 import { updateSede, deleteSede } from "../../../api/SedeActions";
 import { validateTextNotNull } from "../../../api/validation";
@@ -23,11 +23,35 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
   municipios,
   coordinadores,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
   const [editMode, setEditMode] = useState(false);
   const [editedSede, setEditedSede] = useState<Sede | null>(sede);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   useEffect(() => {
     setEditedSede(sede);
@@ -91,7 +115,7 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg max-w-md w-full">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg max-w-md w-full">
         {confirmDelete ? (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg">
             <p>ELIMINAR SEDE</p>

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import AddEdificioManual from "./AddEdificioManual";
 import AddEdificioCSV from "./AddEdificioCSV";
 import { Edificio, Sede, Municipio, User } from "../../../../types/api";
@@ -25,8 +25,32 @@ const AddEdificioModal: React.FC<AddEdificioModalProps> = ({
   rolSimulado,
   idSede,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
   const [edificios, setEdificios] = useState<Edificio[]>([]);
   const [showCsvInfo, setShowCsvInfo] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   const handleEdificiosParsed = (parsedEdificios: Edificio[]) => {
     setEdificios([...edificios, ...parsedEdificios]);
@@ -52,7 +76,7 @@ const AddEdificioModal: React.FC<AddEdificioModalProps> = ({
         isOpen ? "visible" : "invisible"
       }`}
     >
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-[95vw] max-h-[90vh] overflow-y-auto">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-[95vw] max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-black">Añadir Edificios</h2>
 
         <AddEdificioManual

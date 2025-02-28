@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
 import { addUsersManual } from "../../api/UserActions";
@@ -25,6 +25,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   onUsersAdded,
   showSuccessMessage,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [newUser, setNewUser] = useState<User>({
@@ -40,6 +41,29 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   });
   const [showCsvInfo, setShowCsvInfo] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
 
   const [validationErrors, setValidationErrors] = useState<
     Array<{
@@ -247,7 +271,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         isOpen ? "visible" : "invisible"
       }`}
     >
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-black">Añadir Usuarios</h2>
 
         {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}

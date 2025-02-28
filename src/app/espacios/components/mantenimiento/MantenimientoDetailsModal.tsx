@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Mantenimiento, User } from "../../../../types/api";
 import { updateMantenimiento, deleteMantenimiento } from "../../../api/MantenimientoActions";
 import { estadosMantenimiento, tiposMantenimiento, prioridadesMantenimiento, necesidadesMantenimiento, detallesMantenimiento } from "../../../api/desplegableValues";
@@ -16,11 +16,36 @@ interface MantenimientoDetailsModalProps {
 }
 
 const MantenimientoDetailsModal: React.FC<MantenimientoDetailsModalProps> = ({ mantenimiento, isOpen, onClose, onSave, onDelete, maints }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  
   const [editedMantenimiento, setEditedMantenimiento] = useState<Mantenimiento | null>(mantenimiento);
   const [editMode, setEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
 
   useEffect(() => {
     setEditedMantenimiento(mantenimiento);
@@ -86,7 +111,7 @@ const MantenimientoDetailsModal: React.FC<MantenimientoDetailsModalProps> = ({ m
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg max-w-4xl w-full">
         {confirmDelete ? (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg">
             <p>ELIMINAR MANTENIMIENTO</p>

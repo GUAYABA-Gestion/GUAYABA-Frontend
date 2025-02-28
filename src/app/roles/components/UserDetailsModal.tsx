@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Sede } from "../../../types/api";
 import { updateUser, deleteUserManual, getUserReferences } from "../../api/UserActions";
 import { validateCorreo, validateTelefono, validateTextNotNull } from "../../api/validation";
@@ -23,6 +23,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   sedes,
   showSuccess,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
   const [editMode, setEditMode] = useState(false);
   const [editedUser, setEditedUser] = useState<User | null>(user);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -34,6 +36,28 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     id_sede: false,
   });
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   useEffect(() => {
     setEditedUser(user);
@@ -104,7 +128,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg max-w-md w-full">
+      <div ref={modalRef} className="bg-white p-6 rounded-lg max-w-md w-full">
         {confirmDelete ? (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg">
             <p>ELIMINAR USUARIO </p>

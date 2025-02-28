@@ -142,3 +142,10 @@ export const detallesMantenimiento = [
   "Ventanería",
   "Otro",
 ];
+
+// Tipos de Evento
+export const tiposEvento = [
+  "Académico",
+  "Administrativo",
+  "Externo",
+];

@@ -133,15 +133,16 @@ const EventoManager: React.FC<EventoManagerProps> = ({ espacio, rol }) => {
           Añadir Evento
         </button>
       )}
-{/* 
+
       <EventoDetailsModal
         evento={selectedEvento}
         isOpen={isEventoModalOpen}
         onClose={() => setIsEventoModalOpen(false)}
         onSave={handleSaveEvento}
         onDelete={handleDeleteEvento}
+        programas={programas}
       />
-
+{/* 
       <AddEventoModal
         isOpen={isAddEventoModalOpen}
         onClose={() => setIsAddEventoModalOpen(false)}

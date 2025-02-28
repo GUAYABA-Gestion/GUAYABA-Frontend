@@ -48,8 +48,7 @@ const EventoTable: React.FC<EventoTableProps> = ({
     const programaNombre = programa ? programa.programa_nombre : "";
 
     return (
-      (evento.nombre?.toLowerCase().includes(searchNombre.toLowerCase()) ??
-        false) &&
+      (evento.nombre?.toLowerCase().includes(searchNombre.toLowerCase()) ?? false) &&
       facultadNombre.toLowerCase().includes(searchFacultad.toLowerCase()) &&
       programaNombre.toLowerCase().includes(searchPrograma.toLowerCase()) &&
       evento.fecha_inicio.includes(searchFechaInicio) &&
@@ -152,7 +151,7 @@ const EventoTable: React.FC<EventoTableProps> = ({
             <thead>
               <tr className="bg-gray-200 text-black">
                 <th
-                  colSpan={10}
+                  colSpan={8}
                   className="border bg-[#80BA7F] text-white px-4 py-2 text-lg font-semibold"
                 >
                   Tabla de Eventos
@@ -165,17 +164,8 @@ const EventoTable: React.FC<EventoTableProps> = ({
                 <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
                   Tipo
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
-                  Fecha Inicio
-                </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
-                  Hora Inicio
-                </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
-                  Fecha Fin
-                </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
-                  Hora Fin
+                <th className="border border-gray-300 px-4 py-2 min-w-[300px]">
+                  Fecha y Hora
                 </th>
                 <th className="border border-gray-300 px-4 py-2 min-w-[250px]">
                   Programa
@@ -208,16 +198,7 @@ const EventoTable: React.FC<EventoTableProps> = ({
                         {evento.tipo}
                       </td>
                       <td className="border border-gray-300 p-2 text-black text-sm">
-                        {formatDate(evento.fecha_inicio)}
-                      </td>
-                      <td className="border border-gray-300 p-2 text-black text-sm">
-                        {evento.hora_inicio}
-                      </td>
-                      <td className="border border-gray-300 p-2 text-black text-sm">
-                        {formatDate(evento.fecha_fin)}
-                      </td>
-                      <td className="border border-gray-300 p-2 text-black text-sm">
-                        {evento.hora_fin}
+                        {`${formatDate(evento.fecha_inicio)} hasta ${formatDate(evento.fecha_fin)} de ${evento.hora_inicio} a ${evento.hora_fin}`}
                       </td>
                       <td className="border border-gray-300 p-2 text-black text-sm">
                         {programa ? programa.programa_nombre : "N/A"}
@@ -247,7 +228,7 @@ const EventoTable: React.FC<EventoTableProps> = ({
               ) : (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={8}
                     className="border border-gray-300 p-2 text-center text-gray-600 text-sm"
                   >
                     No hay eventos para mostrar.

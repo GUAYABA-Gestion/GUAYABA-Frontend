@@ -86,15 +86,15 @@ export interface Espacio {
 export interface Evento {
   id_evento: number;
   id_espacio: number;
-  tipo: string | null;
-  nombre: string | null;
-  descripcion: string | null;
+  tipo: string;
+  nombre: string;
+  descripcion: string;
   id_programa: number;
   fecha_inicio: string;
   fecha_fin: string;
   hora_inicio: string;
   hora_fin: string;
-  días: string | null;
+  días: string;
   estado: string;
   unique_id?: string; // Campo adicional para el ID único generado
 }
@@ -107,4 +107,12 @@ export interface Log {
   datos_anteriores: JSON;
   datos_nuevos: JSON;
   correo: string;
+}
+
+export interface Programa {
+  id_programa: number;
+  programa_nombre: string;
+  nivel: string;
+  id_facultad: number;
+  facultad_nombre: string;
 }

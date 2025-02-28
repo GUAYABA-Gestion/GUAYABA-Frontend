@@ -98,7 +98,6 @@ const EventoCalendar = forwardRef<EventoCalendarRef, EventoCalendarProps>(({ eve
         id_evento: evento.id_evento, // Mantener el ID original del evento
       },
     }));
-    console.log("Eventos para el calendario:", events);
     return events;
   }, [eventos]);
 

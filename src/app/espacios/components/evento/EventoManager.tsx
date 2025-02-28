@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { fetchEventosByEspacios } from "../../../api/EventoActions";
 import { fetchProgramas } from "../../../api/UtilsActions";
-import { Evento, Espacio } from "../../../../types/api";
+import { Evento, Espacio, Programa } from "../../../../types/api";
 import EventoCalendar, { EventoCalendarRef } from "./EventoCalendar";
 import EventoTable from "./EventoTable";
 import EventoDetailsModal from "./EventoDetailsModal";
@@ -21,7 +21,7 @@ const EventoManager: React.FC<EventoManagerProps> = ({ espacio, rol }) => {
   const [selectedEvento, setSelectedEvento] = useState<Evento | null>(null);
   const [isEventoModalOpen, setIsEventoModalOpen] = useState(false);
   const [isAddEventoModalOpen, setIsAddEventoModalOpen] = useState(false);
-  const [programas, setProgramas] = useState<any[]>([]);
+  const [programas, setProgramas] = useState<Programa[]>([]);
   const calendarRef = useRef<EventoCalendarRef>(null);
 
   useEffect(() => {
@@ -43,6 +43,8 @@ const EventoManager: React.FC<EventoManagerProps> = ({ espacio, rol }) => {
     const fetchProgramasData = async () => {
       try {
         const programasData = await fetchProgramas();
+        // Organizar la lista de programas por ID
+        programasData.sort((a: Programa, b: Programa) => a.id_programa - b.id_programa);
         setProgramas(programasData);
       } catch (error: any) {
         console.error("Error al obtener programas:", error);
@@ -115,6 +117,8 @@ const EventoManager: React.FC<EventoManagerProps> = ({ espacio, rol }) => {
         programas={programas}
         onEventoClick={handleEventoClick}
         onVerEventoClick={handleVerEventoClick}
+        onAddEventoClick={handleAddEventoClick}
+        rol={rol}
       />
 
       <div className="bg-white rounded-lg shadow-md p-4">
@@ -141,14 +145,15 @@ const EventoManager: React.FC<EventoManagerProps> = ({ espacio, rol }) => {
         onSave={handleSaveEvento}
         onDelete={handleDeleteEvento}
         programas={programas}
+        rol={rol}
       />
-{/* 
       <AddEventoModal
         isOpen={isAddEventoModalOpen}
         onClose={() => setIsAddEventoModalOpen(false)}
         onEventosAdded={handleAddEvento}
+        programas={programas}
         idEspacio={espacio.id_espacio}
-      /> */}
+      />
     </div>
   );
 };

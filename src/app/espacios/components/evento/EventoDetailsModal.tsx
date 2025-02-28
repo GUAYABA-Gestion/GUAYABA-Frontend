@@ -12,9 +12,18 @@ interface EventoDetailsModalProps {
   onSave: (evento: Evento) => void;
   onDelete: (id_evento: number) => void;
   programas: Programa[];
+  rol: string;
 }
 
-const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen, onClose, onSave, onDelete, programas }) => {
+const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({
+  evento,
+  isOpen,
+  onClose,
+  onSave,
+  onDelete,
+  programas,
+  rol,
+}) => {
   const [editedEvento, setEditedEvento] = useState<Evento | null>(evento);
   const [editMode, setEditMode] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -34,7 +43,10 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen,
     };
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -105,7 +117,10 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen,
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div ref={modalRef} className="bg-white p-6 rounded-lg max-w-4xl w-full z-60">
+      <div
+        ref={modalRef}
+        className="bg-white p-6 rounded-lg max-w-4xl w-full z-60"
+      >
         {confirmDelete ? (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg">
             <p>ELIMINAR EVENTO</p>
@@ -128,11 +143,15 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen,
           </div>
         ) : (
           <>
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Detalles del Evento</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">
+              Detalles del Evento
+            </h2>
             {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Nombre
+                </label>
                 <input
                   type="text"
                   value={editedEvento.nombre}
@@ -142,7 +161,9 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen,
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Tipo</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Tipo
+                </label>
                 <select
                   value={editedEvento.tipo}
                   onChange={(e) => handleEditField("tipo", e.target.value)}
@@ -157,52 +178,71 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen,
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Programa</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Programa
+                </label>
                 <select
                   value={editedEvento.id_programa}
-                  onChange={(e) => handleEditField("id_programa", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleEditField("id_programa", Number(e.target.value))
+                  }
                   className="mt-1 p-2 border rounded w-full text-gray-900"
                   disabled={!editMode}
                 >
                   {programas.map((programa) => (
-                    <option key={programa.id_programa} value={programa.id_programa}>
+                    <option
+                      key={programa.id_programa}
+                      value={programa.id_programa}
+                    >
                       {programa.programa_nombre}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Fecha de Inicio
+                </label>
                 <input
                   type="date"
-                  value={editedEvento.fecha_inicio.split('T')[0]}
-                  onChange={(e) => handleEditField("fecha_inicio", e.target.value)}
+                  value={editedEvento.fecha_inicio.split("T")[0]}
+                  onChange={(e) =>
+                    handleEditField("fecha_inicio", e.target.value)
+                  }
                   className="mt-1 p-2 border rounded w-full text-gray-900"
                   disabled={!editMode}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Hora de Inicio</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Hora de Inicio
+                </label>
                 <input
                   type="time"
                   value={editedEvento.hora_inicio}
-                  onChange={(e) => handleEditField("hora_inicio", e.target.value)}
+                  onChange={(e) =>
+                    handleEditField("hora_inicio", e.target.value)
+                  }
                   className="mt-1 p-2 border rounded w-full text-gray-900"
                   disabled={!editMode}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Fecha de Fin</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Fecha de Fin
+                </label>
                 <input
                   type="date"
-                  value={editedEvento.fecha_fin.split('T')[0]}
+                  value={editedEvento.fecha_fin.split("T")[0]}
                   onChange={(e) => handleEditField("fecha_fin", e.target.value)}
                   className="mt-1 p-2 border rounded w-full text-gray-900"
                   disabled={!editMode}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Hora de Fin</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Hora de Fin
+                </label>
                 <input
                   type="time"
                   value={editedEvento.hora_fin}
@@ -212,16 +252,22 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen,
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Descripción
+                </label>
                 <textarea
                   value={editedEvento.descripcion}
-                  onChange={(e) => handleEditField("descripcion", e.target.value)}
+                  onChange={(e) =>
+                    handleEditField("descripcion", e.target.value)
+                  }
                   className="mt-1 p-2 border rounded w-full text-gray-900"
                   disabled={!editMode}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Días</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Días
+                </label>
                 <div className="flex space-x-2">
                   {daysOfWeek.map((day) => (
                     <label key={day} className="flex items-center text-black">
@@ -261,18 +307,22 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({ evento, isOpen,
                 </>
               ) : (
                 <>
-                  <button
-                    onClick={() => setEditMode(true)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => setConfirmDelete(true)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Eliminar
-                  </button>
+                  {(rol === "admin" || rol === "coord") && (
+                    <>
+                      <button
+                        onClick={() => setEditMode(true)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(true)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Eliminar
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={handleClose}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"

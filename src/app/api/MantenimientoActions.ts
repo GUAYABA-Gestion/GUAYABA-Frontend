@@ -77,7 +77,8 @@ export const addMantenimientosManual = async (mantenimientos: Mantenimiento[]) =
       throw new Error(errorData.error || "Error al añadir mantenimientos");
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.mantenimientos;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }

@@ -102,8 +102,8 @@ const AddMantenimientoManual: React.FC<AddMantenimientoManualProps> = ({
     }
 
     try {
-      await addMantenimientosManual(mantenimientos);
-      onMantenimientosAdded(mantenimientos);
+      const data = await addMantenimientosManual(mantenimientos);
+      onMantenimientosAdded(data);
       setMantenimientos([]);
       setValidationErrors([]);
       onClose();

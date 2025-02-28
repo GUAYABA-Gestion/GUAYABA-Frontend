@@ -20,9 +20,13 @@ const AddEspacioModal: React.FC<AddEspacioModalProps> = ({
   const [espacios, setEspacios] = useState<Espacio[]>([]);
   const [showCsvInfo, setShowCsvInfo] = useState(false);
 
+  const handleEspaciosParsed = (parsedEspacios: Espacio[]) => {
+    setEspacios([...espacios, ...parsedEspacios]);
+  };
+
   const handleEspaciosAdded = (newEspacios: Espacio[]) => {
-    setEspacios([...espacios, ...newEspacios]);
     onEspaciosAdded(newEspacios);
+    setEspacios([]);
   };
 
   const handleClose = () => {
@@ -68,10 +72,9 @@ const AddEspacioModal: React.FC<AddEspacioModalProps> = ({
 
         {showCsvInfo && (
           <AddEspacioCSV
-            onEspaciosAdded={handleEspaciosAdded}
+            onEspaciosParsed={handleEspaciosParsed}
             onClose={handleClose}
-            espacios={espacios}
-            setEspacios={setEspacios}
+            idEdificio={idEdificio} // Pasar idEdificio al componente
           />
         )}
       </div>

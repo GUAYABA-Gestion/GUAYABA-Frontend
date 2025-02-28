@@ -60,7 +60,8 @@ export const addEventosManual = async (eventos: Evento[]) => {
       throw new Error(errorData.error || "Error al añadir eventos");
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.data;
   } catch (error) {
     throw error; // Relanzar el error para manejarlo en el componente
   }

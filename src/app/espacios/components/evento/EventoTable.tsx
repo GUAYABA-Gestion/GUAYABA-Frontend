@@ -9,6 +9,8 @@ interface EventoTableProps {
   programas: any[];
   onEventoClick: (evento: Evento) => void;
   onVerEventoClick: (evento: Evento) => void;
+  onAddEventoClick: () => void; 
+  rol: string;
 }
 
 const EventoTable: React.FC<EventoTableProps> = ({
@@ -16,6 +18,8 @@ const EventoTable: React.FC<EventoTableProps> = ({
   programas,
   onEventoClick,
   onVerEventoClick,
+  onAddEventoClick,
+  rol,
 }) => {
   const [searchNombre, setSearchNombre] = useState("");
   const [searchFacultad, setSearchFacultad] = useState("");
@@ -61,12 +65,12 @@ const EventoTable: React.FC<EventoTableProps> = ({
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
-      month: "2-digit",
+      month: "long",
       day: "2-digit",
     };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return new Date(dateString).toLocaleDateString("es-ES", options);
   };
-
+  
   return (
     <div className="p-4 bg-gray-50">
       <div className="mb-4 flex flex-wrap items-end gap-2">
@@ -143,6 +147,14 @@ const EventoTable: React.FC<EventoTableProps> = ({
         >
           Reiniciar Filtros
         </button>
+        {(rol === "admin" || rol === "coord") && (
+          <button
+            onClick={onAddEventoClick} // Añadir esta línea
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm w-full md:w-auto"
+          >
+            Añadir Evento
+          </button>
+        )}
         {/* <ExcelExportButton eventos={filteredEventos} programas={programas} /> */}
       </div>
       <div className="mt-4">

@@ -88,6 +88,7 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
     }
 
     try {
+      console.log(espacios);
       const response = await addEspaciosManual(espacios);
       const addedEspacios = response.espacios;
       onEspaciosAdded(addedEspacios);

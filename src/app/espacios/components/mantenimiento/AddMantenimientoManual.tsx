@@ -82,7 +82,7 @@ const AddMantenimientoManual: React.FC<AddMantenimientoManualProps> = ({
     }
 
     const newValidationErrors = mantenimientos.map(mantenimiento => ({
-      plazo_ideal: !validatePositiveNumber(mantenimiento.plazo_ideal),
+      plazo_ideal: !validatePositiveNumber(Number(mantenimiento.plazo_ideal)),
       tipo_contrato: mantenimiento.tipo_contrato === "",
       tipo: mantenimiento.tipo === "",
       estado: mantenimiento.estado === "",

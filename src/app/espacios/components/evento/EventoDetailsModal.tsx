@@ -91,6 +91,7 @@ const EventoDetailsModal: React.FC<EventoDetailsModalProps> = ({
         onClose();
       } catch (error: any) {
         setError(`Error al eliminar el evento: ${error.message}`);
+        setConfirmDelete(false);
       }
     }
   };

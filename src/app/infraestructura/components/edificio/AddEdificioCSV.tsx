@@ -43,6 +43,7 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({
 
     const reader = new FileReader();
     reader.onload = async (e) => {
+      try {
       const buffer = e.target?.result;
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(buffer as ArrayBuffer);
@@ -76,6 +77,10 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({
       });
 
       onEdificiosParsed(parsedEdificios);
+    } catch (error) {
+      console.error("Error procesando el archivo:", error);
+      setError("Hubo un error al procesar el archivo. Verifica el formato e inténtalo de nuevo.");
+    }
     };
     reader.readAsArrayBuffer(file);
   };

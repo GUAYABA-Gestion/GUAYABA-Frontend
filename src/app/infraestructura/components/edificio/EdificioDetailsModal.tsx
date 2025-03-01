@@ -110,6 +110,7 @@ const EdificioDetailsModal: React.FC<EdificioDetailsModalProps> = ({
         onClose();
       } catch (error: any) {
         setError(`Error al eliminar el edificio: ${error.message}`);
+        setConfirmDelete(false);
       }
     }
   };

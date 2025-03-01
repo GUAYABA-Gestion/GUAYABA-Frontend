@@ -67,6 +67,7 @@ const EspacioDetailsModal: React.FC<EspacioDetailsModalProps> = ({ espacio, isOp
         onClose();
       } catch (error: any) {
         setError(`Error al eliminar el espacio: ${error.message}`);
+        setConfirmDelete(false);
       }
     }
   };

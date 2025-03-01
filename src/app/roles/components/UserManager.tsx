@@ -12,16 +12,16 @@ interface UserManagerProps {
 }
 
 const UserManager: React.FC<UserManagerProps> = ({ users, sedes, onUsersUpdated }) => {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [filters, setFilters] = useState({
     sede: "",
     rol: "",
     correo: "",
     es_manual: "",
   });
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -57,6 +57,10 @@ const UserManager: React.FC<UserManagerProps> = ({ users, sedes, onUsersUpdated 
     setCurrentPage(page);
   };
 
+  const adminAndCoordUsers = users.filter(
+    (user) => user.rol === "admin" || user.rol === "coord"
+  );
+
   return (
     <div>
       <UserTable
@@ -90,10 +94,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, sedes, onUsersUpdated 
         onClose={() => setIsAddUserModalOpen(false)}
         sedes={sedes}
         onUsersAdded={handleUsersAdded}
-        showSuccessMessage={() => {
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
-        }}
+        users={adminAndCoordUsers} // Pasar los usuarios filtrados
       />
     </div>
   );

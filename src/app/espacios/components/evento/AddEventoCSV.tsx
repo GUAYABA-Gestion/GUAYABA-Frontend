@@ -27,53 +27,81 @@ const AddEventoCSV: React.FC<AddEventoCSVProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    try {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    const validExtensions = [".xlsx"];
-    const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
-    const validMimeTypes = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+      const validExtensions = [".xlsx"];
+      const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+      const validMimeTypes = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
 
-    if (!validExtensions.includes(fileExtension) || !validMimeTypes.includes(file.type)) {
-      alert("Por favor, sube un archivo válido (.xlsx)");
-      event.target.value = ""; // Reinicia el input
-      return;
-    }
-
-    setSelectedFile(file);
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const buffer = e.target?.result;
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer as ArrayBuffer);
-      const worksheet = workbook.getWorksheet(1);
-      if (!worksheet) {
-        setError("No se pudo encontrar la hoja de cálculo en el archivo.");
-        return;
+      if (!validExtensions.includes(fileExtension) || !validMimeTypes.includes(file.type)) {
+        throw new Error("Por favor, sube un archivo válido (.xlsx)");
       }
-      const rows = worksheet.getSheetValues();
-      const headers = rows[1] as string[];
 
-      const parsedEventos: Evento[] = rows.slice(2).map((row: any) => ({
-        id_evento: 0,
-        id_espacio: idEspacio,
-        nombre: row[headers.indexOf("nombre")] || "",
-        tipo: row[headers.indexOf("tipo")] || "",
-        id_programa: row[headers.indexOf("programa")] || 0,
-        fecha_inicio: row[headers.indexOf("fecha_inicio")] || "",
-        hora_inicio: row[headers.indexOf("hora_inicio")] || "",
-        fecha_fin: row[headers.indexOf("fecha_fin")] || "",
-        hora_fin: row[headers.indexOf("hora_fin")] || "",
-        descripcion: row[headers.indexOf("descripcion")] || "",
-        días: row[headers.indexOf("días")] || "",
-        estado: "pendiente",
-      }));
+      setSelectedFile(file);
+      const reader = new FileReader();
 
-      onEventosParsed(parsedEventos);
-    };
-    reader.readAsArrayBuffer(file);
+      reader.onload = async (e) => {
+        try {
+          const buffer = e.target?.result;
+          const workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(buffer as ArrayBuffer);
+          const worksheet = workbook.getWorksheet(1);
+          if (!worksheet) throw new Error("No se pudo encontrar la hoja de cálculo en el archivo.");
+
+          const rows = worksheet.getSheetValues();
+          const headers = rows[1] as string[];
+
+          const parsedEventos: Evento[] = rows.slice(2).map((row: any) => ({
+            id_evento: 0,
+            id_espacio: idEspacio,
+            nombre: row[headers.indexOf("nombre")] || "",
+            tipo: validarTipoEvento(row[headers.indexOf("tipo")]),
+            id_programa: validarIdPrograma(row[headers.indexOf("programa")]),
+            fecha_inicio: parseDate(row[headers.indexOf("fecha_inicio")]),
+            hora_inicio: getHora(row[headers.indexOf("hora_inicio")]),
+            fecha_fin: parseDate(row[headers.indexOf("fecha_fin")]),
+            hora_fin: getHora(row[headers.indexOf("hora_fin")]),
+            descripcion: row[headers.indexOf("descripcion")] || "",
+            días: row[headers.indexOf("días")] || "",
+            estado: "pendiente",
+          }));
+
+          onEventosParsed(parsedEventos);
+        } catch (error: any) {
+          setError(`Error procesando el archivo: ${error.message}`);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  const parseDate = (cellValue: any) => {
+    if (cellValue instanceof Date) {
+      return cellValue.toISOString().split("T")[0]; // Convierte a formato YYYY-MM-DD
+    }
+    return formatDate(cellValue || "");
+  };
+
+  const getHora = (cellValue: any) => {
+    if (cellValue instanceof Date) {
+      return `${cellValue.getUTCHours().toString().padStart(2, "0")}:${cellValue.getUTCMinutes().toString().padStart(2, "0")}`;
+    }
+    return cellValue; // Si es string, asumir que ya viene bien
+  };
+
+  const validarTipoEvento = (tipo: any) => {
+    return tiposEvento.includes(tipo) ? tipo : "Otro"; // "Otro" como valor por defecto si el tipo no es válido
+  };
+
+  const validarIdPrograma = (id: any) => {
+    const parsedId = parseInt(id, 10);
+    return isNaN(parsedId) ? 0 : parsedId; // Si no es número, asignar 0
   };
 
   const handleDownloadTemplate = async () => {
@@ -92,19 +120,31 @@ const AddEventoCSV: React.FC<AddEventoCSVProps> = ({
       { header: "días", key: "días", width: 10 },
     ];
 
-    worksheet.addRow(["Nombre Ejemplo", "Tipo Ejemplo", "ID Programa Ejemplo", "2025-01-01", "08:00", "2025-01-02", "10:00", "Descripción Ejemplo", "LMX"]);
+    const exampleRow = worksheet.addRow([
+      "Evento de Prueba",
+      tiposEvento[0] || "Otro",
+      programas.length > 0 ? programas[0].id_programa : 0,
+      "01/01/2025",
+      "08:00",
+      "02/01/2025",
+      "10:00",
+      "Descripción de prueba",
+      "LMX",
+    ]);
+
+    worksheet.getCell(`D${exampleRow.number}`).numFmt = "dd/mm/yyyy";
+    worksheet.getCell(`F${exampleRow.number}`).numFmt = "dd/mm/yyyy";
 
     worksheet.getCell("A1").note = "Nombre: Nombre del evento";
     worksheet.getCell("B1").note = "Tipo: Tipo del evento (ver hoja 'Valores Posibles')";
     worksheet.getCell("C1").note = "Programa: ID del programa asociado (ver hoja 'Valores Posibles')";
-    worksheet.getCell("D1").note = "Fecha de Inicio: Fecha de inicio del evento (YYYY-MM-DD)";
+    worksheet.getCell("D1").note = "Fecha de Inicio: Fecha de inicio del evento (dd/mm/yyyy)";
     worksheet.getCell("E1").note = "Hora de Inicio: Hora de inicio del evento (HH:MM)";
-    worksheet.getCell("F1").note = "Fecha de Fin: Fecha de fin del evento (YYYY-MM-DD)";
+    worksheet.getCell("F1").note = "Fecha de Fin: Fecha de fin del evento (dd/mm/yyyy)";
     worksheet.getCell("G1").note = "Hora de Fin: Hora de fin del evento (HH:MM)";
     worksheet.getCell("H1").note = "Descripción: Descripción del evento";
     worksheet.getCell("I1").note = "Días: Días de la semana en los que se repite el evento (L, M, X, J, V, S, D)";
 
-    // Crear una segunda hoja con los valores posibles
     const valoresPosiblesSheet = workbook.addWorksheet("Valores Posibles");
     valoresPosiblesSheet.columns = [
       { header: "Tipo de Evento", key: "tipo_evento", width: 30 },
@@ -112,14 +152,14 @@ const AddEventoCSV: React.FC<AddEventoCSVProps> = ({
       { header: "Nombre del Programa", key: "nombre_programa", width: 30 },
     ];
 
-    tiposEvento.forEach((tipo) => {
-      valoresPosiblesSheet.addRow({ tipo_evento: tipo });
-    });
-
-    // Organizar la lista de programas por ID
-    programas.sort((a, b) => a.id_programa - b.id_programa).forEach((programa) => {
-      valoresPosiblesSheet.addRow({ id_programa: programa.id_programa, nombre_programa: programa.programa_nombre });
-    });
+    const maxRows = Math.max(tiposEvento.length, programas.length);
+    for (let i = 0; i < maxRows; i++) {
+      valoresPosiblesSheet.addRow({
+        tipo_evento: tiposEvento[i] || "",
+        id_programa: programas[i] ? programas[i].id_programa : "",
+        nombre_programa: programas[i] ? programas[i].programa_nombre : "",
+      });
+    }
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -131,27 +171,13 @@ const AddEventoCSV: React.FC<AddEventoCSVProps> = ({
     document.body.removeChild(link);
   };
 
-  const handleClose = () => {
-    setSelectedFile(null);
-    setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-    onClose();
-  };
-
   return (
     <div className="mt-4">
       {error && <div className="mb-4 text-red-500">{error}</div>}
       <input ref={fileInputRef} type="file" accept=".xlsx" onChange={handleFileUpload} className="mt-4 text-black" />
-
       <button onClick={handleDownloadTemplate} className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition duration-300">
         Descargar Plantilla Excel
       </button>
-
-      <div className="mt-4 text-black">
-        <p><b>Por favor, cargue los datos siguiendo la plantilla.</b></p>
-      </div>
     </div>
   );
 };

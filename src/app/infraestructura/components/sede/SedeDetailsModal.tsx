@@ -96,6 +96,7 @@ const SedeDetailsModal: React.FC<SedeDetailsModalProps> = ({
         onClose();
       } catch (error: any) {
         setError(`Error al eliminar la sede: ${error.message}`);
+        setConfirmDelete(false);
       }
     }
   };

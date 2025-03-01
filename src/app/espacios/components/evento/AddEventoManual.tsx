@@ -1,10 +1,8 @@
 "use client";
-
 import { useState } from "react";
+import { addEventosManual } from "../../../api/EventoActions";
 import { Evento, Programa } from "../../../../types/api";
 import { tiposEvento } from "../../../api/desplegableValues";
-import { addEventosManual } from "../../../api/EventoActions";
-import { validateTextNotNull } from "../../../api/validation";
 
 interface AddEventoManualProps {
   onClose: () => void;
@@ -30,56 +28,28 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
       tipo: boolean;
       id_programa: boolean;
       fecha_inicio: boolean;
-      fecha_fin: boolean;
       hora_inicio: boolean;
+      fecha_fin: boolean;
       hora_fin: boolean;
-      días: boolean;
     }>
   >([]);
 
   const handleInputChange = (
     index: number,
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const updatedEventos = [...eventos];
-    const { name, value } = e.target;
-
-    updatedEventos[index] = { ...updatedEventos[index], [name]: value };
-
-    setEventos(updatedEventos);
-
-    const updatedErrors = [...validationErrors];
-    updatedErrors[index] = {
-      ...updatedErrors[index],
-      [name]: false,
+    updatedEventos[index] = {
+      ...updatedEventos[index],
+      [e.target.name]: e.target.value,
     };
-    setValidationErrors(updatedErrors);
-  };
 
-  const handleTextareaChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const updatedEventos = [...eventos];
-    const { name, value } = e.target;
-
-    updatedEventos[index] = { ...updatedEventos[index], [name]: value };
-
-    setEventos(updatedEventos);
-  };
-
-  const handleDayChange = (index: number, day: string) => {
-    const updatedEventos = [...eventos];
-    const newDias = updatedEventos[index].días.includes(day)
-      ? updatedEventos[index].días.replace(day, "")
-      : updatedEventos[index].días + day;
-    updatedEventos[index].días = newDias;
     setEventos(updatedEventos);
 
     const updatedErrors = [...validationErrors];
     updatedErrors[index] = {
       ...updatedErrors[index],
-      días: false,
+      [e.target.name]: false,
     };
     setValidationErrors(updatedErrors);
   };
@@ -90,14 +60,14 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
       {
         id_evento: 0,
         id_espacio: idEspacio,
-        tipo: "",
         nombre: "",
-        descripcion: "",
+        tipo: "",
         id_programa: 0,
         fecha_inicio: "",
-        fecha_fin: "",
         hora_inicio: "",
+        fecha_fin: "",
         hora_fin: "",
+        descripcion: "",
         días: "",
         estado: "pendiente",
       },
@@ -109,10 +79,9 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
         tipo: false,
         id_programa: false,
         fecha_inicio: false,
-        fecha_fin: false,
         hora_inicio: false,
+        fecha_fin: false,
         hora_fin: false,
-        días: false,
       },
     ]);
   };
@@ -125,6 +94,13 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
     setValidationErrors(updatedErrors);
   };
 
+  const handleModalClose = () => {
+    setEventos([]);
+    setValidationErrors([]);
+    setError(null);
+    onClose();
+  }
+
   const handleSubmit = async () => {
     if (eventos.length === 0) {
       setError("No hay eventos para añadir.");
@@ -132,14 +108,13 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
     }
 
     const newValidationErrors = eventos.map((evento) => ({
-      nombre: !validateTextNotNull(evento.nombre),
-      tipo: evento.tipo === "",
-      id_programa: evento.id_programa === 0,
-      fecha_inicio: evento.fecha_inicio === "",
-      fecha_fin: evento.fecha_fin === "",
-      hora_inicio: evento.hora_inicio === "",
-      hora_fin: evento.hora_fin === "",
-      días: evento.días === "",
+      nombre: !evento.nombre,
+      tipo: !evento.tipo,
+      id_programa: !evento.id_programa,
+      fecha_inicio: !evento.fecha_inicio,
+      hora_inicio: !evento.hora_inicio,
+      fecha_fin: !evento.fecha_fin,
+      hora_fin: !evento.hora_fin,
     }));
 
     setValidationErrors(newValidationErrors);
@@ -150,10 +125,9 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
         error.tipo ||
         error.id_programa ||
         error.fecha_inicio ||
-        error.fecha_fin ||
         error.hora_inicio ||
-        error.hora_fin ||
-        error.días
+        error.fecha_fin ||
+        error.hora_fin
     );
 
     if (hasErrors) {
@@ -162,8 +136,13 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
     }
 
     try {
-      // Aquí deberías llamar a la función para añadir eventos manualmente
-      const response = await addEventosManual(eventos);
+      const formattedEventos = eventos.map((evento) => ({
+        ...evento,
+        fecha_inicio: evento.fecha_inicio,
+        fecha_fin: evento.fecha_fin,
+      }));
+
+      const response = await addEventosManual(formattedEventos);
       onEventosAdded(response);
       setEventos([]);
       setValidationErrors([]);
@@ -172,15 +151,6 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
       setError(`Error al añadir eventos: ${error.message}`);
     }
   };
-
-  const handleClose = () => {
-    setEventos([]);
-    setError(null);
-    setValidationErrors([]);
-    onClose();
-  };
-
-  const daysOfWeek = ["L", "M", "X", "J", "V", "S", "D"];
 
   return (
     <div className="mt-4">
@@ -196,25 +166,25 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
                 <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
                   Tipo
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
                   Programa
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
-                  Fecha de Inicio
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                  Fecha Inicio
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
-                  Hora de Inicio
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                  Hora Inicio
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
-                  Fecha de Fin
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                  Fecha Fin
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
-                  Hora de Fin
+                <th className="border border-gray-300 px-4 py-2 min-w-[150px]">
+                  Hora Fin
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
+                <th className="border border-gray-300 px-4 py-2 min-w-[200px]">
                   Descripción
                 </th>
-                <th className="border border-gray-300 px-4 py-2 min-w-[180px]">
+                <th className="border border-gray-300 px-4 py-2 min-w-[100px]">
                   Días
                 </th>
                 <th className="border border-gray-300 px-4 py-2 min-w-[120px]">
@@ -225,13 +195,7 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
             <tbody>
               {eventos.map((evento, index) => (
                 <tr key={index}>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.nombre
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.nombre ? "outline outline-red-500" : ""}`}>
                     <input
                       type="text"
                       name="nombre"
@@ -241,13 +205,7 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.tipo
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.tipo ? "outline outline-red-500" : ""}`}>
                     <select
                       name="tipo"
                       value={evento.tipo}
@@ -262,20 +220,14 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
                       ))}
                     </select>
                   </td>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.id_programa
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.id_programa ? "outline outline-red-500" : ""}`}>
                     <select
                       name="id_programa"
                       value={evento.id_programa}
                       onChange={(e) => handleInputChange(index, e)}
                       className="w-full px-2 py-1 text-sm text-black"
                     >
-                      <option value="">Seleccione un programa</option>
+                      <option value={0}>Seleccione un programa</option>
                       {programas.map((programa) => (
                         <option key={programa.id_programa} value={programa.id_programa}>
                           {programa.programa_nombre}
@@ -283,67 +235,39 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
                       ))}
                     </select>
                   </td>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.fecha_inicio
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.fecha_inicio ? "outline outline-red-500" : ""}`}>
                     <input
                       type="date"
                       name="fecha_inicio"
                       value={evento.fecha_inicio}
                       onChange={(e) => handleInputChange(index, e)}
-                      placeholder="Fecha de Inicio"
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.hora_inicio
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.hora_inicio ? "outline outline-red-500" : ""}`}>
                     <input
                       type="time"
                       name="hora_inicio"
                       value={evento.hora_inicio}
                       onChange={(e) => handleInputChange(index, e)}
-                      placeholder="Hora de Inicio"
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.fecha_fin
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.fecha_fin ? "outline outline-red-500" : ""}`}>
                     <input
                       type="date"
                       name="fecha_fin"
                       value={evento.fecha_fin}
                       onChange={(e) => handleInputChange(index, e)}
-                      placeholder="Fecha de Fin"
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.hora_fin
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
+                  <td className={`border border-gray-300 p-1 ${validationErrors[index]?.hora_fin ? "outline outline-red-500" : ""}`}>
                     <input
                       type="time"
                       name="hora_fin"
                       value={evento.hora_fin}
                       onChange={(e) => handleInputChange(index, e)}
-                      placeholder="Hora de Fin"
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
@@ -351,33 +275,22 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
                     <textarea
                       name="descripcion"
                       value={evento.descripcion}
-                      onChange={(e) => handleTextareaChange(index, e)}
+                      onChange={(e) => handleInputChange(index, e)}
                       placeholder="Descripción"
                       className="w-full px-2 py-1 text-sm text-black"
                     />
                   </td>
-                  <td
-                    className={`border border-gray-300 p-1 ${
-                      validationErrors[index]?.días
-                        ? "outline outline-red-500"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex space-x-2">
-                      {daysOfWeek.map((day) => (
-                        <label key={day} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={evento.días.includes(day)}
-                            onChange={() => handleDayChange(index, day)}
-                            className="mr-1"
-                          />
-                          {day}
-                        </label>
-                      ))}
-                    </div>
-                  </td>
                   <td className="border border-gray-300 p-1">
+                    <input
+                      type="text"
+                      name="días"
+                      value={evento.días}
+                      onChange={(e) => handleInputChange(index, e)}
+                      placeholder="Días"
+                      className="w-full px-2 py-1 text-sm text-black"
+                    />
+                  </td>
+                  <td className="border border-gray-300 p-1 text-center">
                     <button
                       onClick={() => handleRemoveRow(index)}
                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm w-full"
@@ -407,7 +320,7 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
           Guardar Eventos
         </button>
         <button
-          onClick={handleClose}
+          onClick={handleModalClose}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm"
         >
           Cancelar
@@ -424,25 +337,22 @@ const AddEventoManual: React.FC<AddEventoManualProps> = ({
             ) && <li>Nombre: Campo obligatorio</li>}
             {Object.values(validationErrors).some(
               (errors) => errors.tipo
-            ) && <li>Tipo: Campo obligatorio</li>}
+            ) && <li>Tipo: Seleccione un tipo válido</li>}
             {Object.values(validationErrors).some(
               (errors) => errors.id_programa
             ) && <li>Programa: Seleccione un programa válido</li>}
             {Object.values(validationErrors).some(
               (errors) => errors.fecha_inicio
-            ) && <li>Fecha de Inicio: Campo obligatorio</li>}
+            ) && <li>Fecha Inicio: Ingrese una fecha válida</li>}
             {Object.values(validationErrors).some(
               (errors) => errors.hora_inicio
-            ) && <li>Hora de Inicio: Campo obligatorio</li>}
+            ) && <li>Hora Inicio: Ingrese una hora válida</li>}
             {Object.values(validationErrors).some(
               (errors) => errors.fecha_fin
-            ) && <li>Fecha de Fin: Campo obligatorio</li>}
+            ) && <li>Fecha Fin: Ingrese una fecha válida</li>}
             {Object.values(validationErrors).some(
               (errors) => errors.hora_fin
-            ) && <li>Hora de Fin: Campo obligatorio</li>}
-            {Object.values(validationErrors).some(
-              (errors) => errors.días
-            ) && <li>Días: Seleccione al menos un día</li>}
+            ) && <li>Hora Fin: Ingrese una hora válida</li>}
           </ul>
         </div>
       )}

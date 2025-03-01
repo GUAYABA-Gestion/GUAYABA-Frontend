@@ -92,6 +92,7 @@ const MantenimientoDetailsModal: React.FC<MantenimientoDetailsModalProps> = ({ m
         onClose();
       } catch (error: any) {
         setError(`Error al eliminar el mantenimiento: ${error.message}`);
+        setConfirmDelete(false);
       }
     }
   };

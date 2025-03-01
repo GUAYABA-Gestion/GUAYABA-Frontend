@@ -76,6 +76,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
       setConfirmDelete(true);
     } catch (error) {
       setError("Error al obtener referencias del usuario.");
+      setConfirmDelete(false);
     }
   };
 
@@ -87,6 +88,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
       onClose();
     } catch (error: any) {
       setError(`Error al eliminar el usuario: ${error.message}`);
+      setConfirmDelete(false);
     }
   };
 
@@ -113,6 +115,11 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     } catch (error: any) {
       setError(`Error al guardar los cambios: ${error.message}`);
     }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedUser(user);
+    setEditMode(false);
   };
 
   const handleClose = () => {
@@ -292,7 +299,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     Guardar Cambios
                   </button>
                   <button
-                    onClick={handleClose}
+                    onClick={handleCancelEdit}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
                     Cancelar

@@ -2,7 +2,12 @@
 import { useState } from "react";
 import ExcelJS from "exceljs";
 import { Mantenimiento, User } from "../../../../types/api";
-import { estadosMantenimiento, tiposMantenimiento, prioridadesMantenimiento, necesidadesMantenimiento } from "../../../api/desplegableValues";
+import {
+  estadosMantenimiento,
+  tiposMantenimiento,
+  prioridadesMantenimiento,
+  necesidadesMantenimiento,
+} from "../../../api/desplegableValues";
 
 interface AddMantenimientoCSVProps {
   onMantenimientosParsed: (parsedMantenimientos: Mantenimiento[]) => void;
@@ -20,54 +25,103 @@ const AddMantenimientoCSV: React.FC<AddMantenimientoCSVProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const formatDate = (dateString: string) => {
+    const [day, month, year] = dateString.split("/");
+    return `${year}-${month}-${day}`;
+  };
 
-    const validExtensions = [".xlsx"];
-    const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
-    const validMimeTypes = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
-
-    if (!validExtensions.includes(fileExtension) || !validMimeTypes.includes(file.type)) {
-      alert("Por favor, sube un archivo válido (.xlsx)");
-      event.target.value = ""; // Reinicia el input
-      return;
+  const parseDate = (cellValue: any) => {
+    if (cellValue instanceof Date) {
+      return cellValue.toISOString().split("T")[0]; // Convierte a formato YYYY-MM-DD
     }
+    return formatDate(cellValue || "");
+  };
 
-    setSelectedFile(file);
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    try {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const buffer = e.target?.result;
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer as ArrayBuffer);
-      const worksheet = workbook.getWorksheet(1);
-      if (!worksheet) {
-        setError("No se pudo encontrar la hoja de cálculo en el archivo.");
+      const validExtensions = [".xlsx"];
+      const fileExtension = file.name
+        .slice(file.name.lastIndexOf("."))
+        .toLowerCase();
+      const validMimeTypes = [
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ];
+
+      if (
+        !validExtensions.includes(fileExtension) ||
+        !validMimeTypes.includes(file.type)
+      ) {
+        alert("Por favor, sube un archivo válido (.xlsx)");
+        event.target.value = ""; // Reinicia el input
         return;
       }
-      const rows = worksheet.getSheetValues();
-      const headers = rows[1] as string[];
 
-      const parsedMantenimientos: Mantenimiento[] = rows.slice(2).map((row: any) => ({
-        id_mantenimiento: 0,
-        id_espacio: idEspacio,
-        id_encargado: maints.find((maint) => maint.correo === row[headers.indexOf("correo_encargado")])?.id_persona || null,
-        tipo_contrato: row[headers.indexOf("tipo_contrato")] || "",
-        tipo: row[headers.indexOf("tipo")] || "",
-        estado: row[headers.indexOf("estado")] || "",
-        necesidad: row[headers.indexOf("necesidad")] || "",
-        prioridad: row[headers.indexOf("prioridad")] || "",
-        detalle: row[headers.indexOf("detalle")] || "",
-        fecha_asignacion: row[headers.indexOf("fecha_asignacion")] || "",
-        plazo_ideal: Number(row[headers.indexOf("plazo_ideal")]) || 0,
-        terminado: row[headers.indexOf("terminado")] === "true",
-        observación: row[headers.indexOf("observación")] || "",
-      }));
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const buffer = e.target?.result;
+          const workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(buffer as ArrayBuffer);
+          const worksheet = workbook.getWorksheet(1);
+          if (!worksheet)
+            throw new Error(
+              "No se pudo encontrar la hoja de cálculo en el archivo."
+            );
 
-      onMantenimientosParsed(parsedMantenimientos);
-    };
-    reader.readAsArrayBuffer(file);
+          const rows = worksheet.getSheetValues();
+          const headers = rows[1] as string[];
+
+          const parsedMantenimientos: Mantenimiento[] = rows
+            .slice(2)
+            .map((row: any) => ({
+              id_mantenimiento: 0,
+              id_espacio: idEspacio,
+              id_encargado:
+                maints.find(
+                  (maint) =>
+                    maint.correo === row[headers.indexOf("correo_encargado")]
+                )?.id_persona || null,
+              tipo_contrato: row[headers.indexOf("tipo_contrato")] || "",
+              tipo: tiposMantenimiento.includes(row[headers.indexOf("tipo")])
+                ? row[headers.indexOf("tipo")]
+                : "",
+              estado: estadosMantenimiento.includes(
+                row[headers.indexOf("estado")]
+              )
+                ? row[headers.indexOf("estado")]
+                : "",
+              necesidad: necesidadesMantenimiento.includes(
+                row[headers.indexOf("necesidad")]
+              )
+                ? row[headers.indexOf("necesidad")]
+                : "",
+              prioridad: prioridadesMantenimiento.includes(
+                row[headers.indexOf("prioridad")]
+              )
+                ? row[headers.indexOf("prioridad")]
+                : "",
+              detalle: row[headers.indexOf("detalle")] || "",
+              fecha_asignacion: parseDate(row[headers.indexOf("fecha_asignacion")]),
+              plazo_ideal: Number(row[headers.indexOf("plazo_ideal")]) || 0,
+              terminado: row[headers.indexOf("terminado")] === "true",
+              observación: row[headers.indexOf("observación")] || "",
+            }));
+
+          onMantenimientosParsed(parsedMantenimientos);
+        } catch (err) {
+          setError("Error al procesar el archivo. Verifica el formato.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (err) {
+      setError("Error al leer el archivo.");
+    }
   };
 
   const handleDownloadTemplate = async () => {
@@ -88,21 +142,38 @@ const AddMantenimientoCSV: React.FC<AddMantenimientoCSVProps> = ({
       { header: "observación", key: "observación", width: 30 },
     ];
 
-    worksheet.addRow(["encargado@correo.com", "tipo_contrato", "tipo", "estado", "necesidad", "prioridad", "Detalle del mantenimiento", "2025-01-01", 30, "false", "Observación"]);
+    worksheet.addRow([
+      "encargado@correo.com",
+      "tipo_contrato",
+      "tipo",
+      "estado",
+      "necesidad",
+      "prioridad",
+      "Detalle del mantenimiento",
+      "12/02/2025",
+      30,
+      "false",
+      "Observación",
+    ]);
 
-    worksheet.getCell("A1").note = "Correo del encargado del mantenimiento (ver hoja 'Valores Posibles')";
-    worksheet.getCell("B1").note = "Tipo de contrato del mantenimiento";
-    worksheet.getCell("C1").note = "Tipo de mantenimiento (ver hoja 'Valores Posibles')";
-    worksheet.getCell("D1").note = "Estado del mantenimiento (ver hoja 'Valores Posibles')";
-    worksheet.getCell("E1").note = "Necesidad del mantenimiento (ver hoja 'Valores Posibles')";
-    worksheet.getCell("F1").note = "Prioridad del mantenimiento (ver hoja 'Valores Posibles')";
-    worksheet.getCell("G1").note = "Detalle del mantenimiento";
-    worksheet.getCell("H1").note = "Fecha de asignación del mantenimiento (YYYY-MM-DD)";
-    worksheet.getCell("I1").note = "Plazo ideal en días";
-    worksheet.getCell("J1").note = "Indica si el mantenimiento está terminado (true/false)";
-    worksheet.getCell("K1").note = "Observación del mantenimiento";
+    const notas = [
+      "Correo del encargado del mantenimiento (ver hoja 'Valores Posibles')",
+      "Tipo de contrato del mantenimiento",
+      "Tipo de mantenimiento (ver hoja 'Valores Posibles')",
+      "Estado del mantenimiento (ver hoja 'Valores Posibles')",
+      "Necesidad del mantenimiento (ver hoja 'Valores Posibles')",
+      "Prioridad del mantenimiento (ver hoja 'Valores Posibles')",
+      "Detalle del mantenimiento",
+      "Fecha de asignación del mantenimiento (dd/mm/yyyy)",
+      "Plazo ideal en días",
+      "Indica si el mantenimiento está terminado (true/false)",
+      "Observación del mantenimiento",
+    ];
 
-    // Crear una segunda hoja con los valores posibles
+    notas.forEach((nota, i) => {
+      worksheet.getCell(1, i + 1).note = nota;
+    });
+
     const valoresPosiblesSheet = workbook.addWorksheet("Valores Posibles");
     valoresPosiblesSheet.columns = [
       { header: "Correo Encargado", key: "correo_encargado", width: 25 },
@@ -112,7 +183,13 @@ const AddMantenimientoCSV: React.FC<AddMantenimientoCSVProps> = ({
       { header: "Prioridad", key: "prioridad", width: 20 },
     ];
 
-    const maxRows = Math.max(maints.length, tiposMantenimiento.length, estadosMantenimiento.length, necesidadesMantenimiento.length, prioridadesMantenimiento.length);
+    const maxRows = Math.max(
+      maints.length,
+      tiposMantenimiento.length,
+      estadosMantenimiento.length,
+      necesidadesMantenimiento.length,
+      prioridadesMantenimiento.length
+    );
 
     for (let i = 0; i < maxRows; i++) {
       valoresPosiblesSheet.addRow({
@@ -125,7 +202,9 @@ const AddMantenimientoCSV: React.FC<AddMantenimientoCSVProps> = ({
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.setAttribute("download", "mantenimiento_template.xlsx");
@@ -143,15 +222,19 @@ const AddMantenimientoCSV: React.FC<AddMantenimientoCSVProps> = ({
   return (
     <div className="mt-4">
       {error && <div className="mb-4 text-red-500">{error}</div>}
-      <input type="file" accept=".xlsx" onChange={handleFileUpload} className="mt-4 text-black" />
+      <input
+        type="file"
+        accept=".xlsx"
+        onChange={handleFileUpload}
+        className="mt-4 text-black"
+      />
 
-      <button onClick={handleDownloadTemplate} className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition duration-300">
+      <button
+        onClick={handleDownloadTemplate}
+        className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition duration-300"
+      >
         Descargar Plantilla Excel
       </button>
-
-      <div className="mt-4 text-black">
-        <p><b>Por favor, cargue los datos siguiendo la plantilla.</b></p>
-      </div>
     </div>
   );
 };

@@ -34,33 +34,58 @@ const AddEspacioCSV: React.FC<AddEspacioCSVProps> = ({ onEspaciosParsed, onClose
 
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const buffer = e.target?.result;
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer as ArrayBuffer);
-      const worksheet = workbook.getWorksheet(1);
-      if (!worksheet) {
-        setError("No se pudo encontrar la hoja de cálculo en el archivo.");
-        return;
+      try {
+        const buffer = e.target?.result;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer as ArrayBuffer);
+        const worksheet = workbook.getWorksheet(1);
+        if (!worksheet) {
+          setError("No se pudo encontrar la hoja de cálculo en el archivo.");
+          return;
+        }
+        const rows = worksheet.getSheetValues();
+        const headers = rows[1] as string[];
+
+        const parsedEspacios: Espacio[] = rows.slice(2).map((row: any) => ({
+          id_espacio: 0,
+          id_edificio: idEdificio,
+          nombre: row[headers.indexOf("nombre")] || "",
+          estado: validarEstado(row[headers.indexOf("estado")]),
+          clasificacion: validarClasificacion(row[headers.indexOf("clasificacion")]),
+          uso: validarUso(row[headers.indexOf("uso")]),
+          tipo: validarTipo(row[headers.indexOf("tipo")]),
+          piso: validarPiso(row[headers.indexOf("piso")]),
+          capacidad: Math.floor(Number(row[headers.indexOf("capacidad")])) || 0,
+          mediciónmt2: Math.floor(Number(row[headers.indexOf("mediciónmt2")])) || 0,
+        }));
+
+        onEspaciosParsed(parsedEspacios);
+      } catch (error) {
+        console.error("Error procesando el archivo:", error);
+        setError("Hubo un error al procesar el archivo. Verifica el formato e inténtalo de nuevo.");
       }
-      const rows = worksheet.getSheetValues();
-      const headers = rows[1] as string[];
-
-      const parsedEspacios: Espacio[] = rows.slice(2).map((row: any) => ({
-        id_espacio: 0,
-        id_edificio: idEdificio,
-        nombre: row[headers.indexOf("nombre")] || "",
-        estado: row[headers.indexOf("estado")] || "",
-        clasificacion: row[headers.indexOf("clasificacion")] || "",
-        uso: row[headers.indexOf("uso")] || "",
-        tipo: row[headers.indexOf("tipo")] || "",
-        piso: row[headers.indexOf("piso")] || "",
-        capacidad: Number(row[headers.indexOf("capacidad")]) || 0,
-        mediciónmt2: Number(row[headers.indexOf("mediciónmt2")]) || 0,
-      }));
-
-      onEspaciosParsed(parsedEspacios);
     };
     reader.readAsArrayBuffer(file);
+  };
+
+  const validarEstado = (estado: any) => {
+    return estadosEspacio.includes(estado) ? estado : "Desconocido"; // "Desconocido" como valor por defecto si el estado no es válido
+  };
+
+  const validarClasificacion = (clasificacion: any) => {
+    return clasificacionesEspacio.includes(clasificacion) ? clasificacion : "Otro"; // "Otro" como valor por defecto si la clasificación no es válida
+  };
+
+  const validarUso = (uso: any) => {
+    return usosEspacio.includes(uso) ? uso : "Otro"; // "Otro" como valor por defecto si el uso no es válido
+  };
+
+  const validarTipo = (tipo: any) => {
+    return tiposEspacio.includes(tipo) ? tipo : "Otro"; // "Otro" como valor por defecto si el tipo no es válido
+  };
+
+  const validarPiso = (piso: any) => {
+    return pisosEspacio.includes(piso) ? piso : "Desconocido"; // "Desconocido" como valor por defecto si el piso no es válido
   };
 
   const handleDownloadTemplate = async () => {

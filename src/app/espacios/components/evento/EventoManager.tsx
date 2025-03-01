@@ -129,15 +129,6 @@ const EventoManager: React.FC<EventoManagerProps> = ({ espacio, rol }) => {
         />
       </div>
 
-      {(rol === "admin" || rol === "coord") && (
-        <button
-          onClick={handleAddEventoClick}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Añadir Evento
-        </button>
-      )}
-
       <EventoDetailsModal
         evento={selectedEvento}
         isOpen={isEventoModalOpen}

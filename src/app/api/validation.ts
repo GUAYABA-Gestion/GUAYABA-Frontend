@@ -13,5 +13,5 @@ export const validateTelefono = (telefono : string) => {
 };
 
 export const validatePositiveNumber = (number: number) => {
-  return number > 0;
+  return number > 0 && Number.isInteger(number);
 };

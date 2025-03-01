@@ -96,7 +96,7 @@ const AddUserManual: React.FC<AddUserManualProps> = ({
     }
 
     const newValidationErrors = users.map((user) => ({
-      nombre: !validateTextNotNull(user.nombre),
+      nombre: !validateTextNotNull(user.nombre.toString()),
       correo: !validateCorreo(user.correo),
       telefono: user.telefono ? !validateTelefono(user.telefono) : false,
       id_sede: !user.id_sede || user.id_sede === 0,

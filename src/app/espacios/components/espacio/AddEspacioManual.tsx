@@ -59,6 +59,26 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
     setValidationErrors(updatedErrors);
   };
 
+  const validarEstado = (estado: any) => {
+    return estadosEspacio.includes(estado) ? estado : "Desconocido"; // "Desconocido" como valor por defecto si el estado no es válido
+  };
+
+  const validarClasificacion = (clasificacion: any) => {
+    return clasificacionesEspacio.includes(clasificacion) ? clasificacion : "Otro"; // "Otro" como valor por defecto si la clasificación no es válida
+  };
+
+  const validarUso = (uso: any) => {
+    return usosEspacio.includes(uso) ? uso : "Otro"; // "Otro" como valor por defecto si el uso no es válido
+  };
+
+  const validarTipo = (tipo: any) => {
+    return tiposEspacio.includes(tipo) ? tipo : "Otro"; // "Otro" como valor por defecto si el tipo no es válido
+  };
+
+  const validarPiso = (piso: any) => {
+    return pisosEspacio.includes(piso) ? piso : "Desconocido"; // "Desconocido" como valor por defecto si el piso no es válido
+  };
+
   const handleSubmit = async () => {
     if (espacios.length === 0) {
       setError("No hay espacios para añadir.");
@@ -66,12 +86,12 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
     }
 
     const newValidationErrors = espacios.map(espacio => ({
-      nombre: !validateTextNotNull(espacio.nombre),
-      estado: !validateTextNotNull(espacio.estado),
-      clasificacion: !validateTextNotNull(espacio.clasificacion),
-      uso: !validateTextNotNull(espacio.uso),
-      tipo: !validateTextNotNull(espacio.tipo),
-      piso: !validateTextNotNull(espacio.piso),
+      nombre: !validateTextNotNull(espacio.nombre.toString()),
+      estado: !validateTextNotNull(validarEstado(espacio.estado)),
+      clasificacion: !validateTextNotNull(validarClasificacion(espacio.clasificacion)),
+      uso: !validateTextNotNull(validarUso(espacio.uso)),
+      tipo: !validateTextNotNull(validarTipo(espacio.tipo)),
+      piso: !validateTextNotNull(validarPiso(espacio.piso)),
       capacidad: !validatePositiveNumber(espacio.capacidad),
       mediciónmt2: !validatePositiveNumber(espacio.mediciónmt2),
     }));
@@ -280,7 +300,7 @@ const AddEspacioManual: React.FC<AddEspacioManualProps> = ({ isOpen, onClose, on
             {Object.values(validationErrors).some((errors) => errors.uso) && <li>Uso: Seleccione un uso válido</li>}
             {Object.values(validationErrors).some((errors) => errors.tipo) && <li>Tipo: Seleccione un tipo válido</li>}
             {Object.values(validationErrors).some((errors) => errors.piso) && <li>Piso: Seleccione un piso válido</li>}
-            {Object.values(validationErrors).some((errors) => errors.capacidad) && <li>Capacidad: Debe ser un número positivo</li>}
+            {Object.values(validationErrors).some((errors) => errors.capacidad) && <li>Capacidad: Debe ser un número entero positivo</li>}
             {Object.values(validationErrors).some((errors) => errors.mediciónmt2) && <li>Medición (m²): Debe ser un número positivo</li>}
           </ul>
         </div>

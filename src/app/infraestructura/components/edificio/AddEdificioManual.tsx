@@ -134,7 +134,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
     }
 
     const newValidationErrors = edificios.map((edificio) => ({
-      nombre: !validateTextNotNull(edificio.nombre),
+      nombre: !validateTextNotNull(edificio.nombre.toString()),
       dirección: !validateTextNotNull(edificio.dirección),
       id_sede: rolSimulado === "coord" && edificio.id_sede !== idSede, // Validar que el id_sede sea el correcto solo si el rol es coordinador
       categoría: edificio.categoría === "",
@@ -282,7 +282,7 @@ const AddEdificioManual: React.FC<AddEdificioManualProps> = ({
                         </option>
                       ) : (
                         <>
-                          <option value="">Seleccione una sede</option>
+                          <option value="0">Seleccione una sede</option>
                           {sedes.map((sede) => (
                             <option key={sede.id_sede} value={sede.id_sede}>
                               {sede.nombre}

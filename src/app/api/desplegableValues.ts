@@ -58,6 +58,7 @@ export const tiposEspacio = [
   "Local",
   "Oficina",
   "Otro (desciba en observacion)",
+  "Parqueadero",
   "Sala de computo",
   "Sala de tutores",
   "Salon de juegos",

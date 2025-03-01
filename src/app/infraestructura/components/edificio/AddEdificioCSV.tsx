@@ -44,45 +44,62 @@ const AddEdificioCSV: React.FC<AddEdificioCSVProps> = ({
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-      const buffer = e.target?.result;
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer as ArrayBuffer);
-      const worksheet = workbook.getWorksheet(1);
-      if (!worksheet) {
-        setError("No se pudo encontrar la hoja de cálculo en el archivo.");
-        return;
+        const buffer = e.target?.result;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer as ArrayBuffer);
+        const worksheet = workbook.getWorksheet(1);
+        if (!worksheet) {
+          setError("No se pudo encontrar la hoja de cálculo en el archivo.");
+          return;
+        }
+        const rows = worksheet.getSheetValues();
+        const headers = rows[1] as string[];
+
+        const parsedEdificios: Edificio[] = rows.slice(2).map((row: any) => {
+          const correoTitular = row[headers.indexOf("correo_titular")] || "";
+          const titular = coordinadores.find(coordinador => coordinador.correo === correoTitular);
+
+          return {
+            id_edificio: 0,
+            nombre: row[headers.indexOf("nombre")] || "",
+            dirección: row[headers.indexOf("dirección")] || "",
+            id_sede: rolSimulado === "coord" ? idSede ?? 0 : validarIdSede(row[headers.indexOf("id_sede")]),
+            categoría: validarCategoria(row[headers.indexOf("categoría")]),
+            propiedad: validarPropiedad(row[headers.indexOf("propiedad")]),
+            area_terreno: Number(row[headers.indexOf("area_terreno")]) || 0,
+            area_construida: Number(row[headers.indexOf("area_construida")]) || 0,
+            cert_uso_suelo: validarCertUsoSuelo(row[headers.indexOf("cert_uso_suelo")]),
+            id_titular: titular ? titular.id_persona : null,
+            correo_titular: correoTitular,
+            nombre_sede: "",
+            nombre_titular: ""
+          };
+        });
+
+        onEdificiosParsed(parsedEdificios);
+      } catch (error) {
+        console.error("Error procesando el archivo:", error);
+        setError("Hubo un error al procesar el archivo. Verifica el formato e inténtalo de nuevo.");
       }
-      const rows = worksheet.getSheetValues();
-      const headers = rows[1] as string[];
-
-      const parsedEdificios: Edificio[] = rows.slice(2).map((row: any) => {
-        const correoTitular = row[headers.indexOf("correo_titular")] || "";
-        const titular = coordinadores.find(coordinador => coordinador.correo === correoTitular);
-
-        return {
-          id_edificio: 0,
-          nombre: row[headers.indexOf("nombre")] || "",
-          dirección: row[headers.indexOf("dirección")] || "",
-          id_sede: rolSimulado === "coord" ? idSede ?? 0 : Number(row[headers.indexOf("id_sede")]) || 0,
-          categoría: row[headers.indexOf("categoría")] || "",
-          propiedad: row[headers.indexOf("propiedad")] || "",
-          area_terreno: Number(row[headers.indexOf("area_terreno")]) || 0,
-          area_construida: Number(row[headers.indexOf("area_construida")]) || 0,
-          cert_uso_suelo: row[headers.indexOf("cert_uso_suelo")] === "DISPONIBLE",
-          id_titular: titular ? titular.id_persona : null,
-          correo_titular: correoTitular,
-          nombre_sede: "",
-          nombre_titular: ""
-        };
-      });
-
-      onEdificiosParsed(parsedEdificios);
-    } catch (error) {
-      console.error("Error procesando el archivo:", error);
-      setError("Hubo un error al procesar el archivo. Verifica el formato e inténtalo de nuevo.");
-    }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+  const validarCategoria = (categoria: any) => {
+    return categoriasEdificio.includes(categoria) ? categoria : ""; 
+  };
+
+  const validarPropiedad = (propiedad: any) => {
+    return propiedadesEdificio.includes(propiedad) ? propiedad : ""; 
+  };
+
+  const validarCertUsoSuelo = (cert: any) => {
+    return certUsoSuelo.includes(cert) ? cert : "NO DISPONIBLE"; // "NO DISPONIBLE" como valor por defecto si el certificado no es válido
+  };
+
+  const validarIdSede = (id: any) => {
+    const parsedId = parseInt(id, 10);
+    return isNaN(parsedId) ? 0 : parsedId; // Si no es número, asignar 0
   };
 
   const handleDownloadTemplate = async () => {

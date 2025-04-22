@@ -15,6 +15,7 @@ export function middleware(req: NextRequest) {
     "/roles",
     "/historial",
     "/infraestructura/informe",
+    //"/informe",
   ];
 
   // No redirigir si la ruta es /login o /register
@@ -39,5 +40,5 @@ export function middleware(req: NextRequest) {
 
 // Configuración para aplicar el middleware en las rutas protegidas
 export const config = {
-  matcher: ["/roles", "/account","/historial", "/sedes", "/infraestructura", "/espacios", "/mantenimiento", "/reportes", "/infraestructura/informe"], // Rutas protegidas
+  matcher: ["/roles", "/account","/historial", "/sedes", "/infraestructura", "/espacios", "/mantenimiento", "/reportes", "/infraestructura/informe", "/informe"], // Rutas protegidas
 };
